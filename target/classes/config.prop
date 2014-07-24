@@ -1,0 +1,109 @@
+stable-storage=c:\jbpaxos
+file-io-buffsize=10485760
+file-io-queue-deep=10
+ip=127.0.0.1
+listen-port=9000
+max-response-delay=1000
+transport-tcp-num=100
+net-layer=netty
+catchup-delay=5000
+debug-log=true
+elect-self-master=true
+transport-timeout=5000
+
+# this arguments is true indicates system will merge requests from the different client,that will improve the throughput of system
+# by increase the response time of average. 
+
+is-merge-client-request=true
+
+#This heart beat interval is only hint to server, the eventual interval of one heart beat request to other server is decided
+#by the negotiation result between this server and other server,and the value is the minimum between the value of this server and this value of other server
+heart-beat-interval=2000
+
+#30MB = 31457280,this argument means every session will trigger strategy 
+#while the size of successful message be held up in memory arrive in this threshold.
+#The purpose of this argument is to control memory cost on transport of sucessful message.
+#You can calculate your memory cost base on the argument.
+#For example, you set up cluster having 3 node, the max memory be spent on transport successful message
+#will be 3 * 30m = 90m.
+session-success-sync-max-mem=31457280
+
+#closeConnectionAfterWaitTimeStrategy , closeConnectionRightNowStrategy ,waitStrategy
+session-success-sync-max-mem-strategy=closeConnectionAfterWaitTimeStrategy
+
+#the unit is millisecond, the argument will affect closeConnectionAfterWaitTime strategy
+session-success-sync-max-mem-waittime=4000
+
+#boardcastSender,halfCircleSender,fullCircleSender
+#boardcastSender, means the master transport the one paxos successful message to every nodes(they are not members of quorum).
+#halfCircleSender, means the master transport the one paxos successful message to the head node of list.
+#fullCircleSsender,means the master transport the prepare,vote and successful message to the head node of list
+#
+#For example, the cluster having 3 senator nodes and 2 normal node, for 2 normal node the master will transport two messages in boardcast,
+#and transport one message to one node in circleSender.
+#
+#Note: this argument only affect more than the cluster having more than 3 node, in other words it is no different in the cluster having nodes between circleSender and boardcastSender
+#when the cluster have more than 3 nodes, we can calc the cost of sync successful message, for example 3 quorum and 2 normal node, the circleSender is less one message than boardcastSender 
+paxos-sender=circleSender
+
+
+#NO-CHECKSUM = 0;INBUILD-ALDER32 = 1;INBUILD-CRC32 = 2;PURE-JAVA-CRC32 = 3;
+net-checksum-type=3
+file-checksum-type=3
+
+
+#1024 * 256 = 256KB = 262144 , and this min value is 128k, you should set the value more than 128k
+max-message-package-size=262144
+
+#this argu will tolerate n of the disk lost its mem when power down,the the performance of this arg will be decided
+# according to (Math.floor( Math.max((Math.floor(senator /2) + 1 + n, senator) * 2 - senator )/ 2) - 1)
+
+#example 1
+#
+# 2 senator ,disk-mem-lost=1
+# quorm=Math.max((Math.floor(senator /2) + 1 + disk-mem-lost, senator) = 2
+#(Math.floor( Math.max((Math.floor(senator /2) + 1 + disk-mem-lost, senator) * 2 - senator )/ 2) - 1) = 0
+# indicates the system will only tolerate 0 of disk lost,and tolerate (senator -quorum) = 0 process shut down
+#
+# 2 senator ,disk-mem-lost=0
+# quorm=Math.max((Math.floor(senator /2) + 1 + disk-mem-lost, senator) = 2
+#(Math.floor( Math.max((Math.floor(senator /2) + 1 + disk-mem-lost, senator) * 2 - senator )/ 2) - 1) = 0
+# indicates the system will only tolerate 0 of disk lost,and tolerate (senator -quorum) = 0 process shut down
+
+
+#example 2
+#
+# 3 senator ,disk-mem-lost=1
+# quorm=Math.max((Math.floor(senator /2) + 1 + disk-mem-lost, senator) = 3
+#(Math.floor( Math.max((Math.floor(senator /2) + 1 + disk-mem-lost, senator) * 2 - senator )/ 2) - 1) = 1
+# indicates the system will only tolerate 1 of disk lost,and tolerate (senator -quorum) = 0 process shut down
+#
+# 3 senator ,disk-mem-lost=0
+# quorm=Math.max((Math.floor(senator /2) + 1 + disk-mem-lost, senator) = 2
+#(Math.floor( Math.max((Math.floor(senator /2) + 1 + disk-mem-lost, senator) * 2 - senator )/ 2) - 1) = 0
+# indicates the system will only tolerate 0 of disk lost,and tolerate (senator -quorum) = 1 process shut down
+
+#example 3
+# 5 senator ,disk-mem-lost=1
+# quorm=Math.max((Math.floor(senator /2) + 1 + disk-mem-lost, senator) = 4
+#(Math.floor( Math.max((Math.floor(senator /2) + 1 + disk-mem-lost, senator) * 2 - senator )/ 2) - 1) = 1
+# indicates the system will only tolerate 1 of disk lost,and tolerate (senator -quorum) = 1 process shut down
+#
+# 5 senator ,disk-mem-lost=0
+# quorm=Math.max((Math.floor(senator /2) + 1 + disk-mem-lost, senator) = 3
+#(Math.floor( Math.max((Math.floor(senator /2) + 1 + disk-mem-lost, senator) * 2 - senator )/ 2) - 1) = 0
+# indicates the system will only tolerate 0 of disk lost,and tolerate (senator -quorum) = 2 process shut down
+
+# you should be careful to set this argument because will affect this system performance.
+# however,if you close the mem of disk on your os or you think the mem lost is can be tolerated , you can keey the argu 0. 
+#
+#Notice: the process shut down can be found in system,but the mem lost of disk can't be found ,
+#so this argu will can't stop inconsistent data when the mem lost more than the number that is result of upper formula machine
+#,and the situation also can't be detected by system.
+#The argument only provide a method to tolerate this situation the system can't detect.
+disk-mem-lost=0 
+
+#
+#The priority range is 1 to 10. The greater number in natural ordering has greater priority.
+#
+election-priority=5

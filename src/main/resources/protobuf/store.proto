@@ -1,0 +1,21 @@
+package protocolbuffer;
+option java_package = "cn.com.sparkle.paxos.stablestorage.model";
+option java_outer_classname = "StoreModel";
+
+message Value{
+	required int32 type=1;
+	repeated bytes values=2;
+}
+message Id{
+	required int64 increaseId=1;
+	required string address=2; 
+}
+message InstanceVoteRecord{
+	required Id highestJoinNum=2;
+	optional Id highestVotedNum=3;
+	optional Value highestValue=4;
+}
+message SuccessfulRecord{
+	required Id highestVoteNum=1;
+	optional Value v=2;
+}

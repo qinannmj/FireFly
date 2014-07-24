@@ -1,0 +1,12 @@
+package protocolbuffer;
+option java_package = "cn.com.sparkle.raptor.test.model.protocolbuffer";
+option java_outer_classname = "PersonMessage";
+
+message AddressBook{
+	repeated Person person = 1;
+}
+message Person {
+  required int32 id = 1;
+  required string name = 2;
+  optional string email = 3;
+}
