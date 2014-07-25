@@ -11,10 +11,6 @@ public class ConfigurationException extends Exception {
 		super();
 	}
 
-	public ConfigurationException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-		super(message, cause, enableSuppression, writableStackTrace);
-	}
-
 	public ConfigurationException(String message, Throwable cause) {
 		super(message, cause);
 	}
