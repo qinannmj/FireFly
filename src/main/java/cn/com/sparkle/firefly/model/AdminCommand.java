@@ -42,11 +42,4 @@ public class AdminCommand {
 		return sb.toString().getBytes();
 	}
 
-	public static void main(String[] args) {
-		//		AdminCommand c = new AdminCommand("sdfefw服务费违法", ADD_FOLLOWER);
-		//		AdminCommand cn = new AdminCommand(c.toBytes());
-		//		System.out.println(cn.getType());
-		//		System.out.println(cn.getAddress());
-
-	}
 }

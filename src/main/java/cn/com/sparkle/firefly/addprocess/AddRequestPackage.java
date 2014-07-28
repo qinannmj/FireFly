@@ -3,14 +3,19 @@ package cn.com.sparkle.firefly.addprocess;
 import java.util.LinkedList;
 
 import cn.com.sparkle.firefly.Context;
+import cn.com.sparkle.firefly.NodesCollection;
 import cn.com.sparkle.firefly.checksum.ChecksumUtil.UnsupportedChecksumAlgorithm;
+import cn.com.sparkle.firefly.config.ConfigNodeSet;
 import cn.com.sparkle.firefly.model.AddRequest;
+import cn.com.sparkle.firefly.model.AdminCommand;
 import cn.com.sparkle.firefly.net.frame.FrameBody;
 import cn.com.sparkle.firefly.net.netlayer.NetCloseException;
 import cn.com.sparkle.firefly.net.netlayer.PaxosSession;
 import cn.com.sparkle.firefly.net.netlayer.PaxosSessionKeys;
 import cn.com.sparkle.firefly.protocolprocessor.Protocol;
 import cn.com.sparkle.firefly.protocolprocessor.negotiation.ServerNegotiationStatus;
+import cn.com.sparkle.firefly.state.NodeState;
+import cn.com.sparkle.firefly.util.QuorumCalcUtil;
 
 public class AddRequestPackage {
 	private LinkedList<AddRequest> valueList = new LinkedList<AddRequest>();
@@ -84,5 +89,36 @@ public class AddRequestPackage {
 
 	public LinkedList<AddRequest> getValueList() {
 		return valueList;
+	}
+	
+	public String testAdminToPaxosAble(){
+		if(!isManageCommand()){
+			return null;
+		}else{
+			AdminCommand adminCommand = new AdminCommand(valueList.get(0).getValue());
+			if(adminCommand.getType().equals(AdminCommand.ADD_SENATOR)){
+				return null;
+			}else{
+				//rm a node
+				ConfigNodeSet configNodeSet = context.getConfiguration().getConfigNodeSet();
+				int newQuorum = QuorumCalcUtil.calcQuorumNum(configNodeSet.getSenators().size() - 1, context.getConfiguration().getDiskMemLost());
+				String rmAddress = adminCommand.getAddress();
+				NodesCollection nodes = context.getcState().getSenators();
+				int uptoDateRemainCount = 0;
+				for(String ads : nodes.getAllActiveNodes().keySet()){
+					if(!ads.equals(rmAddress)){
+						NodeState nodeState = nodes.getNodeStates().get(ads);
+						if(nodeState.getLastCanExecuteInstanceId() >= configNodeSet.getVersion()){
+							++uptoDateRemainCount;
+						}
+					}
+				}
+				if(uptoDateRemainCount >= newQuorum){
+					return null;
+				}else{
+					return String.format("error:%s", "Remove senator will leads to inconsistent, pls try again later!");
+				}
+			}
+		}
 	}
 }

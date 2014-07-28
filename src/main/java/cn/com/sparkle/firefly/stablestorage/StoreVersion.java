@@ -23,7 +23,7 @@ public class StoreVersion {
 	public final static Map<String, String> operatorClassMap = new HashMap<String, String>();
 
 	static {
-		operatorClassMap.put("v1", "cn.com.sparkle.paxos.stablestorage.v1.RecordFileOperatorDefault");
+		operatorClassMap.put("v1", "cn.com.sparkle.firefly.stablestorage.v1.RecordFileOperatorDefault");
 	}
 
 	@SuppressWarnings("unchecked")
@@ -41,7 +41,7 @@ public class StoreVersion {
 			File f = new File(dir + "/log/" + version);
 			oper.initOperator(f, lastExpectSafeInstanceId, instanceExecutor, conf);
 		} catch (Throwable e) {
-			throw new RuntimeException("The RecordFileOperator's class of version " + version + " not be found! ");
+			throw new RuntimeException("The RecordFileOperator's class of version " + version + " not be found! ",e);
 		}
 
 		if (version.equals(VERSION)) {

@@ -9,6 +9,7 @@ import org.apache.log4j.Logger;
 import cn.com.sparkle.firefly.Constants;
 import cn.com.sparkle.firefly.Context;
 import cn.com.sparkle.firefly.NodesCollection;
+import cn.com.sparkle.firefly.checksum.ChecksumUtil.UnsupportedChecksumAlgorithm;
 import cn.com.sparkle.firefly.config.Configuration;
 import cn.com.sparkle.firefly.event.EventsManager;
 import cn.com.sparkle.firefly.event.events.InstanceExecuteMaxPackageSizeEvent;
@@ -216,26 +217,44 @@ public class AddRequestDealer implements InstanceExecuteEventListener, InstanceP
 				// merge message from all client
 				do {
 					AddRequestPackage arp = requestQueue.removeFirst();
-					if (arp.isManageCommand()) {
-						executable_instances_num = 1;// limit executing number
-						needExecute = 0; // stop cycle
-						if (executingInstanceNum > 0 && list.size() != 0) {
-							requestQueue.addFirst(arp);// restore queue
-							break;
+					String error = arp.testAdminToPaxosAble(); //test admin command if can execute
+					if (error == null) {
+						if (arp.isManageCommand()) {
+							executable_instances_num = 1;// limit executing number
+							needExecute = 0; // stop cycle
+							if (executingInstanceNum > 0 && list.size() != 0) {
+								requestQueue.addFirst(arp);// restore queue
+								break;
+							}
+						}
+						// for null command,there is not DealState,and send a list of size equal 0 indicate a null command
+						if (arp.getValueByteSize() != 0) {
+							DealState ds = arp.getSession().get(DEAL_STATE_KEY);
+							ds.isDealing = true;
+							curByteCount += arp.getValueByteSize();
+						}
+						list.add(arp);
+
+						logger.debug("requestQueue.size()" + requestQueue.size() + " list.size:" + list.size() + " curTcpPackageByteSize"
+								+ curTcpPackageByteSize);
+						if (arp.isManageCommand() || !context.getConfiguration().isMergeClientRequest()) {
+							break; // not to merge, this is will not merge from other node,  so for many client ,to improve rt performance
+						}
+					} else {
+						//response to client this command can't be accepted
+						DealState ds = arp.getSession().get(DEAL_STATE_KEY);
+						if (ds != null) {
+							ds.isDealing = true;
+						}
+						for(AddRequest request : arp.getValueList()){
+							try {
+								arp.responseAdminResponse(request.getMessageId(), false, error);
+							} catch (UnsupportedChecksumAlgorithm e) {
+								logger.error("fatal error", e);
+							}
 						}
 					}
-					// for null command,there is not DealState,and send a list of size equal 0 indicate a null command
-					if (arp.getValueByteSize() != 0) {
-						DealState ds = arp.getSession().get(DEAL_STATE_KEY);
-						ds.isDealing = true;
-						curByteCount += arp.getValueByteSize();
-					}
-					list.add(arp);
 
-					logger.debug("requestQueue.size()" + requestQueue.size() + " list.size:" + list.size() + " curTcpPackageByteSize" + curTcpPackageByteSize);
-					if (arp.isManageCommand() || !context.getConfiguration().isMergeClientRequest()) {
-						break; // not to merge, this is will not merge from other node,  so for many client ,to improve rt performance
-					}
 				} while (requestQueue.size() > 0 && curByteCount + requestQueue.peek().getValueByteSize() < curTcpPackageByteSize);
 				if (list.size() != 0) {
 					// assign a id
@@ -432,7 +451,9 @@ public class AddRequestDealer implements InstanceExecuteEventListener, InstanceP
 						if (waitArp != null) {
 							requestQueue.addLast(waitArp);
 							++dealWait;
-							logger.debug("dealWait:" + dealWait + "ds:" + ds.size());
+							if (conf.isDebugLog()) {
+								logger.debug("dealWait:" + dealWait + "ds:" + ds.size());
+							}
 						} else {
 							ds.isDealing = false;
 						}
