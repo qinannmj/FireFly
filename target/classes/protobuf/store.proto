@@ -1,5 +1,5 @@
 package protocolbuffer;
-option java_package = "cn.com.sparkle.paxos.stablestorage.model";
+option java_package = "cn.com.sparkle.firefly.stablestorage.model";
 option java_outer_classname = "StoreModel";
 
 message Value{

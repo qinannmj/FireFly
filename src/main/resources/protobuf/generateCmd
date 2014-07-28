@@ -1,12 +1,7 @@
-protoc.exe -I=D:\workspaces\workspace-free\raptor\test\ --java_out=D:\workspaces\workspace-free\jdpaxos\src D:\workspaces\workspace-free\jdpaxos\resource\*.proto
-
-protoc.exe -I=D:\workspaces\workspace-free\jbpaxos\resource\protobuf\ --java_out=D:\workspaces\workspace-free\jbpaxos\src D:\workspaces\workspace-free\jbpaxos\resource\protobuf\messages.proto
-
-
 
 //message
-protoc.exe -I=D:\workspaces\workspace-free\jbpaxos\src\main\resources\protobuf\ --java_out=D:\workspaces\workspace-free\jbpaxos\src\main\java D:\workspaces\workspace-free\jbpaxos\src\main\resources\protobuf\messages.proto
+protoc.exe -I=D:\workspaces\workspace-free\FireFly\src\main\resources\protobuf\ --java_out=D:\workspaces\workspace-free\FireFly\src\main\java D:\workspaces\workspace-free\FireFly\src\main\resources\protobuf\messages.proto
 
 
 //store
-protoc.exe -I=D:\workspaces\workspace-free\jbpaxos\src\main\resources\protobuf\ --java_out=D:\workspaces\workspace-free\jbpaxos\src\main\java D:\workspaces\workspace-free\jbpaxos\src\main\resources\protobuf\store.proto
+protoc.exe -I=D:\workspaces\workspace-free\FireFly\src\main\resources\protobuf\ --java_out=D:\workspaces\workspace-free\FireFly\src\main\java D:\workspaces\workspace-free\FireFly\src\main\resources\protobuf\store.proto

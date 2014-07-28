@@ -1,5 +1,5 @@
 package protocolbuffer;
-option java_package = "cn.com.sparkle.paxos.net.protocolprocessor.v0_0_1";
+option java_package = "cn.com.sparkle.firefly.protocolprocessor.v0_0_1";
 option java_outer_classname = "PaxosMessages";
 
 import "store.proto";
@@ -29,8 +29,7 @@ message MessagePackage{
 	optional CatchUpRequest catchUpRequest= 23;
 	optional ConnectRequest connectRequest =24;
 	optional InstanceSuccessResponse instanceSuccessResponse=25;
-	optional ReAssignElectionRequest reAssignElectionRequest=26;
-	optional ReAssignElectionResponse reAssignElectionResponse=27;
+
 	optional ActiveHeartBeatRequest ActiveHeartBeatRequest = 28;
 	optional ConnectResponse connectResponse=29;
 }
@@ -149,10 +148,12 @@ message CommandResponse{
 message AddRequest{
 	required int32 commandType=1;
 	required bytes value=2;
+	optional int64 instanceId=3;
 }
 
 message AddResponse{
 	required bytes result=1;
+	optional int64 instanceId=2;
 }
 message ConnectRequest{
 	required int32 masterDistance=1;
