@@ -1,0 +1,2 @@
+
+protoc.exe -I=D:\workspaces\workspace-free\global-config-repo\src\main\resources --java_out=D:\workspaces\workspace-free\global-config-repo\src\main\java D:\workspaces\workspace-free\global-config-repo\src\main\resources\messages.proto

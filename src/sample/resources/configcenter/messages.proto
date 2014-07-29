@@ -1,0 +1,27 @@
+package message;
+option java_package = "cn.com.sparkle.global.configserver.message";
+option java_outer_classname = "ProtobufMessages";
+
+message Messages{
+	optional Value value = 1;
+	optional Add add = 2;
+	optional Watch watch =3;
+}
+message Value{
+	required bytes value=1;
+	required int64 version=2;
+}
+message Add{
+	required string key=1;
+	required bytes value=2;
+}
+message AddResponse{
+}
+message Watch{
+	required string key=1;
+	required int64 version=2;
+}
+message Entity{
+	required string key=1;
+	required Value value=2;
+}
