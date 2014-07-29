@@ -101,4 +101,9 @@ public class AdminLookupHandler extends HandlerInterface {
 		throw new RuntimeException("unsupported method!");
 	}
 
+	@Override
+	public void onInstanceIdExecuted(long instanceId) {
+		//nothing to do
+	}
+
 }

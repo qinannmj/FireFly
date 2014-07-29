@@ -32,6 +32,8 @@ public abstract class HandlerInterface {
 	public abstract void onReceiveLookUp(PaxosSession session, AddRequest request);
 
 	public abstract byte[] onLoged(byte[] bytes);
+	
+	public abstract void onInstanceIdExecuted(long instanceId);
 
 	public final void onCommandReceive(PaxosSession session, AddRequest request) {
 		if (request.getCommandType().isWrite()) {
@@ -50,6 +52,7 @@ public abstract class HandlerInterface {
 		for (byte[] bs : customCommand) {
 			customResult.add(onLoged(bs));
 		}
+		onInstanceIdExecuted(instanceId);
 		finishLogedProcess(successfulRecordWrap, customResult);
 		try {
 			writeExecuteLog(instanceId, aBook);
@@ -96,9 +99,9 @@ public abstract class HandlerInterface {
 	 * @throws UnsupportedChecksumAlgorithm 
 	 */
 
-	public final void sendNotifyMessageResponse(PaxosSession session, long instanceId, AddRequest addRequest, byte[] notifyMessage)
+	public final void sendNotifyMessageResponse(PaxosSession session, AddRequest addRequest, byte[] notifyMessage)
 			throws UnsupportedChecksumAlgorithm {
-		sendMessage(session, addRequest.getMessageId(), instanceId, notifyMessage, false);
+		sendMessage(session, addRequest.getMessageId(), -1, notifyMessage, false);
 	}
 
 	private void sendMessage(PaxosSession session, long messageId, long instanceId, byte[] bytes, boolean isLast) throws UnsupportedChecksumAlgorithm {

@@ -1,7 +1,7 @@
 package cn.com.sparkle.firefly.net.netlayer;
 
-import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.log4j.Logger;
 
@@ -16,7 +16,7 @@ public abstract class PaxosSession {
 	private final static Logger logger = Logger.getLogger(PaxosSession.class);
 
 	private ObjectProtocolCacheBean protocolAttachment = new ObjectProtocolCacheBean();
-	private HashMap<AttributeKey<?>, Object> attachment = new HashMap<AttributeKey<?>, Object>();
+	private ConcurrentHashMap<AttributeKey<?>, Object> attachment = new ConcurrentHashMap<AttributeKey<?>, Object>();
 	private LinkedList<FrameBody> frameList = new LinkedList<FrameBody>();
 	private int curPackageSize = 0;
 	private int curPackageSizeLength = 0;

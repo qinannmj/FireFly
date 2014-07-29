@@ -271,7 +271,9 @@ public class ProtocolV0_0_1 extends AbstraceProtocol {
 	public byte[] createAddResponse(long packageId,long instanceId, byte[] bytes, boolean isLast) {
 		AddResponse.Builder builder = AddResponse.newBuilder();
 		builder.setResult(ByteString.copyFrom(bytes));
-		builder.setInstanceId(instanceId);
+		if(instanceId != -1){
+			builder.setInstanceId(instanceId);
+		}
 		return makeMessagePackage(packageId, isLast).setAddResponse(builder).build().toByteArray();
 	}
 

@@ -26,6 +26,11 @@
 			<artifactId>disruptor</artifactId>
 			<version>3.2.0</version>
 		</dependency>
+		<dependency>
+			<groupId>org.iq80.snappy</groupId>
+			<artifactId>snappy</artifactId>
+			<version>0.3</version>
+		</dependency>
 	</dependencies>
 	<build>
 		<pluginManagement>
@@ -87,6 +92,8 @@
 				</executions>
 			</plugin>
 		</plugins>
+		
+		
 	</build>
 
 </project>
