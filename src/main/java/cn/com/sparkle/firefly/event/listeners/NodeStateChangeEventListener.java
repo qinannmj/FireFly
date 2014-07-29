@@ -8,7 +8,5 @@ public interface NodeStateChangeEventListener extends EventListener {
 
 	public void openConnect(NetNode nNode);
 
-	public void beatHeart(NetNode nNode, NodeState nState);
-
-	public void activeBeatHeart(String fromAddress, NodeState nState);
+	public void nodeStateChange(String fromNetNodeAddress, NodeState oldState , NodeState newState);
 }

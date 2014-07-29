@@ -26,7 +26,7 @@ import cn.com.sparkle.raptor.core.util.TimeUtil;
 public class ClusterStateProcessor extends AbstractAdminProcessor {
 	private final static Logger logger = Logger.getLogger(ClusterStateProcessor.class);
 	private final static String SENATOR_FORMAT = "%-35s%-20s%-20s%-25s%-17s%-20s%-20s";
-	private final static String FOLLOWER_FORMAT = "%-35s%-20s%-25s%-17s%-20s%-20s";
+	private final static String FOLLOWER_FORMAT = "%-35s%-20s%-20s%-25s%-17s%-20s%-20s";
 	private Context context;
 
 	public ClusterStateProcessor(Context context) {
@@ -53,18 +53,19 @@ public class ClusterStateProcessor extends AbstractAdminProcessor {
 		NodesCollection collections = context.getcState().getSenators();
 		for (NodeState ns : collections.getNodeStates().values()) {
 			String masterDistance = ns.getMasterDistance() + ((ns.getMasterDistance() == 0 && ns.isConnected()) ? "(master)" : "");
-			String room = context.getConfiguration().getConfigNodeSet().getSenatorsMap().get(ns.getAddress()).getRoom();
+			String room = ns.getRoom();
 			pw.println(String.format(SENATOR_FORMAT, ns.getAddress(),room, ns.isConnected(), sdf.format(new Date(ns.getLastBeatHeatTime())),
 					ns.getLastCanExecuteInstanceId(), masterDistance, ns.isUpToDate()));
 		}
 		
 		pw.println();
 		pw.println("followers status:");
-		pw.println(String.format(FOLLOWER_FORMAT, "id", "isMasterConnected", "lastHeartTime", "maxLogId", "master-distance", "isUpToDate"));
+		pw.println(String.format(FOLLOWER_FORMAT, "id", "room", "isMasterConnected", "lastHeartTime", "maxLogId", "master-distance", "isUpToDate"));
 		for (NodeState ns : context.getcState().getFollowers()) {
 			String masterDistance = ns.getMasterDistance() + ((ns.getMasterDistance() == 0 && ns.isConnected()) ? "(master)" : "");
 			if(ns.getLastBeatHeatTime() + Constants.MAX_HEART_BEAT_INTERVAL * 2 > TimeUtil.currentTimeMillis()){
-				pw.println(String.format(FOLLOWER_FORMAT, ns.getAddress(), ns.isConnected(), sdf.format(new Date(ns.getLastBeatHeatTime())),
+				String room = ns.getRoom();
+				pw.println(String.format(FOLLOWER_FORMAT, ns.getAddress(),room, ns.isConnected(), sdf.format(new Date(ns.getLastBeatHeatTime())),
 						ns.getLastCanExecuteInstanceId(), masterDistance, ns.isUpToDate()));
 			}
 		}

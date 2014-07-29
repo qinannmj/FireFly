@@ -12,23 +12,29 @@ import com.lmax.disruptor.RingBuffer;
 
 public class DisruptorEventExecutor implements EventExecutor {
 	private RingBuffer<WaitingEvent> ringBuffer;
-
+	private Thread executeThread;
 	public DisruptorEventExecutor() {
 		ringBuffer = RingBuffer.createMultiProducer(WaitingEvent.EVENT_FACTORY, 128, PhasedBackoffWaitStrategy.withLock(1, 1, TimeUnit.MILLISECONDS));
 		BatchEventProcessor<WaitingEvent> processor = new BatchEventProcessor<WaitingEvent>(ringBuffer, ringBuffer.newBarrier(), new DisruptorHandler());
 		ringBuffer.addGatingSequences(processor.getSequence());
-		Thread t = new Thread(processor);
-		t.setName("disruptEventExecutor");
-		t.start();
+		executeThread = new Thread(processor);
+		executeThread.setName("disruptEventExecutor");
+		executeThread.start();
 	}
 
 	@Override
 	public void execute(Event event, Object... args) {
-		long seq = ringBuffer.next();
-		WaitingEvent wEvent = ringBuffer.get(seq);
-		wEvent.setArgs(args);
-		wEvent.setEvent(event);
-		ringBuffer.publish(seq);
+		if(Thread.currentThread() == executeThread){
+			//directly invoke , because in the same thread maybe lead to deadlock
+			event.notifyAllListener(args);
+		}else{
+			
+			long seq = ringBuffer.next();
+			WaitingEvent wEvent = ringBuffer.get(seq);
+			wEvent.setArgs(args);
+			wEvent.setEvent(event);
+			ringBuffer.publish(seq);
+		}
 	}
 
 	public final static class WaitingEvent {

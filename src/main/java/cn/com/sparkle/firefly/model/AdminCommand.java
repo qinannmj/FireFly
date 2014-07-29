@@ -5,13 +5,11 @@ public class AdminCommand {
 	public final static String REMOVE_SENATOR = "rm";
 	
 	private String address;
-	private String room = "";
 	private String type;
 
-	public AdminCommand(String address, String room, String type) {
+	public AdminCommand(String address, String type) {
 		super();
 		this.address = address;
-		this.room = room;
 		this.type = type;
 	}
 
@@ -19,17 +17,10 @@ public class AdminCommand {
 		String[] s = new String(bytes).split(" ");
 		type = s[0];
 		address = s[1];
-		if(s.length == 3){
-			room = s[2];
-		}
 	}
 
 	public String getAddress() {
 		return address;
-	}
-
-	public String getRoom() {
-		return room;
 	}
 
 	public String getType() {
@@ -38,7 +29,7 @@ public class AdminCommand {
 
 	public byte[] toBytes() {
 		StringBuffer sb = new StringBuffer();
-		sb.append(type).append(" ").append(address).append(" ").append(room);
+		sb.append(type).append(" ").append(address);
 		return sb.toString().getBytes();
 	}
 

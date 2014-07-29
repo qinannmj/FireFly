@@ -3,9 +3,11 @@ package cn.com.sparkle.firefly.protocolprocessor.negotiation;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 
@@ -90,11 +92,12 @@ public abstract class AbstractClientNegotiationProcessor extends AbstractChainPr
 			int _heartBeatInterval = Integer.parseInt(br.readLine());
 			@SuppressWarnings("unused")
 			String errorCode = br.readLine();//pre remain
+			List<String> customParam = readCustomParam(br);
 			
 			if (!protocolVersion.equals("") && !checksumType.equals("")) {
 				Protocol protocol = protocolManager.getProtocol(protocolVersion);
 				session.setChecksumType(Integer.parseInt(checksumType));
-				netNode = createNetNode(appVersion, address, session, protocol, Math.min(_heartBeatInterval, heartBeatIntervale));
+				netNode = createNetNode(appVersion, address,customParam, session, protocol, Math.min(_heartBeatInterval, heartBeatIntervale));
 
 				session.put(PaxosSessionKeys.NET_NODE_KEY, netNode);
 			} else {
@@ -111,6 +114,7 @@ public abstract class AbstractClientNegotiationProcessor extends AbstractChainPr
 	public ProtocolManager getProtocolManager() {
 		return protocolManager;
 	}
-
-	public abstract NetNode createNetNode(String appVersion, String address, PaxosSession session, Protocol protocol, int heartBeatInterval);
+	
+	protected abstract List<String> readCustomParam(BufferedReader br) throws IOException;
+	protected abstract NetNode createNetNode(String appVersion, String address,List<String> customParam, PaxosSession session, Protocol protocol, int heartBeatInterval);
 }

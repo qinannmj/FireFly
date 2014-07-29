@@ -1,7 +1,7 @@
 package cn.com.sparkle.firefly.protocolprocessor.v0_0_1.system;
 
 import cn.com.sparkle.firefly.Context;
-import cn.com.sparkle.firefly.event.events.NodeStateChangeEvent;
+import cn.com.sparkle.firefly.event.events.HeartBeatEvent;
 import cn.com.sparkle.firefly.model.ElectionId;
 import cn.com.sparkle.firefly.net.client.system.SystemNetNode;
 import cn.com.sparkle.firefly.net.netlayer.NetCloseException;
@@ -12,6 +12,7 @@ import cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.ActiveHeart
 import cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.MessagePackage;
 import cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.SenatorHeartBeatResponse;
 import cn.com.sparkle.firefly.state.NodeState;
+import cn.com.sparkle.raptor.core.util.TimeUtil;
 
 public class ActiveHeartProcessor extends AbstractProtocolV0_0_1Processor {
 
@@ -29,7 +30,8 @@ public class ActiveHeartProcessor extends AbstractProtocolV0_0_1Processor {
 			SenatorHeartBeatResponse heart = request.getHeartBeatResponse();
 
 			NodeState nodeState = new NodeState(request.getAddress());
-			nodeState.setLastBeatHeatTime(System.currentTimeMillis());
+			nodeState.setRoom(heart.getRoom());
+			nodeState.setLastBeatHeatTime(TimeUtil.currentTimeMillis());
 			nodeState.setMasterConnected(heart.getIsMasterConnected());
 			nodeState.setLastElectionId(new ElectionId(heart.getElectionAddress(), heart.getElectionId(), heart.getElectionVersion()));
 			nodeState.setLastCanExecuteInstanceId(heart.getLastCanExecuteInstanceId());
@@ -47,7 +49,7 @@ public class ActiveHeartProcessor extends AbstractProtocolV0_0_1Processor {
 				}
 			}
 
-			NodeStateChangeEvent.doActiveBeartHeartEvent(context.getEventsManager(), address, nodeState);
+			HeartBeatEvent.doActiveBeartHeartEvent(context.getEventsManager(), address, nodeState);
 		} else {
 			super.fireOnReceive(t, session);
 		}

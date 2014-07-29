@@ -42,5 +42,14 @@ public class NodesCollection {
 	public Map<String, NetNode> getValidActiveNodes() {
 		return validActiveNodes;
 	}
+	public boolean isSameRoom(String ads1,String ads2){
+		NodeState state1 = nodeStates.get(ads1);
+		NodeState state2 = nodeStates.get(ads2);
+		if(state1 == null || state2 == null){
+			return false;
+		}else{
+			return state1.getRoom().equals(state2.getRoom());
+		}
+	}
 
 }

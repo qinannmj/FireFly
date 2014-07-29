@@ -71,47 +71,55 @@ public class CatchUpDeamon implements Runnable {
 							+ allActiveSenator.size() + " initedNodeSze:" + senators.getValidActiveNodes().size() + ")");
 				}
 				boolean isGiveupCatchup = false;
+
 				while (maxInstanceId > selfInstanceId) {
-
 					tempselfInstanceId = selfInstanceId;
-					for (NetNode nnode : allActiveSenator.values()) {
-						if (nnode.getAddress().equals(selfAddress)) {
-							continue;
-						}
-						NodeState nodeState = senators.getNodeStates().get(nnode.getAddress());
-						long nnodeInstanceId = nodeState.getLastCanExecuteInstanceId();
-						nnodeInstanceId = maxInstanceId > nnodeInstanceId ? nnodeInstanceId : maxInstanceId;
-						// try study newer instance than self's
-						while (nnodeInstanceId > selfInstanceId) {
-							if (conf.isDebugLog()) {
-								logger.debug("catch up from " + nnode.getAddress());
+					for (int j = 0; j < 2; ++j) {
+						//for j == 0 , give prior to study from nodes of same room with self
+						for (NetNode nnode : allActiveSenator.values()) {
+							if (nnode.getAddress().equals(selfAddress) || (j == 0 && !senators.isSameRoom(selfAddress, nnode.getAddress()))) {
+								continue;
 							}
-							long catchUpInstanceId = aBook.getFisrtInstnaceIdOfWaitInsertToExecuteQueue();
-							if (catchUpInstanceId == -1 || catchUpInstanceId > nnodeInstanceId) {
-								catchUpInstanceId = Math.min(nnodeInstanceId, selfInstanceId + Constants.CATCH_STOP_NUM);
-							}
-							// start process of catch up
-							catchUp(nnode, selfInstanceId + 1, (int) (catchUpInstanceId - selfInstanceId));
+							NodeState nodeState = senators.getNodeStates().get(nnode.getAddress());
+							long nnodeInstanceId = nodeState.getLastCanExecuteInstanceId();
+							nnodeInstanceId = maxInstanceId > nnodeInstanceId ? nnodeInstanceId : maxInstanceId;
+							// try study newer instance than self's
+							while (nnodeInstanceId > selfInstanceId) {
+								if (conf.isDebugLog()) {
+									logger.debug("catch up from " + nnode.getAddress());
+								}
+								long catchUpInstanceId = aBook.getFisrtInstnaceIdOfWaitInsertToExecuteQueue();
+								if (catchUpInstanceId == -1 || catchUpInstanceId > nnodeInstanceId) {
+									catchUpInstanceId = Math.min(nnodeInstanceId, selfInstanceId + Constants.CATCH_STOP_NUM);
+								}
+								// start process of catch up
+								catchUp(nnode, selfInstanceId + 1, (int) (catchUpInstanceId - selfInstanceId));
 
-							selfInstanceId = aBook.getLastCanExecutableInstanceId();
-							if (selfInstanceId < catchUpInstanceId) { // the
-																		// peer
-																		// can't
-																		// provide
-																		// enough
-																		// record
-								break;
-							} else if (selfInstanceId > catchUpInstanceId) {
-								// this condition hints this node are receive
-								// new record by other way,
-								// so, we will give up the process of catch up
-								// to avoid receive same record repeatedly
-								isGiveupCatchup = true;
+								selfInstanceId = aBook.getLastCanExecutableInstanceId();
+								if (selfInstanceId < catchUpInstanceId) { // the
+																			// peer
+																			// can't
+																			// provide
+																			// enough
+																			// record
+									break;
+								} else if (selfInstanceId > catchUpInstanceId) {
+									// this condition hints this node are receive
+									// new record by other way,
+									// so, we will give up the process of catch up
+									// to avoid receive same record repeatedly
+									isGiveupCatchup = true;
+									break;
+								}
+							}
+							if(isGiveupCatchup){
 								break;
 							}
+						}
+						if(isGiveupCatchup){
+							break;
 						}
 					}
-
 					if (isGiveupCatchup) {
 						break;// give up
 					} else if (tempselfInstanceId == selfInstanceId) {
@@ -180,8 +188,8 @@ public class CatchUpDeamon implements Runnable {
 		SystemNetNode node = (SystemNetNode) netNode;
 		CatchUpCallBack callback = new CatchUpCallBack(conf, aBook);
 		node.sendCatchUpRequest(startInstanceId, size, callback);
-		if(conf.isDebugLog()){
-			logger.debug(String.format("catch up [%s,%s] from %s", startInstanceId , startInstanceId + size ,netNode.getAddress()));
+		if (conf.isDebugLog()) {
+			logger.debug(String.format("catch up [%s,%s] from %s", startInstanceId, startInstanceId + size, netNode.getAddress()));
 		}
 		try {
 			callback.waitFinish();

@@ -318,6 +318,7 @@ public class ProtocolV0_0_1 extends AbstraceProtocol {
 		heart.setIsUpToDate(nodeState.isUpToDate());
 		heart.setLastCanExecuteInstanceId(nodeState.getLastCanExecuteInstanceId());
 		heart.setMasterDistance(nodeState.getMasterDistance());
+		heart.setRoom(nodeState.getRoom());
 
 		ActiveHeartBeatRequest.Builder request = ActiveHeartBeatRequest.newBuilder().setAddress(nodeState.getAddress()).setHeartBeatResponse(heart);
 

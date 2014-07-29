@@ -1,5 +1,10 @@
 package cn.com.sparkle.firefly.net.client.system;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 import cn.com.sparkle.firefly.config.Configuration;
 import cn.com.sparkle.firefly.event.EventsManager;
 import cn.com.sparkle.firefly.net.client.NetNode;
@@ -20,10 +25,17 @@ public class SystemClientNegotiationProcessor extends AbstractClientNegotiationP
 	}
 
 	@Override
-	public NetNode createNetNode(String appVersion, String address, PaxosSession session, Protocol protocol, int heartBeatInterval) {
-		SystemNetNode netNode = new SystemNetNode(conf, session, address, protocol, appVersion, heartBeatInterval);
+	public NetNode createNetNode(String appVersion, String address,List<String> customParam, PaxosSession session, Protocol protocol, int heartBeatInterval) {
+		SystemNetNode netNode = new SystemNetNode(conf, session, address,Integer.parseInt(customParam.get(0)), protocol, appVersion, heartBeatInterval);
 		netNode.sendFirstHeartBeat(eventsManager);
 		return netNode;
+	}
+
+	@Override
+	protected List<String> readCustomParam(BufferedReader br) throws IOException {
+		ArrayList<String> list = new ArrayList<String>();
+		list.add(br.readLine());//read user port
+		return list;
 	}
 
 }

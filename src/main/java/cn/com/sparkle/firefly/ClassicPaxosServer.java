@@ -78,7 +78,7 @@ public class ClassicPaxosServer implements AccountBookEventListener, ConfigureEv
 
 		handler = new SystemServerHandler(getEventsManager(), configuration);
 		//initiate instance executor
-		InstanceExecutor ie = new InstanceExecutor(context, userHandlerInterface,lastExceptInstanceId == null ? -1 : lastExceptInstanceId);
+		InstanceExecutor ie = new InstanceExecutor(context, userHandlerInterface, lastExceptInstanceId == null ? -1 : lastExceptInstanceId);
 		context.setInstanceExecutor(ie);
 		// initiate account book
 		AccountBook accountBook = new AccountBook(context, lastExceptInstanceId);
@@ -121,11 +121,11 @@ public class ClassicPaxosServer implements AccountBookEventListener, ConfigureEv
 		try {
 			exclusiveServerSocket.close();
 			Configuration conf = context.getConfiguration();
-			ConfigNode configNode = new ConfigNode(conf.getIp(), String.valueOf(conf.getPort()), String.valueOf(conf.getClientPort()), null, null);
+			ConfigNode configNode = new ConfigNode(conf.getIp(), String.valueOf(conf.getPort()));
 			context.getcState().getSelfState().init(context);
 			//after account book have finished initial, start to bind server and user port
 			tryBind(configNode, handler);
-			tryBindUserServer(userHandlerInterface, configNode);
+			tryBindUserServer(userHandlerInterface);
 			// initiate master check deamon
 			Thread checkSenatorDeamon = new Thread(new CheckMasterSenatorStateDeamon(context));
 			checkSenatorDeamon.setName("checkSenatorDeamon");
@@ -165,13 +165,13 @@ public class ClassicPaxosServer implements AccountBookEventListener, ConfigureEv
 		server.listen(configNode.getIp(), Integer.parseInt(configNode.getPort()));
 	}
 
-	private UserServerHandler tryBindUserServer(HandlerInterface userHandlerInterface, ConfigNode configNode) throws Throwable {
+	private UserServerHandler tryBindUserServer(HandlerInterface userHandlerInterface) throws Throwable {
 		EventsManager eventsManager = context.getEventsManager();
 		Configuration conf = context.getConfiguration();
 		UserServerHandler handler = new UserServerHandler(eventsManager, conf, userHandlerInterface, context.getProtocolManager());
 		NetServer server = NetFactory.makeServer(conf.getNetLayer());
 		server.init(conf.getFilePath() + "/service_in_net.prop", conf.getHeartBeatInterval(), handler);
-		server.listen(configNode.getIp(), Integer.parseInt(configNode.getClientPort()));
+		server.listen(conf.getIp(), conf.getClientPort());
 		return handler;
 	}
 

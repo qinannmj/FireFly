@@ -16,11 +16,13 @@ import cn.com.sparkle.firefly.state.NodeState;
 
 public class SenatorHeartBeatProcessor extends AbstractProtocolV0_0_1Processor implements CatchUpEventListener, AccountBookEventListener {
 
-	private volatile ClusterState cState = null;
+	private ClusterState cState = null;
 
 	private volatile boolean isUptodate = false;
 
-	private volatile AccountBook aBook = null;
+	private AccountBook aBook = null;
+	
+	private Context context = null;
 
 	private volatile boolean accountBookInited = false;
 
@@ -28,6 +30,7 @@ public class SenatorHeartBeatProcessor extends AbstractProtocolV0_0_1Processor i
 		context.getEventsManager().registerListener(this);
 		this.aBook = context.getAccountBook();
 		this.cState = context.getcState();
+		this.context = context;
 	}
 
 	@Override
@@ -47,6 +50,7 @@ public class SenatorHeartBeatProcessor extends AbstractProtocolV0_0_1Processor i
 			builder.setElectionVersion(id.getVersion());
 			builder.setIsUpToDate(isUptodate);
 			builder.setMasterDistance(cState.getMasterDistance());
+			builder.setRoom(context.getConfiguration().getRoom());
 			for (NetNode node : senators.getValidActiveNodes().values()) {
 				builder.addConnectedValidNodes(node.getAddress());
 			}

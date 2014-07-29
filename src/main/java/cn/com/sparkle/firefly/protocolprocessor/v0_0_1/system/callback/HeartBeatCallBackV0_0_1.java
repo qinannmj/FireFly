@@ -16,7 +16,7 @@ public class HeartBeatCallBackV0_0_1 implements CallBack<MessagePackage> {
 	@Override
 	public void call(NetNode nnode, MessagePackage value) {
 		SenatorHeartBeatResponse response = value.getSenatorHeartBeatResponse();
-		callback.call(nnode, response.getIsMasterConnected(), response.getElectionId(), response.getElectionAddress(), response.getElectionVersion(),
+		callback.call(nnode,response.getRoom(), response.getIsMasterConnected(), response.getElectionId(), response.getElectionAddress(), response.getElectionVersion(),
 				response.getLastCanExecuteInstanceId(), response.getIsInited(), response.getIsUpToDate(), response.getMasterDistance(),
 				response.getConnectedValidNodesList());
 	}

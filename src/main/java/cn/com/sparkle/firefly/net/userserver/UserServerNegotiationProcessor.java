@@ -1,5 +1,7 @@
 package cn.com.sparkle.firefly.net.userserver;
 
+import java.io.PrintWriter;
+
 import cn.com.sparkle.firefly.config.Configuration;
 import cn.com.sparkle.firefly.protocolprocessor.Protocol;
 import cn.com.sparkle.firefly.protocolprocessor.ProtocolManager;
@@ -23,5 +25,8 @@ public class UserServerNegotiationProcessor extends AbstractServerProtocolNegoti
 		return true;
 	}
 
+	@Override
+	protected void writeCustomParam(PrintWriter pw) {
+	}
 
 }

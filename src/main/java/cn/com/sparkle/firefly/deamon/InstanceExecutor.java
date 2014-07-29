@@ -79,7 +79,7 @@ public class InstanceExecutor extends Thread {
 						}
 						
 						if(c.getType().equals(AdminCommand.ADD_SENATOR)){
-							context.getConfiguration().addSenator(c.getAddress(), c.getRoom(), recordWrap.getInstanceId());
+							context.getConfiguration().addSenator(c.getAddress(), recordWrap.getInstanceId());
 						}else if(c.getType().equals(AdminCommand.REMOVE_SENATOR)){
 							context.getConfiguration().removeSenator(c.getAddress(), recordWrap.getInstanceId());
 						}else{

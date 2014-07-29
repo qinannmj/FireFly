@@ -3,7 +3,7 @@ package cn.com.sparkle.firefly.net.client.system.callback;
 import java.util.List;
 
 import cn.com.sparkle.firefly.event.EventsManager;
-import cn.com.sparkle.firefly.event.events.NodeStateChangeEvent;
+import cn.com.sparkle.firefly.event.events.HeartBeatEvent;
 import cn.com.sparkle.firefly.model.ElectionId;
 import cn.com.sparkle.firefly.net.client.NetNode;
 import cn.com.sparkle.firefly.net.client.system.SystemNetNode;
@@ -20,9 +20,10 @@ public class HeartBeatCallBack {
 		return eventsManager;
 	}
 
-	public void call(NetNode nnode, boolean isMasterConnected, long electionIncreaseId, String electionAddress, long electionVersion,
+	public void call(NetNode nnode,String room, boolean isMasterConnected, long electionIncreaseId, String electionAddress, long electionVersion,
 			long lastExecutableInstanceId, boolean isInited, boolean isUptoDate, int masterDistance, List<String> connectedValidNodes) {
 		NodeState nodeState = new NodeState(nnode.getAddress());
+		nodeState.setRoom(room);
 		nodeState.setLastBeatHeatTime(System.currentTimeMillis());
 		nodeState.setMasterConnected(isMasterConnected);
 		nodeState.setLastElectionId(new ElectionId(electionAddress, electionIncreaseId, electionVersion));
@@ -32,6 +33,6 @@ public class HeartBeatCallBack {
 		nodeState.setUpToDate(isUptoDate);
 		nodeState.setMasterDistance(masterDistance);
 		nodeState.setConnectedValidNode(connectedValidNodes);
-		NodeStateChangeEvent.doBeatHeartEvent(eventsManager, (SystemNetNode) nnode, nodeState);
+		HeartBeatEvent.doBeatHeartEvent(eventsManager, (SystemNetNode) nnode, nodeState);
 	}
 }

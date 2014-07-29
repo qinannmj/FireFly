@@ -32,6 +32,7 @@ import cn.com.sparkle.firefly.protocolprocessor.ProtocolProcessorChain;
  * appversion /r
  * protocol version /r
  * checksum type /r
+ * customdate
  * 
  * response
  * appversion /r
@@ -39,6 +40,7 @@ import cn.com.sparkle.firefly.protocolprocessor.ProtocolProcessorChain;
  * accepted checksum type /r
  * self heart beat interval /r
  * errorcode /r   pre remained
+ * customdate
  * ------------------------------------------------------------
  * @author qinan.qn
  *
@@ -110,6 +112,7 @@ public abstract class AbstractServerProtocolNegotiationProcessor extends Abstrac
 			pw.println(acceptChecksumType);
 			pw.println(conf.getHeartBeatInterval());
 			pw.println("");
+			writeCustomParam(pw);
 			pw.flush();
 			try {
 				FrameBody frameBody = new FrameBody(baos.toByteArray(), ChecksumUtil.PURE_JAVA_CRC32);
@@ -132,7 +135,9 @@ public abstract class AbstractServerProtocolNegotiationProcessor extends Abstrac
 		return protocolManager;
 	}
 
-	public abstract ProtocolProcessorChain getChain(String version);
+	protected abstract void writeCustomParam(PrintWriter pw);
+	
+	protected abstract ProtocolProcessorChain getChain(String version);
 
-	public abstract boolean isAcceptConnect(String targetAddress, String sourceAddress);
+	protected abstract boolean isAcceptConnect(String targetAddress, String sourceAddress);
 }

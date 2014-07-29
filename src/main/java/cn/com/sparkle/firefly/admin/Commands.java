@@ -7,4 +7,6 @@ public class Commands {
 	public final static String CLSTUER_STATE1 = "cs";
 	public final static String STATE = "state";
 	public final static String STATE1 = "st";
+	public final static String CH_ROOM = "changeRoom";
+	public final static String CH_ROOM1 = "chr";
 }

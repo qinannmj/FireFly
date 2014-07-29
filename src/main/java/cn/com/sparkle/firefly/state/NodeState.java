@@ -1,5 +1,6 @@
 package cn.com.sparkle.firefly.state;
 
+import java.util.LinkedList;
 import java.util.List;
 
 import cn.com.sparkle.firefly.model.ElectionId;
@@ -17,10 +18,12 @@ public class NodeState {
 	private boolean isConnected = false;;
 
 	private boolean isUpToDate = false;
+	
+	private String room = "";
 
 	private int masterDistance = Integer.MAX_VALUE;
 
-	private List<String> connectedValidNode;
+	private List<String> connectedValidNode = new LinkedList<String>();
 	
 	public NodeState(String address) {
 		this.address = address;
@@ -101,6 +104,14 @@ public class NodeState {
 
 	public void setConnected(boolean isConnected) {
 		this.isConnected = isConnected;
+	}
+
+	public String getRoom() {
+		return room;
+	}
+
+	public void setRoom(String room) {
+		this.room = room;
 	}
 
 	public boolean isInit() {

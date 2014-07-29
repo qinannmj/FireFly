@@ -9,13 +9,13 @@ import cn.com.sparkle.firefly.Context;
 import cn.com.sparkle.firefly.client.MasterMayBeLostException;
 import cn.com.sparkle.firefly.client.PaxosClient;
 import cn.com.sparkle.firefly.client.PaxosOperater;
-import cn.com.sparkle.firefly.config.ConfigNode;
 import cn.com.sparkle.firefly.config.Configuration;
 import cn.com.sparkle.firefly.event.listeners.MasterChangePosEventListener;
 import cn.com.sparkle.firefly.event.listeners.MasterDistanceChangeListener;
 import cn.com.sparkle.firefly.handlerinterface.HandlerInterface;
 import cn.com.sparkle.firefly.model.AddRequest;
 import cn.com.sparkle.firefly.model.AddRequest.CommandType;
+import cn.com.sparkle.firefly.net.client.system.SystemNetNode;
 import cn.com.sparkle.firefly.net.netlayer.PaxosSession;
 import cn.com.sparkle.firefly.net.netlayer.PaxosSessionKeys;
 import cn.com.sparkle.firefly.protocolprocessor.ProtocolManager;
@@ -94,8 +94,8 @@ public class AddRequestProcessor extends AbstractProtocolV0_0_1Processor impleme
 							context.getcState().getSelfState().addTransportToMasterCount();
 							//The timeout promise the mem is not used excessively
 							long instanceId = addRequest.getCommandType().isConsistentlyRead() ? addRequest.getInstanceId() : -1;
-							operator.add(addRequest.getValue(), context.getConfiguration().getTransportTimeout(), addRequest.getCommandType(),
-									instanceId, new PaxosOperater.CallBack() {
+							operator.add(addRequest.getValue(), context.getConfiguration().getTransportTimeout(), addRequest.getCommandType(), instanceId,
+									new PaxosOperater.CallBack() {
 										@Override
 										public void callBack(byte[] bytes) {
 
@@ -141,24 +141,20 @@ public class AddRequestProcessor extends AbstractProtocolV0_0_1Processor impleme
 	@Override
 	public void masterDistanceChange(int distance) {
 		//find up level node
-		String address = context.getcState().getRouteManage().lookupUpLevelNodeAddress(distance);
-		if (address == null && distance == 0) {
-			address = conf.getSelfAddress(); // self is master
+		SystemNetNode node = context.getcState().getRouteManage().lookupUpLevelNode();
+		if (node == null && distance == 0) {
+			node = (SystemNetNode) context.getcState().getSenators().getAllActiveNodes().get(conf.getSelfAddress());
 		}
 		if (conf.isDebugLog()) {
-			logger.debug("distance change to " + distance + " uplevel node:" + address);
+			logger.debug("distance change to " + distance + " uplevel node:" + (node != null ? node.getAddress() : null));
 		}
 
-		if (address != null) {
+		if (node != null) {
 
 			try {
 				masterChangelock.lock();
 
-				for (ConfigNode cnode : conf.getConfigNodeSet().getSenators()) {
-					if ((cnode.getAddress()).equals(address)) {
-						masterAddress = cnode.getIp() + ":" + cnode.getClientPort();
-					}
-				}
+				masterAddress = node.getAddress().split(":")[0]  + ":"+ node.getUserPort();
 				if (conf.isDebugLog()) {
 					logger.debug("transport to " + masterAddress);
 				}

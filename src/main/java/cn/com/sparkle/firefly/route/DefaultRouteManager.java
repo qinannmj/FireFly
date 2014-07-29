@@ -10,7 +10,6 @@ import org.apache.log4j.Logger;
 
 import cn.com.sparkle.firefly.NodesCollection;
 import cn.com.sparkle.firefly.config.ConfigNode;
-import cn.com.sparkle.firefly.config.ConfigNodeSet;
 import cn.com.sparkle.firefly.config.Configuration;
 import cn.com.sparkle.firefly.event.EventsManager;
 import cn.com.sparkle.firefly.event.listeners.ConfigureEventListener;
@@ -24,10 +23,11 @@ import cn.com.sparkle.firefly.state.ClusterState;
 import cn.com.sparkle.firefly.state.NodeState;
 import cn.com.sparkle.firefly.util.QuorumCalcUtil;
 
-public class DefaultRouteManager implements RouteManage, MasterDistanceChangeListener, NodeStateChangeEventListener, ConfigureEventListener {
-//	@SuppressWarnings("unused")
+public class DefaultRouteManager implements RouteManage, MasterDistanceChangeListener, NodeStateChangeEventListener,
+		ConfigureEventListener {
+	//	@SuppressWarnings("unused")
 	private final static Logger logger = Logger.getLogger(DefaultRouteManager.class);
-	
+
 	private Configuration conf;
 	private ClusterState clusterState;
 	private int curDistance = Integer.MAX_VALUE;
@@ -38,7 +38,6 @@ public class DefaultRouteManager implements RouteManage, MasterDistanceChangeLis
 	private volatile LinkedNodeList linkedNodeList = new LinkedNodeList(null, new LinkedList<String>(), new HashSet<ConnectMap.Edge>(), new HashSet<String>());
 	private volatile ConnectMap connectMap;
 	private volatile HashMap<String, RouteState> routeMap = new HashMap<String, RouteState>();
-	private ConfigNodeSet cacheConfigNodeSet;
 
 	public DefaultRouteManager(Configuration conf, ClusterState clusterState, EventsManager eventsManager) {
 		this.conf = conf;
@@ -48,7 +47,6 @@ public class DefaultRouteManager implements RouteManage, MasterDistanceChangeLis
 		for (ConfigNode n : conf.getConfigNodeSet().getSenators()) {
 			routeMap.put(n.getAddress(), new RouteState(null));
 		}
-		cacheConfigNodeSet = conf.getConfigNodeSet();
 		eventsManager.registerListener(this);
 	}
 
@@ -112,48 +110,6 @@ public class DefaultRouteManager implements RouteManage, MasterDistanceChangeLis
 	}
 
 	@Override
-	public void beatHeart(NetNode nNode, NodeState nState) {
-		activeBeatHeart(nNode.getAddress(), nState);
-	}
-
-	@Override
-	public void activeBeatHeart(String fromAddress, NodeState nState) {
-		RouteState rs = routeMap.get(nState.getAddress());
-		if (rs != null) {
-			//this rs == null maybe happened in the version of senator be different to remote's.
-			
-			rs.node = clusterState.getSenators().getAllActiveNodes().get(fromAddress); //modify route state
-		}
-		ConnectMap cacheConnectMap = connectMap; //variable in function, avoid concurrently modify referance
-		boolean kPathModify = false;
-		boolean connectModify = false;
-		HashSet<String> connectNode = new HashSet<String>();
-		for (String dest : nState.getConnectedValidNode()) {//process connected node map
-			if (conf.getConfigNodeSet().getSenatorsMap().containsKey(dest) && conf.getConfigNodeSet().getSenatorsMap().containsKey(nState.getAddress())) {
-				Edge e = new Edge(nState.getAddress(), dest);
-				boolean isModify = cacheConnectMap.modifyState(e, true);
-				if (isModify) {
-					connectModify = true;
-				}
-				connectNode.add(dest);
-			}
-		}
-		for (String address : cacheConnectMap.getAllNodeSet()) {//process disconnected node map
-			if (!connectNode.contains(address) && conf.getConfigNodeSet().getSenatorsMap().containsKey(address) && conf.getConfigNodeSet().getSenatorsMap().containsKey(nState.getAddress())) {
-				Edge e = new Edge(nState.getAddress(), address);
-				boolean isModify = cacheConnectMap.modifyState(e, false);
-				if (isModify) {
-					kPathModify = linkedNodeList.relatedEdges.contains(e); // if the key path is modified
-				}
-			}
-		}
-		
-		if (kPathModify || connectModify) {
-			recalc();
-		}
-	}
-
-	@Override
 	public void senatorsChange(Set<ConfigNode> newSenators, ConfigNode addNode, ConfigNode rmNode, long version) {
 		ConnectMap newConnectMap = new ConnectMap(newSenators, connectMap);//re create new ConnectMap
 		HashMap<String, RouteState> newMap = new HashMap<String, RouteState>();
@@ -165,7 +121,6 @@ public class DefaultRouteManager implements RouteManage, MasterDistanceChangeLis
 		//check key path is modify
 		connectMap = newConnectMap;
 		routeMap = newMap;
-		cacheConfigNodeSet = conf.getConfigNodeSet();
 		recalc();
 
 	}
@@ -218,10 +173,7 @@ public class DefaultRouteManager implements RouteManage, MasterDistanceChangeLis
 		String lnode = dfsCalcList.temp.size() == 0 ? null : dfsCalcList.temp.getLast();
 		dfsCalcList.temp.addLast(v.getAddress());//push to temp
 		try {
-
-			ConfigNode node = cacheConfigNodeSet.getSenatorsMap().get(v.getAddress());
-
-			if (lnode == null || node.isSameRoomNode(lnode)) {
+			if (lnode == null || clusterState.getSenators().isSameRoom(v.getAddress(), lnode)) {
 				dfsCalcList.tempWeight += 1;
 			} else {
 				dfsCalcList.tempWeight -= 1;
@@ -265,6 +217,45 @@ public class DefaultRouteManager implements RouteManage, MasterDistanceChangeLis
 
 		public RouteState(NetNode node) {
 			this.node = node;
+		}
+	}
+
+	@Override
+	public void nodeStateChange(String fromAddress, NodeState oldState, NodeState newState) {
+		RouteState rs = routeMap.get(newState.getAddress());
+		if (rs != null) {
+			//this rs == null maybe happened in the version of senator be different to remote's.
+
+			rs.node = clusterState.getSenators().getAllActiveNodes().get(fromAddress); //modify route state
+		}
+		ConnectMap cacheConnectMap = connectMap; //variable in function, avoid concurrently modify referance
+		boolean kPathModify = false;
+		boolean connectModify = false;
+		HashSet<String> connectNode = new HashSet<String>();
+		for (String dest : newState.getConnectedValidNode()) {//process connected node map
+			if (conf.getConfigNodeSet().getSenatorsMap().containsKey(dest) && conf.getConfigNodeSet().getSenatorsMap().containsKey(newState.getAddress())) {
+				Edge e = new Edge(newState.getAddress(), dest);
+				boolean isModify = cacheConnectMap.modifyState(e, true);
+				if (isModify) {
+					connectModify = true;
+				}
+				connectNode.add(dest);
+			}
+		}
+		connectModify = connectModify || oldState == null || newState == null || (!oldState.getRoom().equals(newState.getRoom()));
+		for (String address : cacheConnectMap.getAllNodeSet()) {//process disconnected node map
+			if (!connectNode.contains(address) && conf.getConfigNodeSet().getSenatorsMap().containsKey(address)
+					&& conf.getConfigNodeSet().getSenatorsMap().containsKey(newState.getAddress())) {
+				Edge e = new Edge(newState.getAddress(), address);
+				boolean isModify = cacheConnectMap.modifyState(e, false);
+				if (isModify) {
+					kPathModify = linkedNodeList.relatedEdges.contains(e); // if the key path is modified
+				}
+			}
+		}
+
+		if (kPathModify || connectModify) {
+			recalc();
 		}
 	}
 

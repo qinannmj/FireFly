@@ -10,6 +10,7 @@ import cn.com.sparkle.firefly.Context;
 import cn.com.sparkle.firefly.event.EventsManager;
 import cn.com.sparkle.firefly.event.listeners.AccountBookEventListener;
 import cn.com.sparkle.firefly.event.listeners.CatchUpEventListener;
+import cn.com.sparkle.firefly.event.listeners.HeartBeatEventListener;
 import cn.com.sparkle.firefly.event.listeners.MasterDistanceChangeListener;
 import cn.com.sparkle.firefly.event.listeners.NodeStateChangeEventListener;
 import cn.com.sparkle.firefly.net.client.NetNode;
@@ -18,7 +19,7 @@ import cn.com.sparkle.firefly.net.netlayer.NetCloseException;
 import cn.com.sparkle.firefly.state.NodeState;
 import cn.com.sparkle.raptor.core.util.TimeUtil;
 
-public class HeartBeatCheckDeamon extends Thread implements NodeStateChangeEventListener, AccountBookEventListener, CatchUpEventListener,
+public class HeartBeatCheckDeamon extends Thread implements NodeStateChangeEventListener,HeartBeatEventListener, AccountBookEventListener, CatchUpEventListener,
 		MasterDistanceChangeListener {
 	private final static Logger logger = Logger.getLogger(HeartBeatCheckDeamon.class);
 	private EventsManager eventsManager;
@@ -52,6 +53,7 @@ public class HeartBeatCheckDeamon extends Thread implements NodeStateChangeEvent
 
 							NodeState nodeState = new NodeState(context.getConfiguration().getSelfAddress());
 							nodeState.setConnected(false);
+							nodeState.setRoom(context.getConfiguration().getRoom());
 							nodeState.setInit(isAccountBookInit);
 							nodeState.setLastBeatHeatTime(TimeUtil.currentTimeMillis());
 							nodeState.setLastCanExecuteInstanceId(context.getAccountBook().getLastCanExecutableInstanceId());
@@ -142,5 +144,9 @@ public class HeartBeatCheckDeamon extends Thread implements NodeStateChangeEvent
 	@Override
 	public void masterDistanceChange(int distance) {
 		this.distance = distance;
+	}
+
+	@Override
+	public void nodeStateChange(String fromNetNodeAddress, NodeState oldState, NodeState newState) {
 	}
 }

@@ -1,5 +1,7 @@
 package cn.com.sparkle.firefly.net.systemserver;
 
+import java.io.PrintWriter;
+
 import org.apache.log4j.Logger;
 
 import cn.com.sparkle.firefly.config.Configuration;
@@ -34,5 +36,10 @@ public class SystemServerProtocolNegotiationProcessor extends AbstractServerProt
 			logger.info(String.format("Close system connection[from %s]!Cause: the targetAddress is not match the ip of this node!", sourceAddress));
 			return false;
 		}
+	}
+
+	@Override
+	protected void writeCustomParam(PrintWriter pw) {
+		pw.println(conf.getClientPort());
 	}
 }

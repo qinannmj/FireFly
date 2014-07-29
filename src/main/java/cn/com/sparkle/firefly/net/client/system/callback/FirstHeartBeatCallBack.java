@@ -13,9 +13,9 @@ public class FirstHeartBeatCallBack extends HeartBeatCallBack {
 	}
 
 	@Override
-	public void call(NetNode nnode, boolean isMasterConnected, long electionIncreaseId, String electionAddress, long electionVersion,
+	public void call(NetNode nnode,String room, boolean isMasterConnected, long electionIncreaseId, String electionAddress, long electionVersion,
 			long lastExecutableInstanceId, boolean isInited, boolean isUptoDate, int masterDistance, List<String> connectedValidNodes) {
-		super.call(nnode, isMasterConnected, electionIncreaseId, electionAddress, electionVersion, lastExecutableInstanceId, isInited, isUptoDate,
+		super.call(nnode,room, isMasterConnected, electionIncreaseId, electionAddress, electionVersion, lastExecutableInstanceId, isInited, isUptoDate,
 				masterDistance, connectedValidNodes);
 		NodeStateChangeEvent.doOpenConnectEvent(getEventsManager(), (SystemNetNode) nnode);
 	}

@@ -8,6 +8,7 @@ import cn.com.sparkle.firefly.event.events.ConfigureEvent;
 import cn.com.sparkle.firefly.event.events.ElectionEvent;
 import cn.com.sparkle.firefly.event.events.Event;
 import cn.com.sparkle.firefly.event.events.ExecutingInstanceChangeEvent;
+import cn.com.sparkle.firefly.event.events.HeartBeatEvent;
 import cn.com.sparkle.firefly.event.events.InstanceExecuteEvent;
 import cn.com.sparkle.firefly.event.events.InstanceExecuteMaxPackageSizeEvent;
 import cn.com.sparkle.firefly.event.events.InstancePaxosEvent;
@@ -30,6 +31,7 @@ public class DefaultEventManager implements EventsManager {
 		register(ExecutingInstanceChangeEvent.class, executor);
 		register(ConfigureEvent.class, executor);
 		register(NodeStateChangeEvent.class, executor);
+		register(HeartBeatEvent.class,executor);
 		register(InstanceExecuteEvent.class, executor);
 		register(MasterDistanceChangeEvent.class, executor);
 		register(ElectionEvent.class, executor);

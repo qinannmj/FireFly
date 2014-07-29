@@ -5,6 +5,7 @@ import java.util.HashMap;
 import org.apache.log4j.Logger;
 
 import cn.com.sparkle.firefly.Context;
+import cn.com.sparkle.firefly.admin.processors.ChangeRoomProcessor;
 import cn.com.sparkle.firefly.admin.processors.ClusterStateProcessor;
 import cn.com.sparkle.firefly.admin.processors.ReElectionProcessor;
 import cn.com.sparkle.firefly.admin.processors.StateProcessor;
@@ -40,6 +41,10 @@ public class AdminLookupHandler extends HandlerInterface {
 		StateProcessor stateProcessor = new StateProcessor(context);
 		processorMap.put(Commands.STATE, stateProcessor);
 		processorMap.put(Commands.STATE1, stateProcessor);
+		
+		ChangeRoomProcessor changeRoomProcessor = new ChangeRoomProcessor(context);
+		processorMap.put(Commands.CH_ROOM, changeRoomProcessor);
+		processorMap.put(Commands.CH_ROOM1, changeRoomProcessor);
 	}
 
 	@Override

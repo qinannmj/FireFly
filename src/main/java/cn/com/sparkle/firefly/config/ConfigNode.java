@@ -1,28 +1,18 @@
 package cn.com.sparkle.firefly.config;
 
-import java.util.HashSet;
 import java.util.Set;
 
 public class ConfigNode implements Cloneable {
 	private String ip;
 	private String port;
-	private String clientPort;
 	private String address;
-	private String room;
-	private HashSet<String> sameRoomNode;
 	private boolean valid = true;
 
-	public ConfigNode(String ip, String port, String clientPort, String room, HashSet<String> sameRoomNode) {
+	public ConfigNode(String ip, String port) {
 		super();
 		this.ip = ip;
 		this.port = port;
-		this.clientPort = clientPort;
 		this.address = ip + ":" + port;
-		this.sameRoomNode = sameRoomNode;
-		this.room = room;
-		if (sameRoomNode != null) {
-			sameRoomNode.add(this.address);
-		}
 	}
 
 	@Override
@@ -39,18 +29,18 @@ public class ConfigNode implements Cloneable {
 		return false;
 	}
 
-	public boolean isSameRoomNode(String address) {
-		return sameRoomNode.contains(address);
-	}
-
-	protected HashSet<String> getSameRoomNode() {
-		return this.sameRoomNode;
-	}
-
-	@SuppressWarnings("unchecked")
-	public HashSet<String> cloneSameRoomNode() {
-		return (HashSet<String>) sameRoomNode.clone();
-	}
+	//	public boolean isSameRoomNode(String address) {
+	//		return sameRoomNode.contains(address);
+	//	}
+	//
+	//	protected HashSet<String> getSameRoomNode() {
+	//		return this.sameRoomNode;
+	//	}
+	//
+	//	@SuppressWarnings("unchecked")
+	//	public HashSet<String> cloneSameRoomNode() {
+	//		return (HashSet<String>) sameRoomNode.clone();
+	//	}
 
 	public String getIp() {
 		return ip;
@@ -64,55 +54,37 @@ public class ConfigNode implements Cloneable {
 		this.port = port;
 	}
 
-	public String getClientPort() {
-		return clientPort;
-	}
-
-	public void setClientPort(String clientPort) {
-		this.clientPort = clientPort;
-	}
-
 	public String toString() {
-		return getFullAddress();
+		return getAddress();
 	}
 
-	public String getRoom() {
-		return room;
-	}
-	public void invalid(){
+	public void invalid() {
 		this.valid = false;
 	}
-	public boolean isValid(){
-		return this.valid;
-	}
 
-	public String getFullAddress() {
-		return ip + ":" + port + ":" + clientPort;
+	public boolean isValid() {
+		return this.valid;
 	}
 
 	public String getAddress() {
 		return address;
 	}
 
-	public static ConfigNode parseNode(String address, String room, HashSet<String> sameHashSet) {
+	public static ConfigNode parseNode(String address) {
 		String[] array = address.trim().split(":");
-		return new ConfigNode(array[0], array[1], array.length == 3 ? array[2] : "", room, sameHashSet);
+		return new ConfigNode(array[0], array[1]);
 	}
 
 	public static boolean exist(Set<ConfigNode> set, String testAddress) {
-		ConfigNode node = parseNode(testAddress, null, null);
+		ConfigNode node = parseNode(testAddress);
 		return set.contains(node);
 	}
-
-	public ConfigNode clone(HashSet<String> sameHashSet) {
+	@Override
+	public ConfigNode clone() {
 		try {
-			ConfigNode cNode = (ConfigNode) clone();
-			cNode.sameRoomNode = sameHashSet;
-			sameHashSet.add(cNode.getAddress());
-			return cNode;
+			return (ConfigNode)super.clone();
 		} catch (CloneNotSupportedException e) {
 			throw new RuntimeException(e);
 		}
-
 	}
 }

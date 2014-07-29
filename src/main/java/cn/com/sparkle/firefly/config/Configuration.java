@@ -61,6 +61,7 @@ public class Configuration {
 	private int fileIoBuffsize;
 	private int fileIoQueueDeep;
 	private boolean isMergeClientRequest;
+	private String room;
 
 	public Configuration(String filePath, EventsManager eventsManager) throws ParserConfigurationException, SAXException, IOException {
 		this.eventsManager = eventsManager;
@@ -72,27 +73,37 @@ public class Configuration {
 		File senator = new File(filePath + "/senators.prop");
 		senatorProp.load(new InputStreamReader(new FileInputStream(senator)));
 		long version = Long.parseLong(senatorProp.getProperty("version"));
-		HashMap<String, HashSet<String>> roomDisributedMap = new HashMap<String, HashSet<String>>();
+//		HashMap<String, HashSet<String>> roomDisributedMap = new HashMap<String, HashSet<String>>();
 		HashSet<ConfigNode> senators = new HashSet<ConfigNode>();
 		HashMap<String, ConfigNode> senatorsMap = new HashMap<String, ConfigNode>();
 		for (Entry<Object, Object> e : senatorProp.entrySet()) {
 			String key = (String) e.getKey();
 			String value = (String) e.getValue();
 			if (key.indexOf("senators") > -1) {
-				HashSet<String> sameRoomNodes = new HashSet<String>();
-				String room = key.split("_")[1];
-				roomDisributedMap.put(room, sameRoomNodes);
+//				HashSet<String> sameRoomNodes = new HashSet<String>();
+//				String room = key.split("_")[1];
+//				roomDisributedMap.put(room, sameRoomNodes);
 				for (String address : value.split(",")) {
 					if (address.trim().length() != 0) {
 						address = address.trim();
-						ConfigNode configNode = ConfigNode.parseNode(address, room, sameRoomNodes);
+						ConfigNode configNode = ConfigNode.parseNode(address);
 						senators.add(configNode);
 						senatorsMap.put(configNode.getAddress(), configNode);
 					}
 				}
 			}
 		}
-		this.configNodeSet = new ConfigNodeSet(senators, senatorsMap, roomDisributedMap, version);
+		Properties roomProp = new Properties();
+		File roomPropFile = new File(filePath + "/room.prop");
+		roomProp.load(new InputStreamReader(new FileInputStream(roomPropFile)));
+		if (roomProp.getProperty("room") == null) {
+			throw new ConfigurationError("room not be set, please check your configuration!");
+		} else {
+			this.room = roomProp.getProperty("room").trim().toLowerCase();
+		}
+		
+		
+		this.configNodeSet = new ConfigNodeSet(senators, senatorsMap, version);
 
 		if (senators.size() == 0) {
 			throw new ConfigurationError("one senator at least are needed!");
@@ -122,6 +133,8 @@ public class Configuration {
 		} else {
 			this.stableStorage = confProp.getProperty("stable-storage");
 		}
+		
+		
 		if (confProp.getProperty("ip") == null) {
 			throw new ConfigurationError("ip not be set, please check your configuration!");
 		} else {
@@ -360,6 +373,7 @@ public class Configuration {
 			this.isMergeClientRequest = Boolean.parseBoolean(temp);
 		}
 		
+		
 		logger.info("system configuration");
 		logger.info("catch-up-delay:" + this.catchUpDelay);
 		logger.info("service-port:" + this.clientPort);
@@ -367,6 +381,7 @@ public class Configuration {
 		logger.info("disk-mem-lost:" + this.diskMemLost);
 		logger.info("configuration-file-path:" + this.filePath);
 		logger.info("net-layer:" + this.netLayer);
+		logger.info("room:" + this.room);
 		logger.info("ip:" + this.ip);
 		logger.info("system-port:" + this.port);
 		logger.info("response-delay:" + this.responseDelay);
@@ -388,25 +403,29 @@ public class Configuration {
 		logger.info("is-merge-client-request" + this.isMergeClientRequest);
 	}
 
+	public String getRoom() {
+		return room;
+	}
+
 	public boolean isMergeClientRequest() {
 		return isMergeClientRequest;
 	}
 
-	public synchronized void addSenator(String address, String roomName, long version) throws ConfigurationException {
+	public synchronized void addSenator(String address, long version) throws ConfigurationException {
 		if(isDebugLog()){
-			logger.debug(String.format("add %s to %s ,version:%s targetVersion: %s",address,roomName,this.configNodeSet.getVersion(),version));
+			logger.debug(String.format("add %s ,version:%s targetVersion: %s",address,this.configNodeSet.getVersion(),version));
 		}
 		if (version <= this.configNodeSet.getVersion()) {
 			return;
 		}
 		ConfigNodeSet newSet = (ConfigNodeSet) configNodeSet.clone();
 
-		HashSet<String> sameRoomNode = newSet.getRoomDistributedMap().get(roomName);
-		if (sameRoomNode == null) {
-			sameRoomNode = new HashSet<String>();
-			newSet.getRoomDistributedMap().put(roomName, sameRoomNode);
-		}
-		ConfigNode senator = ConfigNode.parseNode(address, roomName, sameRoomNode);
+//		HashSet<String> sameRoomNode = newSet.getRoomDistributedMap().get(roomName);
+//		if (sameRoomNode == null) {
+//			sameRoomNode = new HashSet<String>();
+//			newSet.getRoomDistributedMap().put(roomName, sameRoomNode);
+//		}
+		ConfigNode senator = ConfigNode.parseNode(address);
 		newSet.getSenators().add(senator);
 		newSet.getSenatorsMap().put(senator.getAddress(), senator);
 		newSet.setVersion(version);
@@ -429,13 +448,13 @@ public class Configuration {
 		if (senator != null && newSet.getSenators().size() == 1) {
 			throw new ConfigurationException("The system must need one senator at least!");
 		} else if (senator != null) {
-			senator.getSameRoomNode().remove(senator.getAddress());
-			if (senator.getSameRoomNode().size() == 0) {
-				newSet.getRoomDistributedMap().remove(senator.getRoom());
-			}
+//			senator.getSameRoomNode().remove(senator.getAddress());
+//			if (senator.getSameRoomNode().size() == 0) {
+//				newSet.getRoomDistributedMap().remove(senator.getRoom());
+//			}
 			newSet.getSenatorsMap().remove(senator.getAddress());
 			newSet.getSenators().remove(senator);
-			newSet.getRoomDistributedMap().remove(senator.getAddress());
+//			newSet.getRoomDistributedMap().remove(senator.getAddress());
 			newSet.setVersion(version);
 			this.configNodeSet = newSet;
 			saveSenator();
@@ -458,6 +477,19 @@ public class Configuration {
 			}
 		}
 		sfn.delete();
+		
+		
+		sf = new File(filePath + "/room.prop");
+		sfn = new File(filePath + "/room.prop.new");
+		if (!sf.exists()) {
+			if (!sfn.exists()) {
+				throw new ConfigurationError("old and new room configuration is not existed!");
+			} else {
+				sfn.renameTo(sf);
+			}
+		}
+		sfn.delete();
+		
 	}
 
 	public boolean isElectSelfMaster() {
@@ -475,24 +507,53 @@ public class Configuration {
 	public long getTransportTimeout() {
 		return transportTimeout;
 	}
+	
+	public synchronized void changeRoom(String room){
+		
+		Properties p = new Properties();
+		p.setProperty("room", room);
+		File f = new File(filePath + "/room.prop.new");
+		if (!f.exists()) {
+			try {
+				f.createNewFile();
+			} catch (IOException e1) {
+				throw new ConfigurationError("room configuration write file failed.");
+			}
+		}
+		OutputStream os = null;
+		try {
+			os = new FileOutputStream(f);
+			p.store(os, "");
+			os.close();
+			File ff = new File(filePath + "/room.prop");
+			ff.delete();
+			f.renameTo(ff);
+			this.room = room;
+		} catch (IOException e) {
+			throw new ConfigurationError("room configuration write file failed.");
+		} finally {
+			if (os != null) {
+				try {
+					os.close();
+				} catch (Throwable e) {
+				}
+			}
+		}
+	}
 
 	private void saveSenator() {
 		Properties p = new Properties();
 		p.setProperty("version", String.valueOf(this.configNodeSet.getVersion()));
 
-		HashMap<String, StringBuffer> map = new HashMap<String, StringBuffer>();
+		StringBuffer sb = new StringBuffer();
 		for (ConfigNode senator : this.configNodeSet.getSenators()) {
-			StringBuffer sb = map.get(senator.getRoom());
-			if (sb == null) {
-				sb = new StringBuffer();
-				map.put(senator.getRoom(), sb);
-			}
-			sb.append(senator.getFullAddress()).append(",");
+			sb.append(senator.getAddress()).append(",");
 		}
 
-		for (Entry<String, StringBuffer> e : map.entrySet()) {
-			p.setProperty("senators_" + e.getKey(), e.getValue().toString());
-		}
+//		for (Entry<String, StringBuffer> e : map.entrySet()) {
+//			p.setProperty("senators_" + e.getKey(), e.getValue().toString());
+//		}
+		p.setProperty("senators", sb.toString());
 
 		File f = new File(filePath + "/senators.prop.new");
 		if (!f.exists()) {

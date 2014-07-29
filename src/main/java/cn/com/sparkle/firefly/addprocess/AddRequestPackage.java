@@ -96,28 +96,29 @@ public class AddRequestPackage {
 			return null;
 		}else{
 			AdminCommand adminCommand = new AdminCommand(valueList.get(0).getValue());
+			ConfigNodeSet configNodeSet = context.getConfiguration().getConfigNodeSet();
+			int newQuorum = 0;
 			if(adminCommand.getType().equals(AdminCommand.ADD_SENATOR)){
-				return null;
+				newQuorum = QuorumCalcUtil.calcQuorumNum(configNodeSet.getSenators().size() + 1, context.getConfiguration().getDiskMemLost());
 			}else{
 				//rm a node
-				ConfigNodeSet configNodeSet = context.getConfiguration().getConfigNodeSet();
-				int newQuorum = QuorumCalcUtil.calcQuorumNum(configNodeSet.getSenators().size() - 1, context.getConfiguration().getDiskMemLost());
-				String rmAddress = adminCommand.getAddress();
-				NodesCollection nodes = context.getcState().getSenators();
-				int uptoDateRemainCount = 0;
-				for(String ads : nodes.getAllActiveNodes().keySet()){
-					if(!ads.equals(rmAddress)){
-						NodeState nodeState = nodes.getNodeStates().get(ads);
-						if(nodeState.getLastCanExecuteInstanceId() >= configNodeSet.getVersion()){
-							++uptoDateRemainCount;
-						}
+				newQuorum = QuorumCalcUtil.calcQuorumNum(configNodeSet.getSenators().size() - 1, context.getConfiguration().getDiskMemLost());
+			}
+			String rmAddress = adminCommand.getAddress();
+			NodesCollection nodes = context.getcState().getSenators();
+			int uptoDateRemainCount = 0;
+			for(String ads : nodes.getAllActiveNodes().keySet()){
+				if(!ads.equals(rmAddress)){
+					NodeState nodeState = nodes.getNodeStates().get(ads);
+					if(nodeState.getLastCanExecuteInstanceId() >= configNodeSet.getVersion()){
+						++uptoDateRemainCount;
 					}
 				}
-				if(uptoDateRemainCount >= newQuorum){
-					return null;
-				}else{
-					return String.format("error:%s", "Remove senator will leads to inconsistent, pls try again later!");
-				}
+			}
+			if(uptoDateRemainCount >= newQuorum){
+				return null;
+			}else{
+				return String.format("error:%s", "Add/Remove senator will leads to inconsistent, pls try again later!");
 			}
 		}
 	}

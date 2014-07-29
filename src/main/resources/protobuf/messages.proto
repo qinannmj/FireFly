@@ -50,7 +50,8 @@ message SenatorHeartBeatResponse{
 	required bool isInited=6;
 	required bool isUpToDate =7;
 	required int32 masterDistance=8;
-	repeated string connectedValidNodes=9;
+	required string room=9;
+	repeated string connectedValidNodes=10;
 }
 
 message LookUpLatestInstanceIdRequest{

@@ -31,11 +31,14 @@ import cn.com.sparkle.firefly.state.NodeState;
 public class SystemNetNode extends NetNode {
 	private WaitStrategy syncSuccessfulMessageStrategy;
 	private final long INSERT_SUCCESSFUL_MESSAGE_BYTE_SIZE;
-
-	public SystemNetNode(Configuration conf, PaxosSession session, String address, Protocol protocol, String appVersion, int heartBeatnterval) {
+	
+	private int userPort;
+	
+	public SystemNetNode(Configuration conf, PaxosSession session, String address,int userPort, Protocol protocol, String appVersion, int heartBeatnterval) {
 		super(session, address, protocol, appVersion, heartBeatnterval);
 		this.syncSuccessfulMessageStrategy = SyncStrategyFactory.build(conf);
 		INSERT_SUCCESSFUL_MESSAGE_BYTE_SIZE = conf.getSessionSuccessSyncMaxMem() / 4;
+		this.userPort = userPort;
 	}
 
 	void sendFirstHeartBeat(EventsManager eventsManager) {
@@ -173,6 +176,10 @@ public class SystemNetNode extends NetNode {
 	@Override
 	protected void onClose() {
 		super.onClose();
+	}
+
+	public int getUserPort() {
+		return userPort;
 	}
 
 }

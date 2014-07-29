@@ -1795,7 +1795,7 @@ public final class PaxosMessages {
                 cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.MessagePackage.class, cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.MessagePackage.Builder.class);
       }
 
-      // Construct using cn.com.sparkle.paxos.protocolprocessor.v0_0_1.PaxosMessages.MessagePackage.newBuilder()
+      // Construct using cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.MessagePackage.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
@@ -5560,7 +5560,7 @@ public final class PaxosMessages {
                 cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.HeartBeatRequest.class, cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.HeartBeatRequest.Builder.class);
       }
 
-      // Construct using cn.com.sparkle.paxos.protocolprocessor.v0_0_1.PaxosMessages.HeartBeatRequest.newBuilder()
+      // Construct using cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.HeartBeatRequest.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
@@ -6011,7 +6011,7 @@ public final class PaxosMessages {
                 cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.ActiveHeartBeatRequest.class, cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.ActiveHeartBeatRequest.Builder.class);
       }
 
-      // Construct using cn.com.sparkle.paxos.protocolprocessor.v0_0_1.PaxosMessages.ActiveHeartBeatRequest.newBuilder()
+      // Construct using cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.ActiveHeartBeatRequest.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
@@ -6433,22 +6433,37 @@ public final class PaxosMessages {
      */
     int getMasterDistance();
 
-    // repeated string connectedValidNodes = 9;
+    // required string room = 9;
     /**
-     * <code>repeated string connectedValidNodes = 9;</code>
+     * <code>required string room = 9;</code>
+     */
+    boolean hasRoom();
+    /**
+     * <code>required string room = 9;</code>
+     */
+    java.lang.String getRoom();
+    /**
+     * <code>required string room = 9;</code>
+     */
+    com.google.protobuf.ByteString
+        getRoomBytes();
+
+    // repeated string connectedValidNodes = 10;
+    /**
+     * <code>repeated string connectedValidNodes = 10;</code>
      */
     java.util.List<java.lang.String>
     getConnectedValidNodesList();
     /**
-     * <code>repeated string connectedValidNodes = 9;</code>
+     * <code>repeated string connectedValidNodes = 10;</code>
      */
     int getConnectedValidNodesCount();
     /**
-     * <code>repeated string connectedValidNodes = 9;</code>
+     * <code>repeated string connectedValidNodes = 10;</code>
      */
     java.lang.String getConnectedValidNodes(int index);
     /**
-     * <code>repeated string connectedValidNodes = 9;</code>
+     * <code>repeated string connectedValidNodes = 10;</code>
      */
     com.google.protobuf.ByteString
         getConnectedValidNodesBytes(int index);
@@ -6545,9 +6560,14 @@ public final class PaxosMessages {
               break;
             }
             case 74: {
-              if (!((mutable_bitField0_ & 0x00000100) == 0x00000100)) {
+              bitField0_ |= 0x00000100;
+              room_ = input.readBytes();
+              break;
+            }
+            case 82: {
+              if (!((mutable_bitField0_ & 0x00000200) == 0x00000200)) {
                 connectedValidNodes_ = new com.google.protobuf.LazyStringArrayList();
-                mutable_bitField0_ |= 0x00000100;
+                mutable_bitField0_ |= 0x00000200;
               }
               connectedValidNodes_.add(input.readBytes());
               break;
@@ -6560,7 +6580,7 @@ public final class PaxosMessages {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e.getMessage()).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x00000100) == 0x00000100)) {
+        if (((mutable_bitField0_ & 0x00000200) == 0x00000200)) {
           connectedValidNodes_ = new com.google.protobuf.UnmodifiableLazyStringList(connectedValidNodes_);
         }
         this.unknownFields = unknownFields.build();
@@ -6750,30 +6770,73 @@ public final class PaxosMessages {
       return masterDistance_;
     }
 
-    // repeated string connectedValidNodes = 9;
-    public static final int CONNECTEDVALIDNODES_FIELD_NUMBER = 9;
+    // required string room = 9;
+    public static final int ROOM_FIELD_NUMBER = 9;
+    private java.lang.Object room_;
+    /**
+     * <code>required string room = 9;</code>
+     */
+    public boolean hasRoom() {
+      return ((bitField0_ & 0x00000100) == 0x00000100);
+    }
+    /**
+     * <code>required string room = 9;</code>
+     */
+    public java.lang.String getRoom() {
+      java.lang.Object ref = room_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        if (bs.isValidUtf8()) {
+          room_ = s;
+        }
+        return s;
+      }
+    }
+    /**
+     * <code>required string room = 9;</code>
+     */
+    public com.google.protobuf.ByteString
+        getRoomBytes() {
+      java.lang.Object ref = room_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        room_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    // repeated string connectedValidNodes = 10;
+    public static final int CONNECTEDVALIDNODES_FIELD_NUMBER = 10;
     private com.google.protobuf.LazyStringList connectedValidNodes_;
     /**
-     * <code>repeated string connectedValidNodes = 9;</code>
+     * <code>repeated string connectedValidNodes = 10;</code>
      */
     public java.util.List<java.lang.String>
         getConnectedValidNodesList() {
       return connectedValidNodes_;
     }
     /**
-     * <code>repeated string connectedValidNodes = 9;</code>
+     * <code>repeated string connectedValidNodes = 10;</code>
      */
     public int getConnectedValidNodesCount() {
       return connectedValidNodes_.size();
     }
     /**
-     * <code>repeated string connectedValidNodes = 9;</code>
+     * <code>repeated string connectedValidNodes = 10;</code>
      */
     public java.lang.String getConnectedValidNodes(int index) {
       return connectedValidNodes_.get(index);
     }
     /**
-     * <code>repeated string connectedValidNodes = 9;</code>
+     * <code>repeated string connectedValidNodes = 10;</code>
      */
     public com.google.protobuf.ByteString
         getConnectedValidNodesBytes(int index) {
@@ -6789,6 +6852,7 @@ public final class PaxosMessages {
       isInited_ = false;
       isUpToDate_ = false;
       masterDistance_ = 0;
+      room_ = "";
       connectedValidNodes_ = com.google.protobuf.LazyStringArrayList.EMPTY;
     }
     private byte memoizedIsInitialized = -1;
@@ -6828,6 +6892,10 @@ public final class PaxosMessages {
         memoizedIsInitialized = 0;
         return false;
       }
+      if (!hasRoom()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
       memoizedIsInitialized = 1;
       return true;
     }
@@ -6859,8 +6927,11 @@ public final class PaxosMessages {
       if (((bitField0_ & 0x00000080) == 0x00000080)) {
         output.writeInt32(8, masterDistance_);
       }
+      if (((bitField0_ & 0x00000100) == 0x00000100)) {
+        output.writeBytes(9, getRoomBytes());
+      }
       for (int i = 0; i < connectedValidNodes_.size(); i++) {
-        output.writeBytes(9, connectedValidNodes_.getByteString(i));
+        output.writeBytes(10, connectedValidNodes_.getByteString(i));
       }
       getUnknownFields().writeTo(output);
     }
@@ -6902,6 +6973,10 @@ public final class PaxosMessages {
       if (((bitField0_ & 0x00000080) == 0x00000080)) {
         size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(8, masterDistance_);
+      }
+      if (((bitField0_ & 0x00000100) == 0x00000100)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(9, getRoomBytes());
       }
       {
         int dataSize = 0;
@@ -7008,7 +7083,7 @@ public final class PaxosMessages {
                 cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.SenatorHeartBeatResponse.class, cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.SenatorHeartBeatResponse.Builder.class);
       }
 
-      // Construct using cn.com.sparkle.paxos.protocolprocessor.v0_0_1.PaxosMessages.SenatorHeartBeatResponse.newBuilder()
+      // Construct using cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.SenatorHeartBeatResponse.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
@@ -7044,8 +7119,10 @@ public final class PaxosMessages {
         bitField0_ = (bitField0_ & ~0x00000040);
         masterDistance_ = 0;
         bitField0_ = (bitField0_ & ~0x00000080);
-        connectedValidNodes_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+        room_ = "";
         bitField0_ = (bitField0_ & ~0x00000100);
+        connectedValidNodes_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000200);
         return this;
       }
 
@@ -7106,10 +7183,14 @@ public final class PaxosMessages {
           to_bitField0_ |= 0x00000080;
         }
         result.masterDistance_ = masterDistance_;
-        if (((bitField0_ & 0x00000100) == 0x00000100)) {
+        if (((from_bitField0_ & 0x00000100) == 0x00000100)) {
+          to_bitField0_ |= 0x00000100;
+        }
+        result.room_ = room_;
+        if (((bitField0_ & 0x00000200) == 0x00000200)) {
           connectedValidNodes_ = new com.google.protobuf.UnmodifiableLazyStringList(
               connectedValidNodes_);
-          bitField0_ = (bitField0_ & ~0x00000100);
+          bitField0_ = (bitField0_ & ~0x00000200);
         }
         result.connectedValidNodes_ = connectedValidNodes_;
         result.bitField0_ = to_bitField0_;
@@ -7154,10 +7235,15 @@ public final class PaxosMessages {
         if (other.hasMasterDistance()) {
           setMasterDistance(other.getMasterDistance());
         }
+        if (other.hasRoom()) {
+          bitField0_ |= 0x00000100;
+          room_ = other.room_;
+          onChanged();
+        }
         if (!other.connectedValidNodes_.isEmpty()) {
           if (connectedValidNodes_.isEmpty()) {
             connectedValidNodes_ = other.connectedValidNodes_;
-            bitField0_ = (bitField0_ & ~0x00000100);
+            bitField0_ = (bitField0_ & ~0x00000200);
           } else {
             ensureConnectedValidNodesIsMutable();
             connectedValidNodes_.addAll(other.connectedValidNodes_);
@@ -7198,6 +7284,10 @@ public final class PaxosMessages {
           return false;
         }
         if (!hasMasterDistance()) {
+          
+          return false;
+        }
+        if (!hasRoom()) {
           
           return false;
         }
@@ -7528,42 +7618,116 @@ public final class PaxosMessages {
         return this;
       }
 
-      // repeated string connectedValidNodes = 9;
+      // required string room = 9;
+      private java.lang.Object room_ = "";
+      /**
+       * <code>required string room = 9;</code>
+       */
+      public boolean hasRoom() {
+        return ((bitField0_ & 0x00000100) == 0x00000100);
+      }
+      /**
+       * <code>required string room = 9;</code>
+       */
+      public java.lang.String getRoom() {
+        java.lang.Object ref = room_;
+        if (!(ref instanceof java.lang.String)) {
+          java.lang.String s = ((com.google.protobuf.ByteString) ref)
+              .toStringUtf8();
+          room_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>required string room = 9;</code>
+       */
+      public com.google.protobuf.ByteString
+          getRoomBytes() {
+        java.lang.Object ref = room_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          room_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>required string room = 9;</code>
+       */
+      public Builder setRoom(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000100;
+        room_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required string room = 9;</code>
+       */
+      public Builder clearRoom() {
+        bitField0_ = (bitField0_ & ~0x00000100);
+        room_ = getDefaultInstance().getRoom();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required string room = 9;</code>
+       */
+      public Builder setRoomBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000100;
+        room_ = value;
+        onChanged();
+        return this;
+      }
+
+      // repeated string connectedValidNodes = 10;
       private com.google.protobuf.LazyStringList connectedValidNodes_ = com.google.protobuf.LazyStringArrayList.EMPTY;
       private void ensureConnectedValidNodesIsMutable() {
-        if (!((bitField0_ & 0x00000100) == 0x00000100)) {
+        if (!((bitField0_ & 0x00000200) == 0x00000200)) {
           connectedValidNodes_ = new com.google.protobuf.LazyStringArrayList(connectedValidNodes_);
-          bitField0_ |= 0x00000100;
+          bitField0_ |= 0x00000200;
          }
       }
       /**
-       * <code>repeated string connectedValidNodes = 9;</code>
+       * <code>repeated string connectedValidNodes = 10;</code>
        */
       public java.util.List<java.lang.String>
           getConnectedValidNodesList() {
         return java.util.Collections.unmodifiableList(connectedValidNodes_);
       }
       /**
-       * <code>repeated string connectedValidNodes = 9;</code>
+       * <code>repeated string connectedValidNodes = 10;</code>
        */
       public int getConnectedValidNodesCount() {
         return connectedValidNodes_.size();
       }
       /**
-       * <code>repeated string connectedValidNodes = 9;</code>
+       * <code>repeated string connectedValidNodes = 10;</code>
        */
       public java.lang.String getConnectedValidNodes(int index) {
         return connectedValidNodes_.get(index);
       }
       /**
-       * <code>repeated string connectedValidNodes = 9;</code>
+       * <code>repeated string connectedValidNodes = 10;</code>
        */
       public com.google.protobuf.ByteString
           getConnectedValidNodesBytes(int index) {
         return connectedValidNodes_.getByteString(index);
       }
       /**
-       * <code>repeated string connectedValidNodes = 9;</code>
+       * <code>repeated string connectedValidNodes = 10;</code>
        */
       public Builder setConnectedValidNodes(
           int index, java.lang.String value) {
@@ -7576,7 +7740,7 @@ public final class PaxosMessages {
         return this;
       }
       /**
-       * <code>repeated string connectedValidNodes = 9;</code>
+       * <code>repeated string connectedValidNodes = 10;</code>
        */
       public Builder addConnectedValidNodes(
           java.lang.String value) {
@@ -7589,7 +7753,7 @@ public final class PaxosMessages {
         return this;
       }
       /**
-       * <code>repeated string connectedValidNodes = 9;</code>
+       * <code>repeated string connectedValidNodes = 10;</code>
        */
       public Builder addAllConnectedValidNodes(
           java.lang.Iterable<java.lang.String> values) {
@@ -7599,16 +7763,16 @@ public final class PaxosMessages {
         return this;
       }
       /**
-       * <code>repeated string connectedValidNodes = 9;</code>
+       * <code>repeated string connectedValidNodes = 10;</code>
        */
       public Builder clearConnectedValidNodes() {
         connectedValidNodes_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-        bitField0_ = (bitField0_ & ~0x00000100);
+        bitField0_ = (bitField0_ & ~0x00000200);
         onChanged();
         return this;
       }
       /**
-       * <code>repeated string connectedValidNodes = 9;</code>
+       * <code>repeated string connectedValidNodes = 10;</code>
        */
       public Builder addConnectedValidNodesBytes(
           com.google.protobuf.ByteString value) {
@@ -7843,7 +8007,7 @@ public final class PaxosMessages {
                 cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.LookUpLatestInstanceIdRequest.class, cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.LookUpLatestInstanceIdRequest.Builder.class);
       }
 
-      // Construct using cn.com.sparkle.paxos.protocolprocessor.v0_0_1.PaxosMessages.LookUpLatestInstanceIdRequest.newBuilder()
+      // Construct using cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.LookUpLatestInstanceIdRequest.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
@@ -8152,7 +8316,7 @@ public final class PaxosMessages {
                 cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.GetNewsSenatorsRequest.class, cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.GetNewsSenatorsRequest.Builder.class);
       }
 
-      // Construct using cn.com.sparkle.paxos.protocolprocessor.v0_0_1.PaxosMessages.GetNewsSenatorsRequest.newBuilder()
+      // Construct using cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.GetNewsSenatorsRequest.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
@@ -8645,7 +8809,7 @@ public final class PaxosMessages {
                 cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.GetNewsSenatorsResponse.class, cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.GetNewsSenatorsResponse.Builder.class);
       }
 
-      // Construct using cn.com.sparkle.paxos.protocolprocessor.v0_0_1.PaxosMessages.GetNewsSenatorsResponse.newBuilder()
+      // Construct using cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.GetNewsSenatorsResponse.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
@@ -9346,7 +9510,7 @@ public final class PaxosMessages {
                 cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.CatchUpRequest.class, cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.CatchUpRequest.Builder.class);
       }
 
-      // Construct using cn.com.sparkle.paxos.protocolprocessor.v0_0_1.PaxosMessages.CatchUpRequest.newBuilder()
+      // Construct using cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.CatchUpRequest.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
@@ -9838,7 +10002,7 @@ public final class PaxosMessages {
                 cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.CatchUpResponse.class, cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.CatchUpResponse.Builder.class);
       }
 
-      // Construct using cn.com.sparkle.paxos.protocolprocessor.v0_0_1.PaxosMessages.CatchUpResponse.newBuilder()
+      // Construct using cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.CatchUpResponse.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
@@ -10547,7 +10711,7 @@ public final class PaxosMessages {
                 cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.CatchUpRecord.class, cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.CatchUpRecord.Builder.class);
       }
 
-      // Construct using cn.com.sparkle.paxos.protocolprocessor.v0_0_1.PaxosMessages.CatchUpRecord.newBuilder()
+      // Construct using cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.CatchUpRecord.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
@@ -11233,7 +11397,7 @@ public final class PaxosMessages {
                 cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.InstancePrepareRequest.class, cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.InstancePrepareRequest.Builder.class);
       }
 
-      // Construct using cn.com.sparkle.paxos.protocolprocessor.v0_0_1.PaxosMessages.InstancePrepareRequest.newBuilder()
+      // Construct using cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.InstancePrepareRequest.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
@@ -11954,7 +12118,7 @@ public final class PaxosMessages {
                 cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.PrepareResponseBad.class, cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.PrepareResponseBad.Builder.class);
       }
 
-      // Construct using cn.com.sparkle.paxos.protocolprocessor.v0_0_1.PaxosMessages.PrepareResponseBad.newBuilder()
+      // Construct using cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.PrepareResponseBad.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
@@ -12584,7 +12748,7 @@ public final class PaxosMessages {
                 cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.PrepareResponseGood.class, cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.PrepareResponseGood.Builder.class);
       }
 
-      // Construct using cn.com.sparkle.paxos.protocolprocessor.v0_0_1.PaxosMessages.PrepareResponseGood.newBuilder()
+      // Construct using cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.PrepareResponseGood.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
@@ -13430,7 +13594,7 @@ public final class PaxosMessages {
                 cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.InstanceVoteRequest.class, cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.InstanceVoteRequest.Builder.class);
       }
 
-      // Construct using cn.com.sparkle.paxos.protocolprocessor.v0_0_1.PaxosMessages.InstanceVoteRequest.newBuilder()
+      // Construct using cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.InstanceVoteRequest.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
@@ -14294,7 +14458,7 @@ public final class PaxosMessages {
                 cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.VoteResponse.class, cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.VoteResponse.Builder.class);
       }
 
-      // Construct using cn.com.sparkle.paxos.protocolprocessor.v0_0_1.PaxosMessages.VoteResponse.newBuilder()
+      // Construct using cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.VoteResponse.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
@@ -14904,7 +15068,7 @@ public final class PaxosMessages {
                 cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.ElectionPrepareRequest.class, cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.ElectionPrepareRequest.Builder.class);
       }
 
-      // Construct using cn.com.sparkle.paxos.protocolprocessor.v0_0_1.PaxosMessages.ElectionPrepareRequest.newBuilder()
+      // Construct using cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.ElectionPrepareRequest.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
@@ -15516,7 +15680,7 @@ public final class PaxosMessages {
                 cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.ElectionVoteRequest.class, cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.ElectionVoteRequest.Builder.class);
       }
 
-      // Construct using cn.com.sparkle.paxos.protocolprocessor.v0_0_1.PaxosMessages.ElectionVoteRequest.newBuilder()
+      // Construct using cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.ElectionVoteRequest.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
@@ -16085,7 +16249,7 @@ public final class PaxosMessages {
                 cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.ElectionSuccessMessage.class, cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.ElectionSuccessMessage.Builder.class);
       }
 
-      // Construct using cn.com.sparkle.paxos.protocolprocessor.v0_0_1.PaxosMessages.ElectionSuccessMessage.newBuilder()
+      // Construct using cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.ElectionSuccessMessage.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
@@ -16586,7 +16750,7 @@ public final class PaxosMessages {
                 cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.LookUpLatestInstanceIdResponse.class, cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.LookUpLatestInstanceIdResponse.Builder.class);
       }
 
-      // Construct using cn.com.sparkle.paxos.protocolprocessor.v0_0_1.PaxosMessages.LookUpLatestInstanceIdResponse.newBuilder()
+      // Construct using cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.LookUpLatestInstanceIdResponse.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
@@ -17278,7 +17442,7 @@ public final class PaxosMessages {
                 cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.InstanceSuccessMessage.class, cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.InstanceSuccessMessage.Builder.class);
       }
 
-      // Construct using cn.com.sparkle.paxos.protocolprocessor.v0_0_1.PaxosMessages.InstanceSuccessMessage.newBuilder()
+      // Construct using cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.InstanceSuccessMessage.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
@@ -18514,7 +18678,7 @@ public final class PaxosMessages {
                 cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.InstanceSuccessTransport.class, cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.InstanceSuccessTransport.Builder.class);
       }
 
-      // Construct using cn.com.sparkle.paxos.protocolprocessor.v0_0_1.PaxosMessages.InstanceSuccessTransport.newBuilder()
+      // Construct using cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.InstanceSuccessTransport.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
@@ -19073,7 +19237,7 @@ public final class PaxosMessages {
                 cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.InstanceSuccessResponse.class, cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.InstanceSuccessResponse.Builder.class);
       }
 
-      // Construct using cn.com.sparkle.paxos.protocolprocessor.v0_0_1.PaxosMessages.InstanceSuccessResponse.newBuilder()
+      // Construct using cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.InstanceSuccessResponse.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
@@ -19492,7 +19656,7 @@ public final class PaxosMessages {
                 cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.ElectionId.class, cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.ElectionId.Builder.class);
       }
 
-      // Construct using cn.com.sparkle.paxos.protocolprocessor.v0_0_1.PaxosMessages.ElectionId.newBuilder()
+      // Construct using cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.ElectionId.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
@@ -20114,7 +20278,7 @@ public final class PaxosMessages {
                 cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.CommandResponse.class, cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.CommandResponse.Builder.class);
       }
 
-      // Construct using cn.com.sparkle.paxos.protocolprocessor.v0_0_1.PaxosMessages.CommandResponse.newBuilder()
+      // Construct using cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.CommandResponse.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
@@ -20689,7 +20853,7 @@ public final class PaxosMessages {
                 cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.AddRequest.class, cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.AddRequest.Builder.class);
       }
 
-      // Construct using cn.com.sparkle.paxos.protocolprocessor.v0_0_1.PaxosMessages.AddRequest.newBuilder()
+      // Construct using cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.AddRequest.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
@@ -21223,7 +21387,7 @@ public final class PaxosMessages {
                 cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.AddResponse.class, cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.AddResponse.Builder.class);
       }
 
-      // Construct using cn.com.sparkle.paxos.protocolprocessor.v0_0_1.PaxosMessages.AddResponse.newBuilder()
+      // Construct using cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.AddResponse.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
@@ -21672,7 +21836,7 @@ public final class PaxosMessages {
                 cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.ConnectRequest.class, cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.ConnectRequest.Builder.class);
       }
 
-      // Construct using cn.com.sparkle.paxos.protocolprocessor.v0_0_1.PaxosMessages.ConnectRequest.newBuilder()
+      // Construct using cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.ConnectRequest.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
@@ -22076,7 +22240,7 @@ public final class PaxosMessages {
                 cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.ConnectResponse.class, cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.ConnectResponse.Builder.class);
       }
 
-      // Construct using cn.com.sparkle.paxos.protocolprocessor.v0_0_1.PaxosMessages.ConnectResponse.newBuilder()
+      // Construct using cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.ConnectResponse.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
@@ -22418,60 +22582,60 @@ public final class PaxosMessages {
       "\"\022\n\020HeartBeatRequest\"n\n\026ActiveHeartBeatR" +
       "equest\022\017\n\007address\030\001 \002(\t\022C\n\021heartBeatResp" +
       "onse\030\002 \002(\0132(.protocolbuffer.SenatorHeart" +
-      "BeatResponse\"\370\001\n\030SenatorHeartBeatRespons" +
+      "BeatResponse\"\206\002\n\030SenatorHeartBeatRespons" +
       "e\022 \n\030lastCanExecuteInstanceId\030\001 \002(\003\022\031\n\021i" +
       "sMasterConnected\030\002 \002(\010\022\027\n\017electionAddres" +
       "s\030\003 \002(\t\022\022\n\nelectionId\030\004 \002(\003\022\027\n\017electionV" +
       "ersion\030\005 \002(\003\022\020\n\010isInited\030\006 \002(\010\022\022\n\nisUpTo",
-      "Date\030\007 \002(\010\022\026\n\016masterDistance\030\010 \002(\005\022\033\n\023co" +
-      "nnectedValidNodes\030\t \003(\t\"\037\n\035LookUpLatestI" +
-      "nstanceIdRequest\"\030\n\026GetNewsSenatorsReque" +
-      "st\"`\n\027GetNewsSenatorsResponse\022\017\n\007version" +
-      "\030\001 \002(\003\022\020\n\010senators\030\002 \003(\t\022\"\n\006master\030\003 \002(\013" +
-      "2\022.protocolbuffer.Id\"7\n\016CatchUpRequest\022\027" +
-      "\n\017startInstanceId\030\001 \002(\003\022\014\n\004size\030\002 \002(\005\"K\n" +
-      "\017CatchUpResponse\0228\n\021successfulRecords\030\001 " +
-      "\003(\0132\035.protocolbuffer.CatchUpRecord\"T\n\rCa" +
-      "tchUpRecord\022\022\n\ninstanceId\030\001 \002(\003\022/\n\005value",
-      "\030\002 \002(\0132 .protocolbuffer.SuccessfulRecord" +
-      "\"[\n\026InstancePrepareRequest\022\022\n\ninstanceId" +
-      "\030\001 \002(\003\022\036\n\002id\030\002 \002(\0132\022.protocolbuffer.Id\022\r" +
-      "\n\005chain\030\003 \003(\t\"X\n\022PrepareResponseBad\022\025\n\rl" +
-      "astPrepareId\030\001 \002(\003\022+\n\014successValue\030\002 \001(\013" +
-      "2\025.protocolbuffer.Value\"d\n\023PrepareRespon" +
-      "seGood\022\'\n\013lastVotedId\030\001 \002(\0132\022.protocolbu" +
-      "ffer.Id\022$\n\005value\030\002 \001(\0132\025.protocolbuffer." +
-      "Value\"\202\001\n\023InstanceVoteRequest\022\022\n\ninstanc" +
-      "eId\030\001 \002(\003\022\"\n\006voteId\030\002 \002(\0132\022.protocolbuff",
-      "er.Id\022$\n\005value\030\003 \002(\0132\025.protocolbuffer.Va" +
-      "lue\022\r\n\005chain\030\004 \003(\t\"M\n\014VoteResponse\022\020\n\010re" +
-      "fuseId\030\001 \002(\003\022+\n\014successValue\030\002 \001(\0132\025.pro" +
-      "tocolbuffer.Value\"T\n\026ElectionPrepareRequ" +
-      "est\022&\n\002id\030\001 \002(\0132\032.protocolbuffer.Electio" +
-      "nId\022\022\n\nlastVoteId\030\002 \002(\003\"Q\n\023ElectionVoteR" +
-      "equest\022&\n\002id\030\001 \002(\0132\032.protocolbuffer.Elec" +
-      "tionId\022\022\n\nlastVoteId\030\002 \002(\003\"@\n\026ElectionSu" +
-      "ccessMessage\022&\n\002id\030\001 \002(\0132\032.protocolbuffe" +
-      "r.ElectionId\"4\n\036LookUpLatestInstanceIdRe",
-      "sponse\022\022\n\ninstanceId\030\001 \002(\003\"\314\001\n\026InstanceS" +
-      "uccessMessage\022\n\n\002id\030\001 \002(\003\022$\n\005value\030\002 \001(\013" +
-      "2\025.protocolbuffer.Value\022*\n\016highestVoteNu" +
-      "m\030\003 \002(\0132\022.protocolbuffer.Id\022\025\n\rnotifyAdd" +
-      "ress\030\004 \003(\t\022=\n\013notifyChain\030\005 \003(\0132(.protoc" +
-      "olbuffer.InstanceSuccessTransport\"X\n\030Ins" +
-      "tanceSuccessTransport\022\017\n\007address\030\001 \002(\t\022\025" +
-      "\n\rnotifyAddress\030\002 \003(\t\022\024\n\014isTransValue\030\003 " +
-      "\002(\010\"\031\n\027InstanceSuccessResponse\"=\n\nElecti" +
-      "onId\022\036\n\002id\030\001 \002(\0132\022.protocolbuffer.Id\022\017\n\007",
-      "version\030\002 \002(\003\"6\n\017CommandResponse\022\024\n\014isSu" +
-      "ccessful\030\001 \002(\010\022\r\n\005error\030\002 \002(\t\"D\n\nAddRequ" +
-      "est\022\023\n\013commandType\030\001 \002(\005\022\r\n\005value\030\002 \002(\014\022" +
-      "\022\n\ninstanceId\030\003 \001(\003\"1\n\013AddResponse\022\016\n\006re" +
-      "sult\030\001 \002(\014\022\022\n\ninstanceId\030\002 \001(\003\"(\n\016Connec" +
-      "tRequest\022\026\n\016masterDistance\030\001 \002(\005\"\'\n\017Conn" +
-      "ectResponse\022\024\n\014isSuccessful\030\001 \002(\010B>\n-cn." +
-      "com.sparkle.paxos.protocolprocessor.v0_0" +
-      "_1B\rPaxosMessages"
+      "Date\030\007 \002(\010\022\026\n\016masterDistance\030\010 \002(\005\022\014\n\004ro" +
+      "om\030\t \002(\t\022\033\n\023connectedValidNodes\030\n \003(\t\"\037\n" +
+      "\035LookUpLatestInstanceIdRequest\"\030\n\026GetNew" +
+      "sSenatorsRequest\"`\n\027GetNewsSenatorsRespo" +
+      "nse\022\017\n\007version\030\001 \002(\003\022\020\n\010senators\030\002 \003(\t\022\"" +
+      "\n\006master\030\003 \002(\0132\022.protocolbuffer.Id\"7\n\016Ca" +
+      "tchUpRequest\022\027\n\017startInstanceId\030\001 \002(\003\022\014\n" +
+      "\004size\030\002 \002(\005\"K\n\017CatchUpResponse\0228\n\021succes" +
+      "sfulRecords\030\001 \003(\0132\035.protocolbuffer.Catch" +
+      "UpRecord\"T\n\rCatchUpRecord\022\022\n\ninstanceId\030",
+      "\001 \002(\003\022/\n\005value\030\002 \002(\0132 .protocolbuffer.Su" +
+      "ccessfulRecord\"[\n\026InstancePrepareRequest" +
+      "\022\022\n\ninstanceId\030\001 \002(\003\022\036\n\002id\030\002 \002(\0132\022.proto" +
+      "colbuffer.Id\022\r\n\005chain\030\003 \003(\t\"X\n\022PrepareRe" +
+      "sponseBad\022\025\n\rlastPrepareId\030\001 \002(\003\022+\n\014succ" +
+      "essValue\030\002 \001(\0132\025.protocolbuffer.Value\"d\n" +
+      "\023PrepareResponseGood\022\'\n\013lastVotedId\030\001 \002(" +
+      "\0132\022.protocolbuffer.Id\022$\n\005value\030\002 \001(\0132\025.p" +
+      "rotocolbuffer.Value\"\202\001\n\023InstanceVoteRequ" +
+      "est\022\022\n\ninstanceId\030\001 \002(\003\022\"\n\006voteId\030\002 \002(\0132",
+      "\022.protocolbuffer.Id\022$\n\005value\030\003 \002(\0132\025.pro" +
+      "tocolbuffer.Value\022\r\n\005chain\030\004 \003(\t\"M\n\014Vote" +
+      "Response\022\020\n\010refuseId\030\001 \002(\003\022+\n\014successVal" +
+      "ue\030\002 \001(\0132\025.protocolbuffer.Value\"T\n\026Elect" +
+      "ionPrepareRequest\022&\n\002id\030\001 \002(\0132\032.protocol" +
+      "buffer.ElectionId\022\022\n\nlastVoteId\030\002 \002(\003\"Q\n" +
+      "\023ElectionVoteRequest\022&\n\002id\030\001 \002(\0132\032.proto" +
+      "colbuffer.ElectionId\022\022\n\nlastVoteId\030\002 \002(\003" +
+      "\"@\n\026ElectionSuccessMessage\022&\n\002id\030\001 \002(\0132\032" +
+      ".protocolbuffer.ElectionId\"4\n\036LookUpLate",
+      "stInstanceIdResponse\022\022\n\ninstanceId\030\001 \002(\003" +
+      "\"\314\001\n\026InstanceSuccessMessage\022\n\n\002id\030\001 \002(\003\022" +
+      "$\n\005value\030\002 \001(\0132\025.protocolbuffer.Value\022*\n" +
+      "\016highestVoteNum\030\003 \002(\0132\022.protocolbuffer.I" +
+      "d\022\025\n\rnotifyAddress\030\004 \003(\t\022=\n\013notifyChain\030" +
+      "\005 \003(\0132(.protocolbuffer.InstanceSuccessTr" +
+      "ansport\"X\n\030InstanceSuccessTransport\022\017\n\007a" +
+      "ddress\030\001 \002(\t\022\025\n\rnotifyAddress\030\002 \003(\t\022\024\n\014i" +
+      "sTransValue\030\003 \002(\010\"\031\n\027InstanceSuccessResp" +
+      "onse\"=\n\nElectionId\022\036\n\002id\030\001 \002(\0132\022.protoco",
+      "lbuffer.Id\022\017\n\007version\030\002 \002(\003\"6\n\017CommandRe" +
+      "sponse\022\024\n\014isSuccessful\030\001 \002(\010\022\r\n\005error\030\002 " +
+      "\002(\t\"D\n\nAddRequest\022\023\n\013commandType\030\001 \002(\005\022\r" +
+      "\n\005value\030\002 \002(\014\022\022\n\ninstanceId\030\003 \001(\003\"1\n\013Add" +
+      "Response\022\016\n\006result\030\001 \002(\014\022\022\n\ninstanceId\030\002" +
+      " \001(\003\"(\n\016ConnectRequest\022\026\n\016masterDistance" +
+      "\030\001 \002(\005\"\'\n\017ConnectResponse\022\024\n\014isSuccessfu" +
+      "l\030\001 \002(\010B@\n/cn.com.sparkle.firefly.protoc" +
+      "olprocessor.v0_0_1B\rPaxosMessages"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -22501,7 +22665,7 @@ public final class PaxosMessages {
           internal_static_protocolbuffer_SenatorHeartBeatResponse_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_protocolbuffer_SenatorHeartBeatResponse_descriptor,
-              new java.lang.String[] { "LastCanExecuteInstanceId", "IsMasterConnected", "ElectionAddress", "ElectionId", "ElectionVersion", "IsInited", "IsUpToDate", "MasterDistance", "ConnectedValidNodes", });
+              new java.lang.String[] { "LastCanExecuteInstanceId", "IsMasterConnected", "ElectionAddress", "ElectionId", "ElectionVersion", "IsInited", "IsUpToDate", "MasterDistance", "Room", "ConnectedValidNodes", });
           internal_static_protocolbuffer_LookUpLatestInstanceIdRequest_descriptor =
             getDescriptor().getMessageTypes().get(4);
           internal_static_protocolbuffer_LookUpLatestInstanceIdRequest_fieldAccessorTable = new

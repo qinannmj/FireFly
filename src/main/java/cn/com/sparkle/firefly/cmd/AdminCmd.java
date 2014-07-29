@@ -14,6 +14,7 @@ import cn.com.sparkle.firefly.cmd.command.Cmd;
 import cn.com.sparkle.firefly.cmd.command.CommonCmd;
 import cn.com.sparkle.firefly.cmd.command.HelpCmd;
 import cn.com.sparkle.firefly.cmd.command.QuitCmd;
+import cn.com.sparkle.firefly.cmd.command.SenatorChangeRoomCmd;
 import cn.com.sparkle.firefly.cmd.command.SenatorCmd;
 import cn.com.sparkle.firefly.model.AdminCommand;
 
@@ -31,6 +32,8 @@ public class AdminCmd {
 		commMap.put(Commands.RE_ELECTION1, CommonCmd.DEFAULT);
 		commMap.put(Commands.STATE, CommonCmd.DEFAULT);
 		commMap.put(Commands.STATE1, CommonCmd.DEFAULT);
+		commMap.put(Commands.CH_ROOM, SenatorChangeRoomCmd.DEFAULT);
+		commMap.put(Commands.CH_ROOM1, SenatorChangeRoomCmd.DEFAULT);
 		commMap.put(AdminCommand.ADD_SENATOR, SenatorCmd.DEFAULT);
 		commMap.put(AdminCommand.REMOVE_SENATOR, SenatorCmd.DEFAULT);
 	}

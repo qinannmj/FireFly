@@ -16,7 +16,9 @@ import cn.com.sparkle.firefly.config.Configuration;
 import cn.com.sparkle.firefly.event.EventsManager;
 import cn.com.sparkle.firefly.event.events.MasterChangePosEvent;
 import cn.com.sparkle.firefly.event.events.MasterDistanceChangeEvent;
+import cn.com.sparkle.firefly.event.events.NodeStateChangeEvent;
 import cn.com.sparkle.firefly.event.listeners.ConfigureEventListener;
+import cn.com.sparkle.firefly.event.listeners.HeartBeatEventListener;
 import cn.com.sparkle.firefly.event.listeners.NodeStateChangeEventListener;
 import cn.com.sparkle.firefly.model.ElectionId;
 import cn.com.sparkle.firefly.net.client.NetNode;
@@ -31,7 +33,7 @@ import cn.com.sparkle.firefly.route.RouteManage;
  * @author nanqi
  * 
  */
-public class ClusterState implements ConfigureEventListener, NodeStateChangeEventListener {
+public class ClusterState implements ConfigureEventListener,HeartBeatEventListener, NodeStateChangeEventListener {
 	private final static Logger logger = Logger.getLogger(ClusterState.class);
 
 	private Configuration conf;
@@ -137,7 +139,8 @@ public class ClusterState implements ConfigureEventListener, NodeStateChangeEven
 			if (ConfigNode.exist(senators.getNodeMembers(), address)) {
 				HashMap<String, NodeState> newNodeState = new HashMap<String, NodeState>();
 				newNodeState.putAll(senators.getNodeStates());
-				newNodeState.put(address, new NodeState(address));
+				NodeState nState = new NodeState(address);
+				NodeState old = newNodeState.put(address, nState);
 				HashMap<String, NetNode> newAllActiveNodes = new HashMap<String, NetNode>();
 				newAllActiveNodes.putAll(senators.getAllActiveNodes());
 				newAllActiveNodes.remove(nNode.getAddress());
@@ -152,6 +155,7 @@ public class ClusterState implements ConfigureEventListener, NodeStateChangeEven
 				}
 
 				senators = new NodesCollection(senators.getNodeMembers(), newvalidActiveNodes, newAllActiveNodes, newNodeState);
+				NodeStateChangeEvent.doNodeStateChange(eventsManager, nNode.getAddress(), old, nState);
 			}
 			//reset distance ,and wait heartbeat to fix the distance
 			if (masterDistance != 0) {
@@ -200,7 +204,7 @@ public class ClusterState implements ConfigureEventListener, NodeStateChangeEven
 			if (ConfigNode.exist(senators.getNodeMembers(), nState.getAddress())) {
 				HashMap<String, NodeState> newNodeState = new HashMap<String, NodeState>();
 				newNodeState.putAll(senators.getNodeStates());
-				newNodeState.put(nState.getAddress(), nState);
+				NodeState old = newNodeState.put(nState.getAddress(), nState);
 
 				Map<String, NetNode> initedActiveSenators;
 				if (nState.isInit() && !senators.getValidActiveNodes().containsKey(nNode.getAddress()) && nState.isUpToDate()) {
@@ -216,6 +220,7 @@ public class ClusterState implements ConfigureEventListener, NodeStateChangeEven
 				}
 
 				senators = new NodesCollection(senators.getNodeMembers(), initedActiveSenators, senators.getAllActiveNodes(), newNodeState);
+				NodeStateChangeEvent.doNodeStateChange(eventsManager, nNode.getAddress(), old, nState);
 			} else {
 				followerConnect(nState);
 			}
@@ -236,7 +241,13 @@ public class ClusterState implements ConfigureEventListener, NodeStateChangeEven
 	public void activeBeatHeart(String fromAddress, NodeState nState) {
 		try {
 			nodeLock.lock();
-			if (!ConfigNode.exist(senators.getNodeMembers(), nState.getAddress())) {
+			if (ConfigNode.exist(senators.getNodeMembers(), nState.getAddress())) {
+				HashMap<String, NodeState> newNodeState = new HashMap<String, NodeState>();
+				newNodeState.putAll(senators.getNodeStates());
+				NodeState old = newNodeState.put(nState.getAddress(), nState);
+				senators = new NodesCollection(senators.getNodeMembers(), senators.getValidActiveNodes(), senators.getAllActiveNodes(), newNodeState);
+			NodeStateChangeEvent.doNodeStateChange(eventsManager, fromAddress, old, nState);
+			} else {
 				followerConnect(nState);
 			}
 		} finally {
@@ -377,6 +388,11 @@ public class ClusterState implements ConfigureEventListener, NodeStateChangeEven
 	private void clearFollower(String address) {
 		followerMap.remove(address);
 		followerMapLongTime.remove(address);
+	}
+
+	@Override
+	public void nodeStateChange(String fromNetNodeAddress, NodeState oldState, NodeState newState) {
+		
 	}
 
 }
