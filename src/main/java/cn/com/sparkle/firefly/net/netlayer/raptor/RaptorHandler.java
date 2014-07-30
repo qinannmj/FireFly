@@ -35,7 +35,7 @@ public class RaptorHandler implements ProtocolHandler {
 		if (attachment == null) {
 			netHandler.onRefuse(ioSession.attachment());
 		}
-		logger.error("", e);
+		logger.error(ioSession.getLocalAddress() + "  " + ioSession.getRemoteAddress() , e);
 	}
 
 	@Override

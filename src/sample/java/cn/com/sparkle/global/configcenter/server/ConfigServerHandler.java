@@ -102,7 +102,7 @@ public class ConfigServerHandler extends HandlerInterface {
 					}
 					s.add(session);
 				}
-				logger.debug(" " + session.toString() + "  packageID:" + addRequest.getMessageId());
+				logger.debug("watch   packageID:" + addRequest.getMessageId());
 				this.sendNotifyMessageResponse(session, addRequest, result);
 			}
 		} catch (InvalidProtocolBufferException e1) {

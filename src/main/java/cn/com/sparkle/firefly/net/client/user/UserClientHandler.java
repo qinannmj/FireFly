@@ -72,7 +72,9 @@ public class UserClientHandler implements NetHandler {
 
 	@Override
 	public void onRefuse(Object connectAttachment) {
-		reConnect((ConnectConfig) connectAttachment);
+		ConnectConfig connectConfig = (ConnectConfig) connectAttachment;
+		connectConfig.onRefused();
+		reConnect(connectConfig);
 
 	}
 

@@ -13,6 +13,7 @@ public class ConnectConfig {
 
 	private String address;
 	private volatile boolean isAutoReConnect;
+	private volatile NetNode node;
 	private int masterDistance;
 	private ConnectEvent connectEvent;
 	private SystemFuture<Boolean> future = new SystemFuture<Boolean>();
@@ -58,6 +59,7 @@ public class ConnectConfig {
 	}
 
 	public void connected(NetNode node) {
+		this.node = node;
 		connectEvent.connect(address, node);
 		future.set(true);
 	}
@@ -67,7 +69,16 @@ public class ConnectConfig {
 		future.set(false);
 		handFuture.set(false);
 	}
-
+	
+	
+	public void onRefused(){
+		future.set(false);
+		handFuture.set(false);
+	}
+	public NetNode getNode(){
+		return node;
+	}
+	
 	public void handed() {
 		handFuture.set(true);
 	}

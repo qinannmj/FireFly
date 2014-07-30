@@ -1,6 +1,5 @@
 package cn.com.sparkle.global.configcenter.client;
 
-
 import java.io.UnsupportedEncodingException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
@@ -102,9 +101,9 @@ public class ConfigClient {
 		Future<byte[]> future = operator.add(add.toByteArray(), CommandType.USER_WRITE);
 		try {
 			byte[] response = future.get(5, TimeUnit.SECONDS);
-			if(response[0] == 1){
+			if (response[0] == 1) {
 				return true;
-			}else{
+			} else {
 				return false;
 			}
 		} catch (TimeoutException e) {

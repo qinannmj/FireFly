@@ -1,6 +1,5 @@
 package cn.com.sparkle.firefly.client;
 
-import java.util.HashMap;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -14,9 +13,9 @@ import cn.com.sparkle.firefly.client.deamon.MasterHeartBeatDeamon;
 import cn.com.sparkle.firefly.deamon.ReConnectDeamon;
 import cn.com.sparkle.firefly.net.client.NetNode;
 import cn.com.sparkle.firefly.net.client.user.ConnectConfig;
+import cn.com.sparkle.firefly.net.client.user.ConnectConfig.ConnectEvent;
 import cn.com.sparkle.firefly.net.client.user.UserClientHandler;
 import cn.com.sparkle.firefly.net.client.user.UserNetNode;
-import cn.com.sparkle.firefly.net.client.user.ConnectConfig.ConnectEvent;
 import cn.com.sparkle.firefly.net.client.user.callback.AddRequestCallBack;
 import cn.com.sparkle.firefly.net.netlayer.NetClient;
 import cn.com.sparkle.firefly.net.netlayer.NetCloseException;
@@ -29,10 +28,13 @@ public class CommandAsyncProcessor implements Runnable {
 	private static UserClientHandler handler;
 	private static ReConnectDeamon reConnectThread = new ReConnectDeamon();
 
-	private volatile String[] senator = {};
-	private volatile UserNetNode node;
-	private volatile ConnectConfig firstPriorConfig;
-	private volatile HashMap<String, UserNetNode> activeNode = new HashMap<String, UserNetNode>();
+	private String[] senator = {};
+
+	private volatile String[] newSenator = senator;
+
+	private ConnectConfig curConnectConfig;
+
+	private ConnectConfig firstPriorConfig;
 
 	private ArrayBlockingQueue<Command> commandQueue;
 
@@ -81,26 +83,12 @@ public class CommandAsyncProcessor implements Runnable {
 	private ConnectEvent connectEvent = new ConnectEvent() {
 		@Override
 		public void disconnect(String address, NetNode node) {
-			if (node != null) {
-				synchronized (this) {
-					HashMap<String, UserNetNode> newSet = new HashMap<String, UserNetNode>();
-					newSet.putAll(activeNode);
-					newSet.remove(address);
-					activeNode = newSet;
-					node.close();
-				}
-			}
+			wakeup();//may be first node is disconnected
 		}
 
 		@Override
 		public void connect(String address, NetNode node) {
-			synchronized (this) {
-				HashMap<String, UserNetNode> newSet = new HashMap<String, UserNetNode>();
-				newSet.putAll(activeNode);
-				newSet.put(address, (UserNetNode) node);
-				activeNode = newSet;
-			}
-			heartBeatDeamon.processorChangeNode(CommandAsyncProcessor.this);
+			wakeup(); //may be first node is connected
 		}
 	};
 
@@ -116,42 +104,26 @@ public class CommandAsyncProcessor implements Runnable {
 		handler = new UserClientHandler(nioSocketClient, preferChecksumType, heartBeatInterval, protocolManager, reConnectThread, debugLog);
 		nioSocketClient.init(confPath, heartBeatInterval, handler);
 		reConnectThread.startThread();
+
 	}
 
 	public CommandAsyncProcessor(String[] senator, int maxRunningSize, int maxWaitRunSize, int masterDistance, MasterHeartBeatDeamon heartBeatDeamon,
 			boolean debugLog) throws Throwable {
-		this.senator = senator;
+		this.newSenator = senator;
 		this.maxRunningSize = maxRunningSize;
 		this.debugLog = debugLog;
 		this.masterDistance = masterDistance;
 		this.heartBeatDeamon = heartBeatDeamon;
 		commandQueue = new ArrayBlockingQueue<Command>(maxWaitRunSize);
-
-		String[] tmp = senator[0].split(":");
-		firstPriorConfig = new ConnectConfig(senator[0], true, masterDistance, connectEvent);
-		boolean isSuccess = nioSocketClient.connect(tmp[0], Integer.parseInt(tmp[1]), firstPriorConfig).get();
-		if (isSuccess) {
-			firstPriorConfig.waitHanded();
-		}
+		wakeup();//notify to process first
 	}
 
 	public void changeSenator(String[] senator) throws Throwable {
 		try {
 			nodeChangeLock.lock();
-			if (!senator[0].equals(this.senator[0])) {
-				firstPriorConfig.setAutoReConnect(false);
-				firstPriorConfig = new ConnectConfig(senator[0], true, masterDistance, connectEvent);
-				String[] tmp = senator[0].split(":");
-				boolean isSuccess = nioSocketClient.connect(tmp[0], Integer.parseInt(tmp[1]), firstPriorConfig).get();
-				if (isSuccess) {
-					firstPriorConfig.waitHanded();
-				}
-			}
-			UserNetNode n = node;
-			if (n != null && !n.getAddress().equals(senator[0])) {
-				n.close();
-			}
-			this.senator = senator;
+			newSenator = senator;
+			wakeup();
+
 		} finally {
 			nodeChangeLock.unlock();
 		}
@@ -167,67 +139,105 @@ public class CommandAsyncProcessor implements Runnable {
 		}
 	}
 
+	private void waitWakeup() throws InterruptedException {
+		try {
+			lock.lock();
+			if (!isWakeup) {
+				wakeupCondition.await();
+			}
+			isWakeup = false;
+		} finally {
+			lock.unlock();
+		}
+	}
+
 	int testCount = 0;
 
 	public void run() {
 		try {
 			while (true) {
 				// reactor
-				try {
-					lock.lock();
-					if (!isWakeup) {
-						wakeupCondition.await();
+				waitWakeup();
+				//check new seantors array
+				String[] newSenatorCache = newSenator; //avoid modify newSenator concurrently
+				if (senator != newSenatorCache) {
+					if (senator.length != 0 && (newSenatorCache.length == 0 || !senator[0].equals(newSenatorCache[0]))) {
+						//clear context last time
+						firstPriorConfig.setAutoReConnect(false);
+						if (firstPriorConfig.getNode() != null) {
+							firstPriorConfig.getNode().close();
+						}
+						firstPriorConfig = null;
 					}
-					isWakeup = false;
-				} finally {
-					lock.unlock();
+					if (newSenatorCache.length != 0 && firstPriorConfig == null) {
+						//record context this time
+						firstPriorConfig = new ConnectConfig(newSenatorCache[0], true, masterDistance, connectEvent);
+						String[] tmp = newSenatorCache[0].split(":");
+						boolean isSuccess = nioSocketClient.connect(tmp[0], Integer.parseInt(tmp[1]), firstPriorConfig).get();
+						if (isSuccess) {
+							firstPriorConfig.waitHanded(); // wait first node connect
+						}
+					}
+					senator = newSenatorCache;
 				}
-				if (node != null && node.isClose()) {
-					node = null;
+				//check if first node is connected
+				if (curConnectConfig != firstPriorConfig && firstPriorConfig != null && firstPriorConfig.getNode() != null
+						&& !firstPriorConfig.getNode().isClose()) {
+					if (curConnectConfig != null && curConnectConfig.getNode() != null) {
+						curConnectConfig.getNode().close();//close connection
+					}
+					curConnectConfig = null;
 				}
-				while (node == null) {
+				//check curConnectConfig if is connected
+				if (curConnectConfig != null && (curConnectConfig.getNode() == null || curConnectConfig.getNode().isClose())) {
+					curConnectConfig = null;
+				}
+				if (curConnectConfig == null) {
 					// reconnect master
 					reConnect();
-					// redo
-					EntryNode next = root;
-					while ((next = next.next) != null) {
+					if (curConnectConfig != null) {
+						// redo
+						EntryNode next = root;
+						while ((next = next.next) != null) {
+							try {
+								sendRequestToNode(curConnectConfig, next);
+							} catch (NetCloseException e) {
+								logger.error("master disconnected!");
+								curConnectConfig = null;
+								Thread.sleep(1000);
+								break;
+							}
+						}
+					}
+				}
+				if (curConnectConfig != null) {
+					while (commandQueue.peek() != null && runningSize.get() != maxRunningSize) {
+						EntryNode e = new EntryNode();
+						e.c = commandQueue.poll();
+						synchronized (root) {
+							e.next = root.next;
+							if (root.next != null) {
+								root.next.prev = e;
+							}
+							root.next = e;
+							e.prev = root;
+						}
+						runningSize.incrementAndGet();
 						try {
-							sendRequestToNode(node, next);
-						} catch (NetCloseException e) {
-							logger.error("master disconnected!");
-							node = null;
-							Thread.sleep(1000);
+							sendRequestToNode(curConnectConfig, e);
+						} catch (NetCloseException ee) {
+							logger.error("master disconnect!");
+							curConnectConfig = null;
+							wakeup();
 							break;
 						}
 					}
 				}
 
-				while (commandQueue.peek() != null && runningSize.get() != maxRunningSize) {
-					EntryNode e = new EntryNode();
-					e.c = commandQueue.poll();
-					synchronized (root) {
-						e.next = root.next;
-						if (root.next != null) {
-							root.next.prev = e;
-						}
-						root.next = e;
-						e.prev = root;
-					}
-					runningSize.incrementAndGet();
-					try {
-						sendRequestToNode(node, e);
-					} catch (NetCloseException ee) {
-						logger.error("master disconnect!");
-						node = null;
-						wakeup();
-						break;
-					}
-				}
-				// logger.debug("runningCommand size:" + runningCommand.size());
 			}
 
-		} catch (InterruptedException e) {
-			throw new RuntimeException("not support interruptedException", e);
+		} catch (Throwable e) {
+			logger.error("fatal error", e);
 		}
 	};
 
@@ -246,81 +256,54 @@ public class CommandAsyncProcessor implements Runnable {
 	}
 
 	public UserNetNode getNode() {
-		return node;
+		return curConnectConfig == null ? null : (UserNetNode) curConnectConfig.getNode();
 	}
 
-	private void sendRequestToNode(UserNetNode node, EntryNode entryNode) throws NetCloseException {
+	private void sendRequestToNode(ConnectConfig curConnectConfig, EntryNode entryNode) throws NetCloseException {
 		AddRequestCallBack callback = new AddRequestCallBack(entryNode.c, this, entryNode);
 		if (entryNode.c.getValue() == null) {
-			node.sendHeartBeat(callback);
+			((UserNetNode) curConnectConfig.getNode()).sendHeartBeat(callback);
 		} else {
-			node.sendAddRequest(entryNode.c.getCommandType(),entryNode.c.getInstanceId(), entryNode.c.getValue(), callback);
+			((UserNetNode) curConnectConfig.getNode()).sendAddRequest(entryNode.c.getCommandType(), entryNode.c.getInstanceId(), entryNode.c.getValue(),
+					callback);
 		}
 	}
 
 	private void reConnect() throws InterruptedException {
 		try {
-			UserNetNode node = null;
+			ConnectConfig config = null;
 			Thread.sleep(100); // wait 100ms to avoid broadcast storm
-			while (node == null) {
-				String[] senator = this.senator;
-				HashMap<String, UserNetNode> activeSenators = activeNode;
-				node = activeSenators.get(senator[0]);
-				if (node != null) {
-					logger.info("connect to " + senator[0]);
-					// close other senator
-					for (java.util.Map.Entry<String, UserNetNode> e : activeSenators.entrySet()) {
-						if (!e.getKey().equals(senator[0])) {
-							e.getValue().close();
-						}
-					}
-				} else {
-					if (senator.length > 1) {
-						for (int i = 1; i < senator.length; ++i) {
-							node = activeNode.get(senator[i]);
-							if (node == null) {
-								String[] tmp = senator[i].split(":");
-								ConnectConfig connectConfig = new ConnectConfig(senator[i], false, masterDistance, connectEvent);
-								try {
-									nioSocketClient.connect(tmp[0], Integer.parseInt(tmp[1]), connectConfig);
-									if (connectConfig.waitHanded(3000)) { //wait 3 seconds
-										logger.info("connect to " + senator[i]);
-									} else {
-										logger.info("fail to connect to " + senator[i]);
-									}
-								} catch (TimeoutException e) {
-									logger.info("connect to " + senator[i] + " time out~");
-								}
-							}
-							node = activeNode.get(senator[i]);
-							if (node != null && !node.isClose()) {
-								break;
-							} else {
-								node = null;
-							}
-						}
-					}
-				}
-
-				if (node == null) {
-					Thread.sleep(2000);
-					logger.error("find master position failed!");
-				} else {
+			if (firstPriorConfig != null && firstPriorConfig.getNode() != null && !firstPriorConfig.getNode().isClose()) {
+				logger.info("connect to " + senator[0]);
+				// close other senator
+				config = firstPriorConfig;
+			} else if (senator.length > 1) {
+				for (int i = 1; i < senator.length; ++i) {
+					String[] tmp = senator[i].split(":");
+					ConnectConfig connectConfig = new ConnectConfig(senator[i], false, masterDistance, connectEvent);
 					try {
-						nodeChangeLock.lock();
-						if (senator == this.senator) {
-							logger.info("node is changed");
-							this.node = node;
-							heartBeatDeamon.processorChangeNode(this);
-
+						nioSocketClient.connect(tmp[0], Integer.parseInt(tmp[1]), connectConfig);
+						if (connectConfig.waitHanded(3000)) { //wait 3 seconds
+							logger.info("connect to " + senator[i]);
 						} else {
-							node.close();
-							node = null;
+							logger.info("fail to connect to " + senator[i]);
 						}
-					} finally {
-						nodeChangeLock.unlock();
+					} catch (TimeoutException e) {
+						logger.info("connect to " + senator[i] + " time out~");
+					}
+
+					if (connectConfig.getNode() != null && !connectConfig.getNode().isClose()) {
+						config = connectConfig;
+						break;
 					}
 				}
+			}
+			if (config == null) {
+				Thread.sleep(2000);
+				logger.error("find master position failed!");
+			} else {
+				curConnectConfig = config;
+				heartBeatDeamon.processorChangeNode(this);
 			}
 		} catch (Throwable e) {
 			logger.error("fatal error", e);

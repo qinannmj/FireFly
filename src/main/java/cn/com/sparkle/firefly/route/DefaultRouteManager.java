@@ -70,7 +70,6 @@ public class DefaultRouteManager implements RouteManage, MasterDistanceChangeLis
 	public String lookupUpLevelNodeAddress(int distance) {
 		if (cacheDistance != distance) {
 			NodesCollection senator = clusterState.getSenators();
-			logger.info("look senator " + senator);
 			upLevelAddress = null;
 			upLevelNetNode = null;
 			for (NetNode n : senator.getAllActiveNodes().values()) {
