@@ -19,6 +19,7 @@ public class SelfState implements ConfigureEventListener{
 	private volatile ElectionId electionPrepareId;
 	private volatile long electionLastVoteId = -1;
 	private volatile boolean isSenator = false;
+	private String selfAddress;
 
 	private ReentrantLock electionPrepareIdLock = new ReentrantLock();
 	private AtomicLong transportToMasterCount = new AtomicLong(0);//for statistic
@@ -29,10 +30,12 @@ public class SelfState implements ConfigureEventListener{
 	private long recoverRecordFromMasterLossCount = 0; //for statistic
 	private Context context;
 
+
 	private boolean isDebug;
 	
-	public SelfState(EventsManager eventManager){
+	public SelfState(EventsManager eventManager,String selfAddress){
 		eventManager.registerListener(this);
+		this.selfAddress = selfAddress;
 	}
 	public ElectionId getElectionVoteIdBySelf() {
 		return electionVoteIdBySelf;
@@ -48,7 +51,9 @@ public class SelfState implements ConfigureEventListener{
 	}
 	
 	public void reInit(){
-		init(context);
+		if(context != null){
+			init(context);
+		}
 	}
 	public ElectionId casElectionPrepareId(ElectionId id, long lastVoteId) {
 		try {
@@ -66,7 +71,7 @@ public class SelfState implements ConfigureEventListener{
 						, lastVoteId, electionLastVoteId, electionPrepareId.getVersion(), context.getConfiguration().getConfigNodeSet().getVersion()));
 			}
 			if (compareResult >= 0 && lastVoteId >= (electionLastVoteId - Constants.ELECTION_VOTE_ID_TOLERATION)
-					&& electionPrepareId.getVersion() == context.getConfiguration().getConfigNodeSet().getVersion()) {
+					&& electionPrepareId.getVersion() >= context.getConfiguration().getConfigNodeSet().getVersion()) {
 				electionPrepareId = new ElectionId(id.getAddress(), id.getIncreaseId(), id.getVersion());
 				electionLastVoteId = lastVoteId;
 				return id;
@@ -138,9 +143,9 @@ public class SelfState implements ConfigureEventListener{
 
 	@Override
 	public void senatorsChange(Set<ConfigNode> newSenators, ConfigNode addNode, ConfigNode rmNode, long version) {
-		if(addNode != null && addNode.getAddress().equals(context.getConfiguration().getSelfAddress())){
+		if(addNode != null && addNode.getAddress().equals(selfAddress)){
 			isSenator = true;
-		}else if(rmNode != null && rmNode.getAddress().equals(context.getConfiguration().getSelfAddress())){
+		}else if(rmNode != null && rmNode.getAddress().equals(selfAddress)){
 			isSenator = false;
 		}
 	}

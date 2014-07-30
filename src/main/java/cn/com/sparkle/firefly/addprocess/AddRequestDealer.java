@@ -234,9 +234,10 @@ public class AddRequestDealer implements InstanceExecuteEventListener, InstanceP
 							curByteCount += arp.getValueByteSize();
 						}
 						list.add(arp);
-
-						logger.debug("requestQueue.size()" + requestQueue.size() + " list.size:" + list.size() + " curTcpPackageByteSize"
-								+ curTcpPackageByteSize);
+						if (conf.isDebugLog()) {
+							logger.debug("requestQueue.size()" + requestQueue.size() + " list.size:" + list.size() + " curTcpPackageByteSize"
+									+ curTcpPackageByteSize);
+						}
 						if (arp.isManageCommand() || !context.getConfiguration().isMergeClientRequest()) {
 							break; // not to merge, this is will not merge from other node,  so for many client ,to improve rt performance
 						}
@@ -246,7 +247,7 @@ public class AddRequestDealer implements InstanceExecuteEventListener, InstanceP
 						if (ds != null) {
 							ds.isDealing = true;
 						}
-						for(AddRequest request : arp.getValueList()){
+						for (AddRequest request : arp.getValueList()) {
 							try {
 								arp.responseAdminResponse(request.getMessageId(), false, error);
 							} catch (UnsupportedChecksumAlgorithm e) {

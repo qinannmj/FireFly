@@ -32,18 +32,18 @@ public class TestClient {
 		//		PaxosOperater oper = client.getOperator();
 
 		final int size = 300000;
-		int threadSize = 100;
+		int threadSize = 500;
 
 		//		final PaxosClient client = new PaxosClient(address,args[0] + "service_out_net.prop",args[1],3,false);
 		//		int cycle = Integer.parseInt(args[2]);
 
-		final PaxosClient client = new PaxosClient(address, "target/classes/conf10000/service_out_net.prop", "netty",
-				ChecksumUtil.NO_CHECKSUM, 2000, 1, 999999,true);
+		final PaxosClient client = new PaxosClient(address, "target/classes/conf10000/service_out_net.prop", "raptor",
+				ChecksumUtil.NO_CHECKSUM, 2000, 1, 999999,false);
 		int cycle = 8;
 
 		logger.info("¿ªÊ¼²âÊÔ");
-//		String sample = "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd2131231231123   ";
-		String sample="1";
+		String sample = "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd2131231231123   ";
+//		String sample="1";
 		String a = "";
 		for (int i = 0; i < cycle; ++i) {
 			a += sample;
@@ -80,7 +80,7 @@ public class TestClient {
 							//							ct = System.currentTimeMillis();
 							//							Thread.sleep(100);
 //							Thread.sleep(100);
-//							f.get();
+							f.get();
 						}
 						oper.waitAllFinish(6000000);
 					} catch (InterruptedException e) {

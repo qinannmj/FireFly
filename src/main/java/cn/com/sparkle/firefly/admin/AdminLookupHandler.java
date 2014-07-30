@@ -62,7 +62,9 @@ public class AdminLookupHandler extends HandlerInterface {
 		if (r.length  <2 || context.getConfiguration().getSelfAddress().equals(r[1]) ) {
 			//process by self
 			AbstractAdminProcessor p = processorMap.get(r[0]);
-			logger.info("command: " + new String(b));
+			if(context.getConfiguration().isDebugLog()){
+				logger.info("command: " + new String(b));
+			}
 			if (p != null) {
 				p.process(r, this, session, request);
 				context.getcState().getSelfState().addResponseAdminAddRequestCount();

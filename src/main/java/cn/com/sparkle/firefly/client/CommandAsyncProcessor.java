@@ -100,7 +100,7 @@ public class CommandAsyncProcessor implements Runnable {
 
 	public static void init(String confPath, String netLayerType, int preferChecksumType, int heartBeatInterval, ProtocolManager protocolManager,
 			boolean debugLog) throws Throwable {
-		nioSocketClient = NetFactory.makeClient(netLayerType);
+		nioSocketClient = NetFactory.makeClient(netLayerType,debugLog);
 		handler = new UserClientHandler(nioSocketClient, preferChecksumType, heartBeatInterval, protocolManager, reConnectThread, debugLog);
 		nioSocketClient.init(confPath, heartBeatInterval, handler);
 		reConnectThread.startThread();

@@ -5,19 +5,25 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.log4j.Logger;
 
+import cn.com.sparkle.firefly.Context;
 import cn.com.sparkle.firefly.future.SystemFuture;
 import cn.com.sparkle.firefly.net.netlayer.NetClient;
 import cn.com.sparkle.firefly.net.netlayer.NetHandler;
 
 public class JvmPipeClient implements NetClient {
 	private final static Logger logger = Logger.getLogger(JvmPipeClient.class);
-
+	
+	private final static AtomicLong atomicLong = new AtomicLong(0);
 	private NetClient netClient;
+	
+	private boolean isDebug;
+	
+	
+	
 
-	private static AtomicLong atomicLong = new AtomicLong(0);
-
-	public JvmPipeClient(NetClient netClient) {
+	public JvmPipeClient(NetClient netClient,boolean isDebug) {
 		this.netClient = netClient;
+		this.isDebug = isDebug;
 	}
 
 	@Override
@@ -34,7 +40,9 @@ public class JvmPipeClient implements NetClient {
 			serverSession.setPeer(clientSession);
 			netClient.getHandler().onConnect(clientSession, connectAttachment);
 			serverHandler.onConnect(serverSession, null);
-			logger.info("build a injvm pipe,id:" + flag);
+			if(isDebug){
+				logger.debug("build a injvm pipe,id:" + flag);
+			}
 			return future;
 		} else {
 			return netClient.connect(ip, port, connectAttachment);

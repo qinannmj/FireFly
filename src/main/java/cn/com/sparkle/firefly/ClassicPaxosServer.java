@@ -65,7 +65,7 @@ public class ClassicPaxosServer implements AccountBookEventListener, ConfigureEv
 	public void init(String filePath, HandlerInterface userHandlerInterface) throws Throwable {
 		this.userHandlerInterface = userHandlerInterface;
 		Configuration configuration = new Configuration(filePath, eManager);
-		client = NetFactory.makeClient(configuration.getNetLayer());
+		client = NetFactory.makeClient(configuration.getNetLayer(),configuration.isDebugLog());
 
 		//start exclusive port
 		exclusiveServerSocket = new ServerSocket();
@@ -112,6 +112,7 @@ public class ClassicPaxosServer implements AccountBookEventListener, ConfigureEv
 		AddRequestDealer addRequestDealer = new AddRequestDealer(context);
 		userHandlerInterface.setAddRequestDealer(addRequestDealer);
 		context.setAddRequestDealer(addRequestDealer);
+		
 		// init book
 		accountBook.init(ie);
 	}
@@ -160,7 +161,7 @@ public class ClassicPaxosServer implements AccountBookEventListener, ConfigureEv
 
 	private void tryBind(ConfigNode configNode, SystemServerHandler handler) throws Throwable {
 		Configuration conf = context.getConfiguration();
-		NetServer server = NetFactory.makeServer(conf.getNetLayer());
+		NetServer server = NetFactory.makeServer(conf.getNetLayer(), conf.isDebugLog());
 		server.init(conf.getFilePath() + "/system_in_net.prop", conf.getHeartBeatInterval(), handler);
 		server.listen(configNode.getIp(), Integer.parseInt(configNode.getPort()));
 	}
@@ -169,7 +170,7 @@ public class ClassicPaxosServer implements AccountBookEventListener, ConfigureEv
 		EventsManager eventsManager = context.getEventsManager();
 		Configuration conf = context.getConfiguration();
 		UserServerHandler handler = new UserServerHandler(eventsManager, conf, userHandlerInterface, context.getProtocolManager());
-		NetServer server = NetFactory.makeServer(conf.getNetLayer());
+		NetServer server = NetFactory.makeServer(conf.getNetLayer(), conf.isDebugLog());
 		server.init(conf.getFilePath() + "/service_in_net.prop", conf.getHeartBeatInterval(), handler);
 		server.listen(conf.getIp(), conf.getClientPort());
 		return handler;

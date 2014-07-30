@@ -11,15 +11,15 @@ import cn.com.sparkle.firefly.net.netlayer.raptor.RaptorServer;
 
 public class NetFactory {
 
-	public static NetClient makeClient(String type) throws IOException {
+	public static NetClient makeClient(String type,boolean isDebug) throws IOException {
 		if (type.equals("raptor")) {
-			return new JvmPipeClient(new RaptorClient());
+			return new JvmPipeClient(new RaptorClient(),isDebug);
 		} else {
-			return new JvmPipeClient(new NettyClient());
+			return new JvmPipeClient(new NettyClient(),isDebug);
 		}
 	}
 
-	public static NetServer makeServer(String type) throws IOException {
+	public static NetServer makeServer(String type,boolean isDebug) throws IOException {
 		if (type == null) {
 			throw new RuntimeException("unspported net layer :" + type);
 		}

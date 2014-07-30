@@ -56,7 +56,7 @@ public class ClusterState implements ConfigureEventListener,HeartBeatEventListen
 	public ClusterState(EventsManager eventsManager, final Configuration conf) {
 
 		this.conf = conf;
-		this.selfState = new SelfState(eventsManager);
+		this.selfState = new SelfState(eventsManager,conf.getSelfAddress());
 		this.eventsManager = eventsManager;
 		this.lastElectionId = new ElectionId("", -1, conf.getConfigNodeSet().getVersion());
 		HashMap<String, NodeState> temp = new HashMap<String, NodeState>();
