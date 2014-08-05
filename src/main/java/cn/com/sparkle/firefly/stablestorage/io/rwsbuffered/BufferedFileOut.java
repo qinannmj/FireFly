@@ -1,9 +1,7 @@
-package cn.com.sparkle.firefly.stablestorage.io;
+package cn.com.sparkle.firefly.stablestorage.io.rwsbuffered;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.util.LinkedList;
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Condition;
@@ -11,90 +9,16 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.log4j.Logger;
 
-import cn.com.sparkle.firefly.stablestorage.WriteQueue;
+import cn.com.sparkle.firefly.stablestorage.io.RecordFileOut;
+import cn.com.sparkle.firefly.stablestorage.io.rwsbuffered.FlushThreadGroup.BufferPackage;
+import cn.com.sparkle.firefly.stablestorage.io.rwsbuffered.FlushThreadGroup.MyNode;
 
-public class BufferedFileOut {
+public class BufferedFileOut implements RecordFileOut{
 	private final static Logger logger = Logger.getLogger(BufferedFileOut.class);
 
-	@SuppressWarnings("unused")
-	private volatile static boolean debugLog = true;
-	
-	private static ArrayBlockingQueue<MyNode> idleBufferPool = new ArrayBlockingQueue<MyNode>(1000);
-	
-	private final static WriteQueue<BufferedFileOut, BufferPackage, MyNode> waitQueue = new WriteQueue<BufferedFileOut, BufferPackage, MyNode>();
-	
-	public static WriteQueue<BufferedFileOut, BufferPackage, MyNode> getWaitQueue(){
-		return waitQueue;
-	}
-	public static void init(boolean debugLog,int buffSize,int idleBufferPoolSize) {
-		BufferedFileOut.debugLog = debugLog;
-		for(int i = 0 ; i < idleBufferPoolSize ; ++i){
-			idleBufferPool.add(new MyNode(null, new BufferPackage(buffSize)));
-		}
-		
-		// initial finish event deal thread
-		eventThread = new FinishRealEventThread();
-		Thread flushEventThread = new Thread(eventThread);
-		flushEventThread.setName("Paxos-File-Flush-Event-Thread");
-		flushEventThread.start();
-		// initial thread to write data into file system truely.
-		Thread t = new Thread() {
-			public void run() {
-				while (true) {
-					MyNode n;
-					try {
-						n = waitQueue.take();
-						BufferPackage bp = n.getElement();
-
-						n.getTag().raf.write(bp.buff, 0, bp.used);
-						LinkedList<Callable<Object>> calllist = bp.callAbleList;
-						bp.callAbleList = new LinkedList<Callable<Object>>();
-						n.getTag().finish(n);
-						n.getElement().used = 0;
-						idleBufferPool.add(n);
-						for (Callable<Object> callable : calllist) {
-							eventThread.addFinishEvent(callable);
-						}
-					} catch (Throwable e) {
-						logger.error("fatal error", e);
-						try {
-							Thread.sleep(1000);
-						} catch (InterruptedException e1) {
-						}
-						System.exit(1);// quickly close process
-					}
-
-				}
-			}
-		};
-		t.setName("Paxos-File-Flush-Thread");
-		t.start();
-	}
-
-	private static class MyNode extends WriteQueue.Node<BufferedFileOut, BufferPackage> {
-		public MyNode(BufferedFileOut tag, BufferPackage element) {
-			super(tag, element);
-		}
-
-		@Override
-		public boolean canGet() {
-			return this.getElement().used != this.getElement().buff.length;
-		}
-	}
-
-	private static Callable<Object> nullCallable = new Callable<Object>() {
-		@Override
-		public Object call() throws Exception {
-			return null;
-		}
-	};
-
-//	private ArrayBlockingQueue<MyNode> idleBuffer = new ArrayBlockingQueue<MyNode>(2);
-	
 	private RandomAccessFile raf;
 	private byte[] intbyte = new byte[4];
 	private byte[] longbyte = new byte[8];
-	private static FinishRealEventThread eventThread;
 
 	private long curPos = 0;
 
@@ -102,22 +26,15 @@ public class BufferedFileOut {
 	private ReentrantLock finishLock = new ReentrantLock();
 	private Condition finishCondition = finishLock.newCondition();
 	private AtomicInteger waitedWriteBuffSize = new AtomicInteger(0);
-
+	private FlushThreadGroup flushThreadGroup;
 	// private boolean isClose = false;
 
-	private final static class BufferPackage {
-		byte[] buff;
-		LinkedList<Callable<Object>> callAbleList = new LinkedList<Callable<Object>>();
-		int used = 0;
+	
 
-		public BufferPackage(int size) {
-			this.buff = new byte[size];
-		}
-	}
-
-	public BufferedFileOut(RandomAccessFile randomAccessFile) throws IOException {
+	public BufferedFileOut(RandomAccessFile randomAccessFile,FlushThreadGroup flushThreadGroup) throws IOException {
 		this.raf = randomAccessFile;
 		this.curPos = randomAccessFile.getFilePointer();
+		this.flushThreadGroup = flushThreadGroup;
 	}
 
 	/**
@@ -172,10 +89,10 @@ public class BufferedFileOut {
 			long tempCurPos = curPos;
 
 			while (true) {
-				MyNode n = waitQueue.getLastNodeOfTag(this);
+				MyNode n = flushThreadGroup.getWaitQueue().getLastNodeOfTag(this);
 				if (n == null) {
 					try {
-						n = idleBufferPool.take();
+						n =flushThreadGroup.getIdleBufferPool().take();
 						waitedWriteBuffSize.incrementAndGet();
 						n.setTag(this);
 					} catch (InterruptedException e) {
@@ -193,10 +110,10 @@ public class BufferedFileOut {
 
 				if (length == 0) {
 					bp.callAbleList.add(callable);
-					waitQueue.push(n);
+					flushThreadGroup.getWaitQueue().push(n);
 					break;
 				} else {
-					waitQueue.push(n);
+					flushThreadGroup.getWaitQueue().push(n);
 				}
 			}
 			return tempCurPos;
@@ -205,7 +122,12 @@ public class BufferedFileOut {
 		}
 	}
 
-	private void finish(MyNode n) {
+	
+	public RandomAccessFile getRaf() {
+		return raf;
+	}
+
+	public void finish(MyNode n) {
 		try {
 			finishLock.lock();
 			
@@ -247,4 +169,11 @@ public class BufferedFileOut {
 			writeLock.unlock();
 		}
 	}
+	
+	private static Callable<Object> nullCallable = new Callable<Object>() {
+		@Override
+		public Object call() throws Exception {
+			return null;
+		}
+	};
 }

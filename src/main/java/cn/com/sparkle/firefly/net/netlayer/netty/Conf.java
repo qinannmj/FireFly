@@ -23,7 +23,7 @@ public class Conf extends CommonConf {
 		prop.load(new InputStreamReader(new FileInputStream(path)));
 		workthreadNum = Integer.parseInt(prop.getProperty("worker_thread_num"));
 		sendBuf = Integer.parseInt(prop.getProperty("send_mem_size"));
-		recvBuf = Integer.parseInt(prop.getProperty("recieve_mem_size"));
+		recvBuf = Integer.parseInt(prop.getProperty("recv_mem_size"));
 	}
 
 	public int getWorkthreadNum() {

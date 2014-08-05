@@ -366,6 +366,20 @@ public final class PaxosMessages {
      * <code>optional .protocolbuffer.ConnectResponse connectResponse = 29;</code>
      */
     cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.ConnectResponseOrBuilder getConnectResponseOrBuilder();
+
+    // optional .protocolbuffer.ValueTrunk valueTrunk = 30;
+    /**
+     * <code>optional .protocolbuffer.ValueTrunk valueTrunk = 30;</code>
+     */
+    boolean hasValueTrunk();
+    /**
+     * <code>optional .protocolbuffer.ValueTrunk valueTrunk = 30;</code>
+     */
+    cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.ValueTrunk getValueTrunk();
+    /**
+     * <code>optional .protocolbuffer.ValueTrunk valueTrunk = 30;</code>
+     */
+    cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.ValueTrunkOrBuilder getValueTrunkOrBuilder();
   }
   /**
    * Protobuf type {@code protocolbuffer.MessagePackage}
@@ -738,6 +752,19 @@ public final class PaxosMessages {
                 connectResponse_ = subBuilder.buildPartial();
               }
               bitField0_ |= 0x02000000;
+              break;
+            }
+            case 242: {
+              cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.ValueTrunk.Builder subBuilder = null;
+              if (((bitField0_ & 0x04000000) == 0x04000000)) {
+                subBuilder = valueTrunk_.toBuilder();
+              }
+              valueTrunk_ = input.readMessage(cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.ValueTrunk.PARSER, extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(valueTrunk_);
+                valueTrunk_ = subBuilder.buildPartial();
+              }
+              bitField0_ |= 0x04000000;
               break;
             }
           }
@@ -1340,6 +1367,28 @@ public final class PaxosMessages {
       return connectResponse_;
     }
 
+    // optional .protocolbuffer.ValueTrunk valueTrunk = 30;
+    public static final int VALUETRUNK_FIELD_NUMBER = 30;
+    private cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.ValueTrunk valueTrunk_;
+    /**
+     * <code>optional .protocolbuffer.ValueTrunk valueTrunk = 30;</code>
+     */
+    public boolean hasValueTrunk() {
+      return ((bitField0_ & 0x04000000) == 0x04000000);
+    }
+    /**
+     * <code>optional .protocolbuffer.ValueTrunk valueTrunk = 30;</code>
+     */
+    public cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.ValueTrunk getValueTrunk() {
+      return valueTrunk_;
+    }
+    /**
+     * <code>optional .protocolbuffer.ValueTrunk valueTrunk = 30;</code>
+     */
+    public cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.ValueTrunkOrBuilder getValueTrunkOrBuilder() {
+      return valueTrunk_;
+    }
+
     private void initFields() {
       id_ = 0L;
       isLast_ = false;
@@ -1367,6 +1416,7 @@ public final class PaxosMessages {
       instanceSuccessResponse_ = cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.InstanceSuccessResponse.getDefaultInstance();
       activeHeartBeatRequest_ = cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.ActiveHeartBeatRequest.getDefaultInstance();
       connectResponse_ = cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.ConnectResponse.getDefaultInstance();
+      valueTrunk_ = cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.ValueTrunk.getDefaultInstance();
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -1501,6 +1551,12 @@ public final class PaxosMessages {
           return false;
         }
       }
+      if (hasValueTrunk()) {
+        if (!getValueTrunk().isInitialized()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+      }
       memoizedIsInitialized = 1;
       return true;
     }
@@ -1585,6 +1641,9 @@ public final class PaxosMessages {
       }
       if (((bitField0_ & 0x02000000) == 0x02000000)) {
         output.writeMessage(29, connectResponse_);
+      }
+      if (((bitField0_ & 0x04000000) == 0x04000000)) {
+        output.writeMessage(30, valueTrunk_);
       }
       getUnknownFields().writeTo(output);
     }
@@ -1698,6 +1757,10 @@ public final class PaxosMessages {
       if (((bitField0_ & 0x02000000) == 0x02000000)) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(29, connectResponse_);
+      }
+      if (((bitField0_ & 0x04000000) == 0x04000000)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(30, valueTrunk_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -1831,6 +1894,7 @@ public final class PaxosMessages {
           getInstanceSuccessResponseFieldBuilder();
           getActiveHeartBeatRequestFieldBuilder();
           getConnectResponseFieldBuilder();
+          getValueTrunkFieldBuilder();
         }
       }
       private static Builder create() {
@@ -1987,6 +2051,12 @@ public final class PaxosMessages {
           connectResponseBuilder_.clear();
         }
         bitField0_ = (bitField0_ & ~0x02000000);
+        if (valueTrunkBuilder_ == null) {
+          valueTrunk_ = cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.ValueTrunk.getDefaultInstance();
+        } else {
+          valueTrunkBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x04000000);
         return this;
       }
 
@@ -2215,6 +2285,14 @@ public final class PaxosMessages {
         } else {
           result.connectResponse_ = connectResponseBuilder_.build();
         }
+        if (((from_bitField0_ & 0x04000000) == 0x04000000)) {
+          to_bitField0_ |= 0x04000000;
+        }
+        if (valueTrunkBuilder_ == null) {
+          result.valueTrunk_ = valueTrunk_;
+        } else {
+          result.valueTrunk_ = valueTrunkBuilder_.build();
+        }
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -2308,6 +2386,9 @@ public final class PaxosMessages {
         }
         if (other.hasConnectResponse()) {
           mergeConnectResponse(other.getConnectResponse());
+        }
+        if (other.hasValueTrunk()) {
+          mergeValueTrunk(other.getValueTrunk());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
@@ -2438,6 +2519,12 @@ public final class PaxosMessages {
         }
         if (hasConnectResponse()) {
           if (!getConnectResponse().isInitialized()) {
+            
+            return false;
+          }
+        }
+        if (hasValueTrunk()) {
+          if (!getValueTrunk().isInitialized()) {
             
             return false;
           }
@@ -5338,6 +5425,123 @@ public final class PaxosMessages {
         return connectResponseBuilder_;
       }
 
+      // optional .protocolbuffer.ValueTrunk valueTrunk = 30;
+      private cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.ValueTrunk valueTrunk_ = cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.ValueTrunk.getDefaultInstance();
+      private com.google.protobuf.SingleFieldBuilder<
+          cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.ValueTrunk, cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.ValueTrunk.Builder, cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.ValueTrunkOrBuilder> valueTrunkBuilder_;
+      /**
+       * <code>optional .protocolbuffer.ValueTrunk valueTrunk = 30;</code>
+       */
+      public boolean hasValueTrunk() {
+        return ((bitField0_ & 0x04000000) == 0x04000000);
+      }
+      /**
+       * <code>optional .protocolbuffer.ValueTrunk valueTrunk = 30;</code>
+       */
+      public cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.ValueTrunk getValueTrunk() {
+        if (valueTrunkBuilder_ == null) {
+          return valueTrunk_;
+        } else {
+          return valueTrunkBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>optional .protocolbuffer.ValueTrunk valueTrunk = 30;</code>
+       */
+      public Builder setValueTrunk(cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.ValueTrunk value) {
+        if (valueTrunkBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          valueTrunk_ = value;
+          onChanged();
+        } else {
+          valueTrunkBuilder_.setMessage(value);
+        }
+        bitField0_ |= 0x04000000;
+        return this;
+      }
+      /**
+       * <code>optional .protocolbuffer.ValueTrunk valueTrunk = 30;</code>
+       */
+      public Builder setValueTrunk(
+          cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.ValueTrunk.Builder builderForValue) {
+        if (valueTrunkBuilder_ == null) {
+          valueTrunk_ = builderForValue.build();
+          onChanged();
+        } else {
+          valueTrunkBuilder_.setMessage(builderForValue.build());
+        }
+        bitField0_ |= 0x04000000;
+        return this;
+      }
+      /**
+       * <code>optional .protocolbuffer.ValueTrunk valueTrunk = 30;</code>
+       */
+      public Builder mergeValueTrunk(cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.ValueTrunk value) {
+        if (valueTrunkBuilder_ == null) {
+          if (((bitField0_ & 0x04000000) == 0x04000000) &&
+              valueTrunk_ != cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.ValueTrunk.getDefaultInstance()) {
+            valueTrunk_ =
+              cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.ValueTrunk.newBuilder(valueTrunk_).mergeFrom(value).buildPartial();
+          } else {
+            valueTrunk_ = value;
+          }
+          onChanged();
+        } else {
+          valueTrunkBuilder_.mergeFrom(value);
+        }
+        bitField0_ |= 0x04000000;
+        return this;
+      }
+      /**
+       * <code>optional .protocolbuffer.ValueTrunk valueTrunk = 30;</code>
+       */
+      public Builder clearValueTrunk() {
+        if (valueTrunkBuilder_ == null) {
+          valueTrunk_ = cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.ValueTrunk.getDefaultInstance();
+          onChanged();
+        } else {
+          valueTrunkBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x04000000);
+        return this;
+      }
+      /**
+       * <code>optional .protocolbuffer.ValueTrunk valueTrunk = 30;</code>
+       */
+      public cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.ValueTrunk.Builder getValueTrunkBuilder() {
+        bitField0_ |= 0x04000000;
+        onChanged();
+        return getValueTrunkFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>optional .protocolbuffer.ValueTrunk valueTrunk = 30;</code>
+       */
+      public cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.ValueTrunkOrBuilder getValueTrunkOrBuilder() {
+        if (valueTrunkBuilder_ != null) {
+          return valueTrunkBuilder_.getMessageOrBuilder();
+        } else {
+          return valueTrunk_;
+        }
+      }
+      /**
+       * <code>optional .protocolbuffer.ValueTrunk valueTrunk = 30;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilder<
+          cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.ValueTrunk, cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.ValueTrunk.Builder, cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.ValueTrunkOrBuilder> 
+          getValueTrunkFieldBuilder() {
+        if (valueTrunkBuilder_ == null) {
+          valueTrunkBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+              cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.ValueTrunk, cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.ValueTrunk.Builder, cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.ValueTrunkOrBuilder>(
+                  valueTrunk_,
+                  getParentForChildren(),
+                  isClean());
+          valueTrunk_ = null;
+        }
+        return valueTrunkBuilder_;
+      }
+
       // @@protoc_insertion_point(builder_scope:protocolbuffer.MessagePackage)
     }
 
@@ -5347,6 +5551,413 @@ public final class PaxosMessages {
     }
 
     // @@protoc_insertion_point(class_scope:protocolbuffer.MessagePackage)
+  }
+
+  public interface ValueTrunkOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
+
+    // required bytes part = 1;
+    /**
+     * <code>required bytes part = 1;</code>
+     */
+    boolean hasPart();
+    /**
+     * <code>required bytes part = 1;</code>
+     */
+    com.google.protobuf.ByteString getPart();
+  }
+  /**
+   * Protobuf type {@code protocolbuffer.ValueTrunk}
+   */
+  public static final class ValueTrunk extends
+      com.google.protobuf.GeneratedMessage
+      implements ValueTrunkOrBuilder {
+    // Use ValueTrunk.newBuilder() to construct.
+    private ValueTrunk(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      super(builder);
+      this.unknownFields = builder.getUnknownFields();
+    }
+    private ValueTrunk(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
+    private static final ValueTrunk defaultInstance;
+    public static ValueTrunk getDefaultInstance() {
+      return defaultInstance;
+    }
+
+    public ValueTrunk getDefaultInstanceForType() {
+      return defaultInstance;
+    }
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private ValueTrunk(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 10: {
+              bitField0_ |= 0x00000001;
+              part_ = input.readBytes();
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.internal_static_protocolbuffer_ValueTrunk_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.internal_static_protocolbuffer_ValueTrunk_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.ValueTrunk.class, cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.ValueTrunk.Builder.class);
+    }
+
+    public static com.google.protobuf.Parser<ValueTrunk> PARSER =
+        new com.google.protobuf.AbstractParser<ValueTrunk>() {
+      public ValueTrunk parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new ValueTrunk(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<ValueTrunk> getParserForType() {
+      return PARSER;
+    }
+
+    private int bitField0_;
+    // required bytes part = 1;
+    public static final int PART_FIELD_NUMBER = 1;
+    private com.google.protobuf.ByteString part_;
+    /**
+     * <code>required bytes part = 1;</code>
+     */
+    public boolean hasPart() {
+      return ((bitField0_ & 0x00000001) == 0x00000001);
+    }
+    /**
+     * <code>required bytes part = 1;</code>
+     */
+    public com.google.protobuf.ByteString getPart() {
+      return part_;
+    }
+
+    private void initFields() {
+      part_ = com.google.protobuf.ByteString.EMPTY;
+    }
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized != -1) return isInitialized == 1;
+
+      if (!hasPart()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getSerializedSize();
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        output.writeBytes(1, part_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    private int memoizedSerializedSize = -1;
+    public int getSerializedSize() {
+      int size = memoizedSerializedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(1, part_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSerializedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    protected java.lang.Object writeReplace()
+        throws java.io.ObjectStreamException {
+      return super.writeReplace();
+    }
+
+    public static cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.ValueTrunk parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.ValueTrunk parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.ValueTrunk parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.ValueTrunk parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.ValueTrunk parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.ValueTrunk parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+    public static cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.ValueTrunk parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input);
+    }
+    public static cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.ValueTrunk parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+    }
+    public static cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.ValueTrunk parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.ValueTrunk parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+
+    public static Builder newBuilder() { return Builder.create(); }
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder(cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.ValueTrunk prototype) {
+      return newBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() { return newBuilder(this); }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code protocolbuffer.ValueTrunk}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.ValueTrunkOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.internal_static_protocolbuffer_ValueTrunk_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.internal_static_protocolbuffer_ValueTrunk_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.ValueTrunk.class, cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.ValueTrunk.Builder.class);
+      }
+
+      // Construct using cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.ValueTrunk.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+        }
+      }
+      private static Builder create() {
+        return new Builder();
+      }
+
+      public Builder clear() {
+        super.clear();
+        part_ = com.google.protobuf.ByteString.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000001);
+        return this;
+      }
+
+      public Builder clone() {
+        return create().mergeFrom(buildPartial());
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.internal_static_protocolbuffer_ValueTrunk_descriptor;
+      }
+
+      public cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.ValueTrunk getDefaultInstanceForType() {
+        return cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.ValueTrunk.getDefaultInstance();
+      }
+
+      public cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.ValueTrunk build() {
+        cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.ValueTrunk result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.ValueTrunk buildPartial() {
+        cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.ValueTrunk result = new cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.ValueTrunk(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+          to_bitField0_ |= 0x00000001;
+        }
+        result.part_ = part_;
+        result.bitField0_ = to_bitField0_;
+        onBuilt();
+        return result;
+      }
+
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.ValueTrunk) {
+          return mergeFrom((cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.ValueTrunk)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.ValueTrunk other) {
+        if (other == cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.ValueTrunk.getDefaultInstance()) return this;
+        if (other.hasPart()) {
+          setPart(other.getPart());
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        if (!hasPart()) {
+          
+          return false;
+        }
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.ValueTrunk parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.ValueTrunk) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      // required bytes part = 1;
+      private com.google.protobuf.ByteString part_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <code>required bytes part = 1;</code>
+       */
+      public boolean hasPart() {
+        return ((bitField0_ & 0x00000001) == 0x00000001);
+      }
+      /**
+       * <code>required bytes part = 1;</code>
+       */
+      public com.google.protobuf.ByteString getPart() {
+        return part_;
+      }
+      /**
+       * <code>required bytes part = 1;</code>
+       */
+      public Builder setPart(com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+        part_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required bytes part = 1;</code>
+       */
+      public Builder clearPart() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        part_ = getDefaultInstance().getPart();
+        onChanged();
+        return this;
+      }
+
+      // @@protoc_insertion_point(builder_scope:protocolbuffer.ValueTrunk)
+    }
+
+    static {
+      defaultInstance = new ValueTrunk(true);
+      defaultInstance.initFields();
+    }
+
+    // @@protoc_insertion_point(class_scope:protocolbuffer.ValueTrunk)
   }
 
   public interface HeartBeatRequestOrBuilder
@@ -13161,39 +13772,61 @@ public final class PaxosMessages {
      */
     cn.com.sparkle.firefly.stablestorage.model.StoreModel.IdOrBuilder getVoteIdOrBuilder();
 
-    // required .protocolbuffer.Value value = 3;
-    /**
-     * <code>required .protocolbuffer.Value value = 3;</code>
-     */
-    boolean hasValue();
-    /**
-     * <code>required .protocolbuffer.Value value = 3;</code>
-     */
-    cn.com.sparkle.firefly.stablestorage.model.StoreModel.Value getValue();
-    /**
-     * <code>required .protocolbuffer.Value value = 3;</code>
-     */
-    cn.com.sparkle.firefly.stablestorage.model.StoreModel.ValueOrBuilder getValueOrBuilder();
-
     // repeated string chain = 4;
     /**
      * <code>repeated string chain = 4;</code>
+     *
+     * <pre>
+     *required Value value=3
+     * </pre>
      */
     java.util.List<java.lang.String>
     getChainList();
     /**
      * <code>repeated string chain = 4;</code>
+     *
+     * <pre>
+     *required Value value=3
+     * </pre>
      */
     int getChainCount();
     /**
      * <code>repeated string chain = 4;</code>
+     *
+     * <pre>
+     *required Value value=3
+     * </pre>
      */
     java.lang.String getChain(int index);
     /**
      * <code>repeated string chain = 4;</code>
+     *
+     * <pre>
+     *required Value value=3
+     * </pre>
      */
     com.google.protobuf.ByteString
         getChainBytes(int index);
+
+    // required int32 valuetype = 5;
+    /**
+     * <code>required int32 valuetype = 5;</code>
+     */
+    boolean hasValuetype();
+    /**
+     * <code>required int32 valuetype = 5;</code>
+     */
+    int getValuetype();
+
+    // required int32 valueLength = 6;
+    /**
+     * <code>required int32 valueLength = 6;</code>
+     */
+    boolean hasValueLength();
+    /**
+     * <code>required int32 valueLength = 6;</code>
+     */
+    int getValueLength();
   }
   /**
    * Protobuf type {@code protocolbuffer.InstanceVoteRequest}
@@ -13264,25 +13897,22 @@ public final class PaxosMessages {
               bitField0_ |= 0x00000002;
               break;
             }
-            case 26: {
-              cn.com.sparkle.firefly.stablestorage.model.StoreModel.Value.Builder subBuilder = null;
-              if (((bitField0_ & 0x00000004) == 0x00000004)) {
-                subBuilder = value_.toBuilder();
-              }
-              value_ = input.readMessage(cn.com.sparkle.firefly.stablestorage.model.StoreModel.Value.PARSER, extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(value_);
-                value_ = subBuilder.buildPartial();
-              }
-              bitField0_ |= 0x00000004;
-              break;
-            }
             case 34: {
-              if (!((mutable_bitField0_ & 0x00000008) == 0x00000008)) {
+              if (!((mutable_bitField0_ & 0x00000004) == 0x00000004)) {
                 chain_ = new com.google.protobuf.LazyStringArrayList();
-                mutable_bitField0_ |= 0x00000008;
+                mutable_bitField0_ |= 0x00000004;
               }
               chain_.add(input.readBytes());
+              break;
+            }
+            case 40: {
+              bitField0_ |= 0x00000004;
+              valuetype_ = input.readInt32();
+              break;
+            }
+            case 48: {
+              bitField0_ |= 0x00000008;
+              valueLength_ = input.readInt32();
               break;
             }
           }
@@ -13293,7 +13923,7 @@ public final class PaxosMessages {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e.getMessage()).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x00000008) == 0x00000008)) {
+        if (((mutable_bitField0_ & 0x00000004) == 0x00000004)) {
           chain_ = new com.google.protobuf.UnmodifiableLazyStringList(chain_);
         }
         this.unknownFields = unknownFields.build();
@@ -13366,33 +13996,15 @@ public final class PaxosMessages {
       return voteId_;
     }
 
-    // required .protocolbuffer.Value value = 3;
-    public static final int VALUE_FIELD_NUMBER = 3;
-    private cn.com.sparkle.firefly.stablestorage.model.StoreModel.Value value_;
-    /**
-     * <code>required .protocolbuffer.Value value = 3;</code>
-     */
-    public boolean hasValue() {
-      return ((bitField0_ & 0x00000004) == 0x00000004);
-    }
-    /**
-     * <code>required .protocolbuffer.Value value = 3;</code>
-     */
-    public cn.com.sparkle.firefly.stablestorage.model.StoreModel.Value getValue() {
-      return value_;
-    }
-    /**
-     * <code>required .protocolbuffer.Value value = 3;</code>
-     */
-    public cn.com.sparkle.firefly.stablestorage.model.StoreModel.ValueOrBuilder getValueOrBuilder() {
-      return value_;
-    }
-
     // repeated string chain = 4;
     public static final int CHAIN_FIELD_NUMBER = 4;
     private com.google.protobuf.LazyStringList chain_;
     /**
      * <code>repeated string chain = 4;</code>
+     *
+     * <pre>
+     *required Value value=3
+     * </pre>
      */
     public java.util.List<java.lang.String>
         getChainList() {
@@ -13400,29 +14012,74 @@ public final class PaxosMessages {
     }
     /**
      * <code>repeated string chain = 4;</code>
+     *
+     * <pre>
+     *required Value value=3
+     * </pre>
      */
     public int getChainCount() {
       return chain_.size();
     }
     /**
      * <code>repeated string chain = 4;</code>
+     *
+     * <pre>
+     *required Value value=3
+     * </pre>
      */
     public java.lang.String getChain(int index) {
       return chain_.get(index);
     }
     /**
      * <code>repeated string chain = 4;</code>
+     *
+     * <pre>
+     *required Value value=3
+     * </pre>
      */
     public com.google.protobuf.ByteString
         getChainBytes(int index) {
       return chain_.getByteString(index);
     }
 
+    // required int32 valuetype = 5;
+    public static final int VALUETYPE_FIELD_NUMBER = 5;
+    private int valuetype_;
+    /**
+     * <code>required int32 valuetype = 5;</code>
+     */
+    public boolean hasValuetype() {
+      return ((bitField0_ & 0x00000004) == 0x00000004);
+    }
+    /**
+     * <code>required int32 valuetype = 5;</code>
+     */
+    public int getValuetype() {
+      return valuetype_;
+    }
+
+    // required int32 valueLength = 6;
+    public static final int VALUELENGTH_FIELD_NUMBER = 6;
+    private int valueLength_;
+    /**
+     * <code>required int32 valueLength = 6;</code>
+     */
+    public boolean hasValueLength() {
+      return ((bitField0_ & 0x00000008) == 0x00000008);
+    }
+    /**
+     * <code>required int32 valueLength = 6;</code>
+     */
+    public int getValueLength() {
+      return valueLength_;
+    }
+
     private void initFields() {
       instanceId_ = 0L;
       voteId_ = cn.com.sparkle.firefly.stablestorage.model.StoreModel.Id.getDefaultInstance();
-      value_ = cn.com.sparkle.firefly.stablestorage.model.StoreModel.Value.getDefaultInstance();
       chain_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+      valuetype_ = 0;
+      valueLength_ = 0;
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -13437,15 +14094,15 @@ public final class PaxosMessages {
         memoizedIsInitialized = 0;
         return false;
       }
-      if (!hasValue()) {
+      if (!hasValuetype()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      if (!hasValueLength()) {
         memoizedIsInitialized = 0;
         return false;
       }
       if (!getVoteId().isInitialized()) {
-        memoizedIsInitialized = 0;
-        return false;
-      }
-      if (!getValue().isInitialized()) {
         memoizedIsInitialized = 0;
         return false;
       }
@@ -13462,11 +14119,14 @@ public final class PaxosMessages {
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
         output.writeMessage(2, voteId_);
       }
-      if (((bitField0_ & 0x00000004) == 0x00000004)) {
-        output.writeMessage(3, value_);
-      }
       for (int i = 0; i < chain_.size(); i++) {
         output.writeBytes(4, chain_.getByteString(i));
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        output.writeInt32(5, valuetype_);
+      }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        output.writeInt32(6, valueLength_);
       }
       getUnknownFields().writeTo(output);
     }
@@ -13485,10 +14145,6 @@ public final class PaxosMessages {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(2, voteId_);
       }
-      if (((bitField0_ & 0x00000004) == 0x00000004)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(3, value_);
-      }
       {
         int dataSize = 0;
         for (int i = 0; i < chain_.size(); i++) {
@@ -13497,6 +14153,14 @@ public final class PaxosMessages {
         }
         size += dataSize;
         size += 1 * getChainList().size();
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(5, valuetype_);
+      }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(6, valueLength_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -13607,7 +14271,6 @@ public final class PaxosMessages {
       private void maybeForceBuilderInitialization() {
         if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
           getVoteIdFieldBuilder();
-          getValueFieldBuilder();
         }
       }
       private static Builder create() {
@@ -13624,14 +14287,12 @@ public final class PaxosMessages {
           voteIdBuilder_.clear();
         }
         bitField0_ = (bitField0_ & ~0x00000002);
-        if (valueBuilder_ == null) {
-          value_ = cn.com.sparkle.firefly.stablestorage.model.StoreModel.Value.getDefaultInstance();
-        } else {
-          valueBuilder_.clear();
-        }
-        bitField0_ = (bitField0_ & ~0x00000004);
         chain_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000004);
+        valuetype_ = 0;
         bitField0_ = (bitField0_ & ~0x00000008);
+        valueLength_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000010);
         return this;
       }
 
@@ -13672,20 +14333,20 @@ public final class PaxosMessages {
         } else {
           result.voteId_ = voteIdBuilder_.build();
         }
-        if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
-          to_bitField0_ |= 0x00000004;
-        }
-        if (valueBuilder_ == null) {
-          result.value_ = value_;
-        } else {
-          result.value_ = valueBuilder_.build();
-        }
-        if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        if (((bitField0_ & 0x00000004) == 0x00000004)) {
           chain_ = new com.google.protobuf.UnmodifiableLazyStringList(
               chain_);
-          bitField0_ = (bitField0_ & ~0x00000008);
+          bitField0_ = (bitField0_ & ~0x00000004);
         }
         result.chain_ = chain_;
+        if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
+          to_bitField0_ |= 0x00000004;
+        }
+        result.valuetype_ = valuetype_;
+        if (((from_bitField0_ & 0x00000010) == 0x00000010)) {
+          to_bitField0_ |= 0x00000008;
+        }
+        result.valueLength_ = valueLength_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -13708,18 +14369,21 @@ public final class PaxosMessages {
         if (other.hasVoteId()) {
           mergeVoteId(other.getVoteId());
         }
-        if (other.hasValue()) {
-          mergeValue(other.getValue());
-        }
         if (!other.chain_.isEmpty()) {
           if (chain_.isEmpty()) {
             chain_ = other.chain_;
-            bitField0_ = (bitField0_ & ~0x00000008);
+            bitField0_ = (bitField0_ & ~0x00000004);
           } else {
             ensureChainIsMutable();
             chain_.addAll(other.chain_);
           }
           onChanged();
+        }
+        if (other.hasValuetype()) {
+          setValuetype(other.getValuetype());
+        }
+        if (other.hasValueLength()) {
+          setValueLength(other.getValueLength());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
@@ -13734,15 +14398,15 @@ public final class PaxosMessages {
           
           return false;
         }
-        if (!hasValue()) {
+        if (!hasValuetype()) {
+          
+          return false;
+        }
+        if (!hasValueLength()) {
           
           return false;
         }
         if (!getVoteId().isInitialized()) {
-          
-          return false;
-        }
-        if (!getValue().isInitialized()) {
           
           return false;
         }
@@ -13918,133 +14582,20 @@ public final class PaxosMessages {
         return voteIdBuilder_;
       }
 
-      // required .protocolbuffer.Value value = 3;
-      private cn.com.sparkle.firefly.stablestorage.model.StoreModel.Value value_ = cn.com.sparkle.firefly.stablestorage.model.StoreModel.Value.getDefaultInstance();
-      private com.google.protobuf.SingleFieldBuilder<
-          cn.com.sparkle.firefly.stablestorage.model.StoreModel.Value, cn.com.sparkle.firefly.stablestorage.model.StoreModel.Value.Builder, cn.com.sparkle.firefly.stablestorage.model.StoreModel.ValueOrBuilder> valueBuilder_;
-      /**
-       * <code>required .protocolbuffer.Value value = 3;</code>
-       */
-      public boolean hasValue() {
-        return ((bitField0_ & 0x00000004) == 0x00000004);
-      }
-      /**
-       * <code>required .protocolbuffer.Value value = 3;</code>
-       */
-      public cn.com.sparkle.firefly.stablestorage.model.StoreModel.Value getValue() {
-        if (valueBuilder_ == null) {
-          return value_;
-        } else {
-          return valueBuilder_.getMessage();
-        }
-      }
-      /**
-       * <code>required .protocolbuffer.Value value = 3;</code>
-       */
-      public Builder setValue(cn.com.sparkle.firefly.stablestorage.model.StoreModel.Value value) {
-        if (valueBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          value_ = value;
-          onChanged();
-        } else {
-          valueBuilder_.setMessage(value);
-        }
-        bitField0_ |= 0x00000004;
-        return this;
-      }
-      /**
-       * <code>required .protocolbuffer.Value value = 3;</code>
-       */
-      public Builder setValue(
-          cn.com.sparkle.firefly.stablestorage.model.StoreModel.Value.Builder builderForValue) {
-        if (valueBuilder_ == null) {
-          value_ = builderForValue.build();
-          onChanged();
-        } else {
-          valueBuilder_.setMessage(builderForValue.build());
-        }
-        bitField0_ |= 0x00000004;
-        return this;
-      }
-      /**
-       * <code>required .protocolbuffer.Value value = 3;</code>
-       */
-      public Builder mergeValue(cn.com.sparkle.firefly.stablestorage.model.StoreModel.Value value) {
-        if (valueBuilder_ == null) {
-          if (((bitField0_ & 0x00000004) == 0x00000004) &&
-              value_ != cn.com.sparkle.firefly.stablestorage.model.StoreModel.Value.getDefaultInstance()) {
-            value_ =
-              cn.com.sparkle.firefly.stablestorage.model.StoreModel.Value.newBuilder(value_).mergeFrom(value).buildPartial();
-          } else {
-            value_ = value;
-          }
-          onChanged();
-        } else {
-          valueBuilder_.mergeFrom(value);
-        }
-        bitField0_ |= 0x00000004;
-        return this;
-      }
-      /**
-       * <code>required .protocolbuffer.Value value = 3;</code>
-       */
-      public Builder clearValue() {
-        if (valueBuilder_ == null) {
-          value_ = cn.com.sparkle.firefly.stablestorage.model.StoreModel.Value.getDefaultInstance();
-          onChanged();
-        } else {
-          valueBuilder_.clear();
-        }
-        bitField0_ = (bitField0_ & ~0x00000004);
-        return this;
-      }
-      /**
-       * <code>required .protocolbuffer.Value value = 3;</code>
-       */
-      public cn.com.sparkle.firefly.stablestorage.model.StoreModel.Value.Builder getValueBuilder() {
-        bitField0_ |= 0x00000004;
-        onChanged();
-        return getValueFieldBuilder().getBuilder();
-      }
-      /**
-       * <code>required .protocolbuffer.Value value = 3;</code>
-       */
-      public cn.com.sparkle.firefly.stablestorage.model.StoreModel.ValueOrBuilder getValueOrBuilder() {
-        if (valueBuilder_ != null) {
-          return valueBuilder_.getMessageOrBuilder();
-        } else {
-          return value_;
-        }
-      }
-      /**
-       * <code>required .protocolbuffer.Value value = 3;</code>
-       */
-      private com.google.protobuf.SingleFieldBuilder<
-          cn.com.sparkle.firefly.stablestorage.model.StoreModel.Value, cn.com.sparkle.firefly.stablestorage.model.StoreModel.Value.Builder, cn.com.sparkle.firefly.stablestorage.model.StoreModel.ValueOrBuilder> 
-          getValueFieldBuilder() {
-        if (valueBuilder_ == null) {
-          valueBuilder_ = new com.google.protobuf.SingleFieldBuilder<
-              cn.com.sparkle.firefly.stablestorage.model.StoreModel.Value, cn.com.sparkle.firefly.stablestorage.model.StoreModel.Value.Builder, cn.com.sparkle.firefly.stablestorage.model.StoreModel.ValueOrBuilder>(
-                  value_,
-                  getParentForChildren(),
-                  isClean());
-          value_ = null;
-        }
-        return valueBuilder_;
-      }
-
       // repeated string chain = 4;
       private com.google.protobuf.LazyStringList chain_ = com.google.protobuf.LazyStringArrayList.EMPTY;
       private void ensureChainIsMutable() {
-        if (!((bitField0_ & 0x00000008) == 0x00000008)) {
+        if (!((bitField0_ & 0x00000004) == 0x00000004)) {
           chain_ = new com.google.protobuf.LazyStringArrayList(chain_);
-          bitField0_ |= 0x00000008;
+          bitField0_ |= 0x00000004;
          }
       }
       /**
        * <code>repeated string chain = 4;</code>
+       *
+       * <pre>
+       *required Value value=3
+       * </pre>
        */
       public java.util.List<java.lang.String>
           getChainList() {
@@ -14052,18 +14603,30 @@ public final class PaxosMessages {
       }
       /**
        * <code>repeated string chain = 4;</code>
+       *
+       * <pre>
+       *required Value value=3
+       * </pre>
        */
       public int getChainCount() {
         return chain_.size();
       }
       /**
        * <code>repeated string chain = 4;</code>
+       *
+       * <pre>
+       *required Value value=3
+       * </pre>
        */
       public java.lang.String getChain(int index) {
         return chain_.get(index);
       }
       /**
        * <code>repeated string chain = 4;</code>
+       *
+       * <pre>
+       *required Value value=3
+       * </pre>
        */
       public com.google.protobuf.ByteString
           getChainBytes(int index) {
@@ -14071,6 +14634,10 @@ public final class PaxosMessages {
       }
       /**
        * <code>repeated string chain = 4;</code>
+       *
+       * <pre>
+       *required Value value=3
+       * </pre>
        */
       public Builder setChain(
           int index, java.lang.String value) {
@@ -14084,6 +14651,10 @@ public final class PaxosMessages {
       }
       /**
        * <code>repeated string chain = 4;</code>
+       *
+       * <pre>
+       *required Value value=3
+       * </pre>
        */
       public Builder addChain(
           java.lang.String value) {
@@ -14097,6 +14668,10 @@ public final class PaxosMessages {
       }
       /**
        * <code>repeated string chain = 4;</code>
+       *
+       * <pre>
+       *required Value value=3
+       * </pre>
        */
       public Builder addAllChain(
           java.lang.Iterable<java.lang.String> values) {
@@ -14107,15 +14682,23 @@ public final class PaxosMessages {
       }
       /**
        * <code>repeated string chain = 4;</code>
+       *
+       * <pre>
+       *required Value value=3
+       * </pre>
        */
       public Builder clearChain() {
         chain_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-        bitField0_ = (bitField0_ & ~0x00000008);
+        bitField0_ = (bitField0_ & ~0x00000004);
         onChanged();
         return this;
       }
       /**
        * <code>repeated string chain = 4;</code>
+       *
+       * <pre>
+       *required Value value=3
+       * </pre>
        */
       public Builder addChainBytes(
           com.google.protobuf.ByteString value) {
@@ -14124,6 +14707,72 @@ public final class PaxosMessages {
   }
   ensureChainIsMutable();
         chain_.add(value);
+        onChanged();
+        return this;
+      }
+
+      // required int32 valuetype = 5;
+      private int valuetype_ ;
+      /**
+       * <code>required int32 valuetype = 5;</code>
+       */
+      public boolean hasValuetype() {
+        return ((bitField0_ & 0x00000008) == 0x00000008);
+      }
+      /**
+       * <code>required int32 valuetype = 5;</code>
+       */
+      public int getValuetype() {
+        return valuetype_;
+      }
+      /**
+       * <code>required int32 valuetype = 5;</code>
+       */
+      public Builder setValuetype(int value) {
+        bitField0_ |= 0x00000008;
+        valuetype_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required int32 valuetype = 5;</code>
+       */
+      public Builder clearValuetype() {
+        bitField0_ = (bitField0_ & ~0x00000008);
+        valuetype_ = 0;
+        onChanged();
+        return this;
+      }
+
+      // required int32 valueLength = 6;
+      private int valueLength_ ;
+      /**
+       * <code>required int32 valueLength = 6;</code>
+       */
+      public boolean hasValueLength() {
+        return ((bitField0_ & 0x00000010) == 0x00000010);
+      }
+      /**
+       * <code>required int32 valueLength = 6;</code>
+       */
+      public int getValueLength() {
+        return valueLength_;
+      }
+      /**
+       * <code>required int32 valueLength = 6;</code>
+       */
+      public Builder setValueLength(int value) {
+        bitField0_ |= 0x00000010;
+        valueLength_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required int32 valueLength = 6;</code>
+       */
+      public Builder clearValueLength() {
+        bitField0_ = (bitField0_ & ~0x00000010);
+        valueLength_ = 0;
         onChanged();
         return this;
       }
@@ -22394,6 +23043,11 @@ public final class PaxosMessages {
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_protocolbuffer_MessagePackage_fieldAccessorTable;
   private static com.google.protobuf.Descriptors.Descriptor
+    internal_static_protocolbuffer_ValueTrunk_descriptor;
+  private static
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_protocolbuffer_ValueTrunk_fieldAccessorTable;
+  private static com.google.protobuf.Descriptors.Descriptor
     internal_static_protocolbuffer_HeartBeatRequest_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
@@ -22538,7 +23192,7 @@ public final class PaxosMessages {
   static {
     java.lang.String[] descriptorData = {
       "\n\016messages.proto\022\016protocolbuffer\032\013store." +
-      "proto\"\340\014\n\016MessagePackage\022\n\n\002id\030\001 \002(\003\022\016\n\006" +
+      "proto\"\220\r\n\016MessagePackage\022\n\n\002id\030\001 \002(\003\022\016\n\006" +
       "isLast\030\002 \002(\010\022:\n\020heartBeatRequest\030\003 \001(\0132 " +
       ".protocolbuffer.HeartBeatRequest\022J\n\030sena" +
       "torHeartBeatResponse\030\004 \001(\0132(.protocolbuf" +
@@ -22579,63 +23233,65 @@ public final class PaxosMessages {
       "HeartBeatRequest\030\034 \001(\0132&.protocolbuffer.",
       "ActiveHeartBeatRequest\0228\n\017connectRespons" +
       "e\030\035 \001(\0132\037.protocolbuffer.ConnectResponse" +
-      "\"\022\n\020HeartBeatRequest\"n\n\026ActiveHeartBeatR" +
-      "equest\022\017\n\007address\030\001 \002(\t\022C\n\021heartBeatResp" +
-      "onse\030\002 \002(\0132(.protocolbuffer.SenatorHeart" +
-      "BeatResponse\"\206\002\n\030SenatorHeartBeatRespons" +
-      "e\022 \n\030lastCanExecuteInstanceId\030\001 \002(\003\022\031\n\021i" +
-      "sMasterConnected\030\002 \002(\010\022\027\n\017electionAddres" +
-      "s\030\003 \002(\t\022\022\n\nelectionId\030\004 \002(\003\022\027\n\017electionV" +
-      "ersion\030\005 \002(\003\022\020\n\010isInited\030\006 \002(\010\022\022\n\nisUpTo",
-      "Date\030\007 \002(\010\022\026\n\016masterDistance\030\010 \002(\005\022\014\n\004ro" +
-      "om\030\t \002(\t\022\033\n\023connectedValidNodes\030\n \003(\t\"\037\n" +
-      "\035LookUpLatestInstanceIdRequest\"\030\n\026GetNew" +
-      "sSenatorsRequest\"`\n\027GetNewsSenatorsRespo" +
-      "nse\022\017\n\007version\030\001 \002(\003\022\020\n\010senators\030\002 \003(\t\022\"" +
-      "\n\006master\030\003 \002(\0132\022.protocolbuffer.Id\"7\n\016Ca" +
-      "tchUpRequest\022\027\n\017startInstanceId\030\001 \002(\003\022\014\n" +
-      "\004size\030\002 \002(\005\"K\n\017CatchUpResponse\0228\n\021succes" +
-      "sfulRecords\030\001 \003(\0132\035.protocolbuffer.Catch" +
-      "UpRecord\"T\n\rCatchUpRecord\022\022\n\ninstanceId\030",
-      "\001 \002(\003\022/\n\005value\030\002 \002(\0132 .protocolbuffer.Su" +
-      "ccessfulRecord\"[\n\026InstancePrepareRequest" +
-      "\022\022\n\ninstanceId\030\001 \002(\003\022\036\n\002id\030\002 \002(\0132\022.proto" +
-      "colbuffer.Id\022\r\n\005chain\030\003 \003(\t\"X\n\022PrepareRe" +
-      "sponseBad\022\025\n\rlastPrepareId\030\001 \002(\003\022+\n\014succ" +
-      "essValue\030\002 \001(\0132\025.protocolbuffer.Value\"d\n" +
-      "\023PrepareResponseGood\022\'\n\013lastVotedId\030\001 \002(" +
-      "\0132\022.protocolbuffer.Id\022$\n\005value\030\002 \001(\0132\025.p" +
-      "rotocolbuffer.Value\"\202\001\n\023InstanceVoteRequ" +
-      "est\022\022\n\ninstanceId\030\001 \002(\003\022\"\n\006voteId\030\002 \002(\0132",
-      "\022.protocolbuffer.Id\022$\n\005value\030\003 \002(\0132\025.pro" +
-      "tocolbuffer.Value\022\r\n\005chain\030\004 \003(\t\"M\n\014Vote" +
-      "Response\022\020\n\010refuseId\030\001 \002(\003\022+\n\014successVal" +
-      "ue\030\002 \001(\0132\025.protocolbuffer.Value\"T\n\026Elect" +
-      "ionPrepareRequest\022&\n\002id\030\001 \002(\0132\032.protocol" +
-      "buffer.ElectionId\022\022\n\nlastVoteId\030\002 \002(\003\"Q\n" +
-      "\023ElectionVoteRequest\022&\n\002id\030\001 \002(\0132\032.proto" +
-      "colbuffer.ElectionId\022\022\n\nlastVoteId\030\002 \002(\003" +
-      "\"@\n\026ElectionSuccessMessage\022&\n\002id\030\001 \002(\0132\032" +
-      ".protocolbuffer.ElectionId\"4\n\036LookUpLate",
-      "stInstanceIdResponse\022\022\n\ninstanceId\030\001 \002(\003" +
-      "\"\314\001\n\026InstanceSuccessMessage\022\n\n\002id\030\001 \002(\003\022" +
-      "$\n\005value\030\002 \001(\0132\025.protocolbuffer.Value\022*\n" +
-      "\016highestVoteNum\030\003 \002(\0132\022.protocolbuffer.I" +
-      "d\022\025\n\rnotifyAddress\030\004 \003(\t\022=\n\013notifyChain\030" +
-      "\005 \003(\0132(.protocolbuffer.InstanceSuccessTr" +
-      "ansport\"X\n\030InstanceSuccessTransport\022\017\n\007a" +
-      "ddress\030\001 \002(\t\022\025\n\rnotifyAddress\030\002 \003(\t\022\024\n\014i" +
-      "sTransValue\030\003 \002(\010\"\031\n\027InstanceSuccessResp" +
-      "onse\"=\n\nElectionId\022\036\n\002id\030\001 \002(\0132\022.protoco",
-      "lbuffer.Id\022\017\n\007version\030\002 \002(\003\"6\n\017CommandRe" +
-      "sponse\022\024\n\014isSuccessful\030\001 \002(\010\022\r\n\005error\030\002 " +
-      "\002(\t\"D\n\nAddRequest\022\023\n\013commandType\030\001 \002(\005\022\r" +
-      "\n\005value\030\002 \002(\014\022\022\n\ninstanceId\030\003 \001(\003\"1\n\013Add" +
-      "Response\022\016\n\006result\030\001 \002(\014\022\022\n\ninstanceId\030\002" +
-      " \001(\003\"(\n\016ConnectRequest\022\026\n\016masterDistance" +
-      "\030\001 \002(\005\"\'\n\017ConnectResponse\022\024\n\014isSuccessfu" +
-      "l\030\001 \002(\010B@\n/cn.com.sparkle.firefly.protoc" +
-      "olprocessor.v0_0_1B\rPaxosMessages"
+      "\022.\n\nvalueTrunk\030\036 \001(\0132\032.protocolbuffer.Va" +
+      "lueTrunk\"\032\n\nValueTrunk\022\014\n\004part\030\001 \002(\014\"\022\n\020" +
+      "HeartBeatRequest\"n\n\026ActiveHeartBeatReque" +
+      "st\022\017\n\007address\030\001 \002(\t\022C\n\021heartBeatResponse" +
+      "\030\002 \002(\0132(.protocolbuffer.SenatorHeartBeat" +
+      "Response\"\206\002\n\030SenatorHeartBeatResponse\022 \n" +
+      "\030lastCanExecuteInstanceId\030\001 \002(\003\022\031\n\021isMas" +
+      "terConnected\030\002 \002(\010\022\027\n\017electionAddress\030\003 ",
+      "\002(\t\022\022\n\nelectionId\030\004 \002(\003\022\027\n\017electionVersi" +
+      "on\030\005 \002(\003\022\020\n\010isInited\030\006 \002(\010\022\022\n\nisUpToDate" +
+      "\030\007 \002(\010\022\026\n\016masterDistance\030\010 \002(\005\022\014\n\004room\030\t" +
+      " \002(\t\022\033\n\023connectedValidNodes\030\n \003(\t\"\037\n\035Loo" +
+      "kUpLatestInstanceIdRequest\"\030\n\026GetNewsSen" +
+      "atorsRequest\"`\n\027GetNewsSenatorsResponse\022" +
+      "\017\n\007version\030\001 \002(\003\022\020\n\010senators\030\002 \003(\t\022\"\n\006ma" +
+      "ster\030\003 \002(\0132\022.protocolbuffer.Id\"7\n\016CatchU" +
+      "pRequest\022\027\n\017startInstanceId\030\001 \002(\003\022\014\n\004siz" +
+      "e\030\002 \002(\005\"K\n\017CatchUpResponse\0228\n\021successful",
+      "Records\030\001 \003(\0132\035.protocolbuffer.CatchUpRe" +
+      "cord\"T\n\rCatchUpRecord\022\022\n\ninstanceId\030\001 \002(" +
+      "\003\022/\n\005value\030\002 \002(\0132 .protocolbuffer.Succes" +
+      "sfulRecord\"[\n\026InstancePrepareRequest\022\022\n\n" +
+      "instanceId\030\001 \002(\003\022\036\n\002id\030\002 \002(\0132\022.protocolb" +
+      "uffer.Id\022\r\n\005chain\030\003 \003(\t\"X\n\022PrepareRespon" +
+      "seBad\022\025\n\rlastPrepareId\030\001 \002(\003\022+\n\014successV" +
+      "alue\030\002 \001(\0132\025.protocolbuffer.Value\"d\n\023Pre" +
+      "pareResponseGood\022\'\n\013lastVotedId\030\001 \002(\0132\022." +
+      "protocolbuffer.Id\022$\n\005value\030\002 \001(\0132\025.proto",
+      "colbuffer.Value\"\204\001\n\023InstanceVoteRequest\022" +
+      "\022\n\ninstanceId\030\001 \002(\003\022\"\n\006voteId\030\002 \002(\0132\022.pr" +
+      "otocolbuffer.Id\022\r\n\005chain\030\004 \003(\t\022\021\n\tvaluet" +
+      "ype\030\005 \002(\005\022\023\n\013valueLength\030\006 \002(\005\"M\n\014VoteRe" +
+      "sponse\022\020\n\010refuseId\030\001 \002(\003\022+\n\014successValue" +
+      "\030\002 \001(\0132\025.protocolbuffer.Value\"T\n\026Electio" +
+      "nPrepareRequest\022&\n\002id\030\001 \002(\0132\032.protocolbu" +
+      "ffer.ElectionId\022\022\n\nlastVoteId\030\002 \002(\003\"Q\n\023E" +
+      "lectionVoteRequest\022&\n\002id\030\001 \002(\0132\032.protoco" +
+      "lbuffer.ElectionId\022\022\n\nlastVoteId\030\002 \002(\003\"@",
+      "\n\026ElectionSuccessMessage\022&\n\002id\030\001 \002(\0132\032.p" +
+      "rotocolbuffer.ElectionId\"4\n\036LookUpLatest" +
+      "InstanceIdResponse\022\022\n\ninstanceId\030\001 \002(\003\"\314" +
+      "\001\n\026InstanceSuccessMessage\022\n\n\002id\030\001 \002(\003\022$\n" +
+      "\005value\030\002 \001(\0132\025.protocolbuffer.Value\022*\n\016h" +
+      "ighestVoteNum\030\003 \002(\0132\022.protocolbuffer.Id\022" +
+      "\025\n\rnotifyAddress\030\004 \003(\t\022=\n\013notifyChain\030\005 " +
+      "\003(\0132(.protocolbuffer.InstanceSuccessTran" +
+      "sport\"X\n\030InstanceSuccessTransport\022\017\n\007add" +
+      "ress\030\001 \002(\t\022\025\n\rnotifyAddress\030\002 \003(\t\022\024\n\014isT",
+      "ransValue\030\003 \002(\010\"\031\n\027InstanceSuccessRespon" +
+      "se\"=\n\nElectionId\022\036\n\002id\030\001 \002(\0132\022.protocolb" +
+      "uffer.Id\022\017\n\007version\030\002 \002(\003\"6\n\017CommandResp" +
+      "onse\022\024\n\014isSuccessful\030\001 \002(\010\022\r\n\005error\030\002 \002(" +
+      "\t\"D\n\nAddRequest\022\023\n\013commandType\030\001 \002(\005\022\r\n\005" +
+      "value\030\002 \002(\014\022\022\n\ninstanceId\030\003 \001(\003\"1\n\013AddRe" +
+      "sponse\022\016\n\006result\030\001 \002(\014\022\022\n\ninstanceId\030\002 \001" +
+      "(\003\"(\n\016ConnectRequest\022\026\n\016masterDistance\030\001" +
+      " \002(\005\"\'\n\017ConnectResponse\022\024\n\014isSuccessful\030" +
+      "\001 \002(\010B@\n/cn.com.sparkle.firefly.protocol",
+      "processor.v0_0_1B\rPaxosMessages"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -22647,165 +23303,171 @@ public final class PaxosMessages {
           internal_static_protocolbuffer_MessagePackage_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_protocolbuffer_MessagePackage_descriptor,
-              new java.lang.String[] { "Id", "IsLast", "HeartBeatRequest", "SenatorHeartBeatResponse", "VoteResponse", "PrepareResponseBad", "PrepareResponseGood", "LookUpLatestInstanceIdResponse", "CatchUpResponse", "AddRequest", "AddResponse", "ElectionPrepareRequest", "ElectionVoteRequest", "ElectionSuccessMessage", "InstanceSuccessMessage", "LookUpLatestInstanceIdRequest", "InstancePrepareRequest", "InstanceVoteRequest", "GetNewsSenatorsRequest", "GetNewsSenatorsResponse", "CommandResponse", "CatchUpRequest", "ConnectRequest", "InstanceSuccessResponse", "ActiveHeartBeatRequest", "ConnectResponse", });
-          internal_static_protocolbuffer_HeartBeatRequest_descriptor =
+              new java.lang.String[] { "Id", "IsLast", "HeartBeatRequest", "SenatorHeartBeatResponse", "VoteResponse", "PrepareResponseBad", "PrepareResponseGood", "LookUpLatestInstanceIdResponse", "CatchUpResponse", "AddRequest", "AddResponse", "ElectionPrepareRequest", "ElectionVoteRequest", "ElectionSuccessMessage", "InstanceSuccessMessage", "LookUpLatestInstanceIdRequest", "InstancePrepareRequest", "InstanceVoteRequest", "GetNewsSenatorsRequest", "GetNewsSenatorsResponse", "CommandResponse", "CatchUpRequest", "ConnectRequest", "InstanceSuccessResponse", "ActiveHeartBeatRequest", "ConnectResponse", "ValueTrunk", });
+          internal_static_protocolbuffer_ValueTrunk_descriptor =
             getDescriptor().getMessageTypes().get(1);
+          internal_static_protocolbuffer_ValueTrunk_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+              internal_static_protocolbuffer_ValueTrunk_descriptor,
+              new java.lang.String[] { "Part", });
+          internal_static_protocolbuffer_HeartBeatRequest_descriptor =
+            getDescriptor().getMessageTypes().get(2);
           internal_static_protocolbuffer_HeartBeatRequest_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_protocolbuffer_HeartBeatRequest_descriptor,
               new java.lang.String[] { });
           internal_static_protocolbuffer_ActiveHeartBeatRequest_descriptor =
-            getDescriptor().getMessageTypes().get(2);
+            getDescriptor().getMessageTypes().get(3);
           internal_static_protocolbuffer_ActiveHeartBeatRequest_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_protocolbuffer_ActiveHeartBeatRequest_descriptor,
               new java.lang.String[] { "Address", "HeartBeatResponse", });
           internal_static_protocolbuffer_SenatorHeartBeatResponse_descriptor =
-            getDescriptor().getMessageTypes().get(3);
+            getDescriptor().getMessageTypes().get(4);
           internal_static_protocolbuffer_SenatorHeartBeatResponse_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_protocolbuffer_SenatorHeartBeatResponse_descriptor,
               new java.lang.String[] { "LastCanExecuteInstanceId", "IsMasterConnected", "ElectionAddress", "ElectionId", "ElectionVersion", "IsInited", "IsUpToDate", "MasterDistance", "Room", "ConnectedValidNodes", });
           internal_static_protocolbuffer_LookUpLatestInstanceIdRequest_descriptor =
-            getDescriptor().getMessageTypes().get(4);
+            getDescriptor().getMessageTypes().get(5);
           internal_static_protocolbuffer_LookUpLatestInstanceIdRequest_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_protocolbuffer_LookUpLatestInstanceIdRequest_descriptor,
               new java.lang.String[] { });
           internal_static_protocolbuffer_GetNewsSenatorsRequest_descriptor =
-            getDescriptor().getMessageTypes().get(5);
+            getDescriptor().getMessageTypes().get(6);
           internal_static_protocolbuffer_GetNewsSenatorsRequest_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_protocolbuffer_GetNewsSenatorsRequest_descriptor,
               new java.lang.String[] { });
           internal_static_protocolbuffer_GetNewsSenatorsResponse_descriptor =
-            getDescriptor().getMessageTypes().get(6);
+            getDescriptor().getMessageTypes().get(7);
           internal_static_protocolbuffer_GetNewsSenatorsResponse_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_protocolbuffer_GetNewsSenatorsResponse_descriptor,
               new java.lang.String[] { "Version", "Senators", "Master", });
           internal_static_protocolbuffer_CatchUpRequest_descriptor =
-            getDescriptor().getMessageTypes().get(7);
+            getDescriptor().getMessageTypes().get(8);
           internal_static_protocolbuffer_CatchUpRequest_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_protocolbuffer_CatchUpRequest_descriptor,
               new java.lang.String[] { "StartInstanceId", "Size", });
           internal_static_protocolbuffer_CatchUpResponse_descriptor =
-            getDescriptor().getMessageTypes().get(8);
+            getDescriptor().getMessageTypes().get(9);
           internal_static_protocolbuffer_CatchUpResponse_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_protocolbuffer_CatchUpResponse_descriptor,
               new java.lang.String[] { "SuccessfulRecords", });
           internal_static_protocolbuffer_CatchUpRecord_descriptor =
-            getDescriptor().getMessageTypes().get(9);
+            getDescriptor().getMessageTypes().get(10);
           internal_static_protocolbuffer_CatchUpRecord_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_protocolbuffer_CatchUpRecord_descriptor,
               new java.lang.String[] { "InstanceId", "Value", });
           internal_static_protocolbuffer_InstancePrepareRequest_descriptor =
-            getDescriptor().getMessageTypes().get(10);
+            getDescriptor().getMessageTypes().get(11);
           internal_static_protocolbuffer_InstancePrepareRequest_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_protocolbuffer_InstancePrepareRequest_descriptor,
               new java.lang.String[] { "InstanceId", "Id", "Chain", });
           internal_static_protocolbuffer_PrepareResponseBad_descriptor =
-            getDescriptor().getMessageTypes().get(11);
+            getDescriptor().getMessageTypes().get(12);
           internal_static_protocolbuffer_PrepareResponseBad_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_protocolbuffer_PrepareResponseBad_descriptor,
               new java.lang.String[] { "LastPrepareId", "SuccessValue", });
           internal_static_protocolbuffer_PrepareResponseGood_descriptor =
-            getDescriptor().getMessageTypes().get(12);
+            getDescriptor().getMessageTypes().get(13);
           internal_static_protocolbuffer_PrepareResponseGood_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_protocolbuffer_PrepareResponseGood_descriptor,
               new java.lang.String[] { "LastVotedId", "Value", });
           internal_static_protocolbuffer_InstanceVoteRequest_descriptor =
-            getDescriptor().getMessageTypes().get(13);
+            getDescriptor().getMessageTypes().get(14);
           internal_static_protocolbuffer_InstanceVoteRequest_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_protocolbuffer_InstanceVoteRequest_descriptor,
-              new java.lang.String[] { "InstanceId", "VoteId", "Value", "Chain", });
+              new java.lang.String[] { "InstanceId", "VoteId", "Chain", "Valuetype", "ValueLength", });
           internal_static_protocolbuffer_VoteResponse_descriptor =
-            getDescriptor().getMessageTypes().get(14);
+            getDescriptor().getMessageTypes().get(15);
           internal_static_protocolbuffer_VoteResponse_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_protocolbuffer_VoteResponse_descriptor,
               new java.lang.String[] { "RefuseId", "SuccessValue", });
           internal_static_protocolbuffer_ElectionPrepareRequest_descriptor =
-            getDescriptor().getMessageTypes().get(15);
+            getDescriptor().getMessageTypes().get(16);
           internal_static_protocolbuffer_ElectionPrepareRequest_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_protocolbuffer_ElectionPrepareRequest_descriptor,
               new java.lang.String[] { "Id", "LastVoteId", });
           internal_static_protocolbuffer_ElectionVoteRequest_descriptor =
-            getDescriptor().getMessageTypes().get(16);
+            getDescriptor().getMessageTypes().get(17);
           internal_static_protocolbuffer_ElectionVoteRequest_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_protocolbuffer_ElectionVoteRequest_descriptor,
               new java.lang.String[] { "Id", "LastVoteId", });
           internal_static_protocolbuffer_ElectionSuccessMessage_descriptor =
-            getDescriptor().getMessageTypes().get(17);
+            getDescriptor().getMessageTypes().get(18);
           internal_static_protocolbuffer_ElectionSuccessMessage_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_protocolbuffer_ElectionSuccessMessage_descriptor,
               new java.lang.String[] { "Id", });
           internal_static_protocolbuffer_LookUpLatestInstanceIdResponse_descriptor =
-            getDescriptor().getMessageTypes().get(18);
+            getDescriptor().getMessageTypes().get(19);
           internal_static_protocolbuffer_LookUpLatestInstanceIdResponse_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_protocolbuffer_LookUpLatestInstanceIdResponse_descriptor,
               new java.lang.String[] { "InstanceId", });
           internal_static_protocolbuffer_InstanceSuccessMessage_descriptor =
-            getDescriptor().getMessageTypes().get(19);
+            getDescriptor().getMessageTypes().get(20);
           internal_static_protocolbuffer_InstanceSuccessMessage_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_protocolbuffer_InstanceSuccessMessage_descriptor,
               new java.lang.String[] { "Id", "Value", "HighestVoteNum", "NotifyAddress", "NotifyChain", });
           internal_static_protocolbuffer_InstanceSuccessTransport_descriptor =
-            getDescriptor().getMessageTypes().get(20);
+            getDescriptor().getMessageTypes().get(21);
           internal_static_protocolbuffer_InstanceSuccessTransport_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_protocolbuffer_InstanceSuccessTransport_descriptor,
               new java.lang.String[] { "Address", "NotifyAddress", "IsTransValue", });
           internal_static_protocolbuffer_InstanceSuccessResponse_descriptor =
-            getDescriptor().getMessageTypes().get(21);
+            getDescriptor().getMessageTypes().get(22);
           internal_static_protocolbuffer_InstanceSuccessResponse_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_protocolbuffer_InstanceSuccessResponse_descriptor,
               new java.lang.String[] { });
           internal_static_protocolbuffer_ElectionId_descriptor =
-            getDescriptor().getMessageTypes().get(22);
+            getDescriptor().getMessageTypes().get(23);
           internal_static_protocolbuffer_ElectionId_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_protocolbuffer_ElectionId_descriptor,
               new java.lang.String[] { "Id", "Version", });
           internal_static_protocolbuffer_CommandResponse_descriptor =
-            getDescriptor().getMessageTypes().get(23);
+            getDescriptor().getMessageTypes().get(24);
           internal_static_protocolbuffer_CommandResponse_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_protocolbuffer_CommandResponse_descriptor,
               new java.lang.String[] { "IsSuccessful", "Error", });
           internal_static_protocolbuffer_AddRequest_descriptor =
-            getDescriptor().getMessageTypes().get(24);
+            getDescriptor().getMessageTypes().get(25);
           internal_static_protocolbuffer_AddRequest_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_protocolbuffer_AddRequest_descriptor,
               new java.lang.String[] { "CommandType", "Value", "InstanceId", });
           internal_static_protocolbuffer_AddResponse_descriptor =
-            getDescriptor().getMessageTypes().get(25);
+            getDescriptor().getMessageTypes().get(26);
           internal_static_protocolbuffer_AddResponse_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_protocolbuffer_AddResponse_descriptor,
               new java.lang.String[] { "Result", "InstanceId", });
           internal_static_protocolbuffer_ConnectRequest_descriptor =
-            getDescriptor().getMessageTypes().get(26);
+            getDescriptor().getMessageTypes().get(27);
           internal_static_protocolbuffer_ConnectRequest_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_protocolbuffer_ConnectRequest_descriptor,
               new java.lang.String[] { "MasterDistance", });
           internal_static_protocolbuffer_ConnectResponse_descriptor =
-            getDescriptor().getMessageTypes().get(27);
+            getDescriptor().getMessageTypes().get(28);
           internal_static_protocolbuffer_ConnectResponse_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_protocolbuffer_ConnectResponse_descriptor,

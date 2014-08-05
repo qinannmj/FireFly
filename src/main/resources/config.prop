@@ -44,7 +44,7 @@ session-success-sync-max-mem-waittime=4000
 #
 #Note: this argument only affect more than the cluster having more than 3 node, in other words it is no different in the cluster having nodes between circleSender and boardcastSender
 #when the cluster have more than 3 nodes, we can calc the cost of sync successful message, for example 3 quorum and 2 normal node, the circleSender is less one message than boardcastSender 
-paxos-sender=circleSender
+paxos-sender=boardcastSender
 
 
 #NO-CHECKSUM = 0;INBUILD-ALDER32 = 1;INBUILD-CRC32 = 2;PURE-JAVA-CRC32 = 3;

@@ -25,21 +25,26 @@ public class TestClient {
 			rtArray[i] = new AtomicInteger();
 		}
 		
-				String[] address = { "127.0.0.1:8001", 	"127.0.0.1:10001", "127.0.0.1:11001","127.0.0.1:9001", "127.0.0.1:12001" };
-//		String[] address = {  "127.0.0.1:11001" };
-		//		String[] address = {"10.232.35.16:10011","10.232.133.72:10011","10.232.35.13:10011"};
-
+				
 		//		PaxosOperater oper = client.getOperator();
 
-		final int size = 300000;
-		int threadSize = 500;
+		final int size = 100000;
+		int threadSize = 100;
 
-		//		final PaxosClient client = new PaxosClient(address,args[0] + "service_out_net.prop",args[1],3,false);
-		//		int cycle = Integer.parseInt(args[2]);
-
-		final PaxosClient client = new PaxosClient(address, "target/classes/conf10000/service_out_net.prop", "raptor",
+		String type = args.length > 0 ?args[0] : "raptor";
+		int cycle = args.length > 1 ? Integer.parseInt(args[1]):8;
+		String[] address = {"127.0.0.1:11001", "127.0.0.1:8001","127.0.0.1:9001",  "127.0.0.1:12001","127.0.0.1:10001" };
+		if(args.length > 2){
+			address = new String[args.length - 2];
+			for(int i = 2 ; i < args.length ; ++i){
+				address[i - 2] = args[i];
+			}
+		}
+		
+		final PaxosClient client = new PaxosClient(address, "target/classes/conf10000/service_out_net.prop", type,
 				ChecksumUtil.NO_CHECKSUM, 2000, 1, 999999,false);
-		int cycle = 8;
+		
+		
 
 		logger.info("¿ªÊ¼²âÊÔ");
 		String sample = "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd2131231231123   ";
@@ -59,6 +64,7 @@ public class TestClient {
 					try {
 						PaxosOperater oper = client.getOperator();
 						for (int i = 0; i < size; i++) {
+							
 							Future<byte[]> f = oper.add(sample1.getBytes(), 0, CommandType.USER_WRITE, new PaxosOperater.CallBack() {
 								private long st = TimeUtil.currentTimeMillis();
 								public void callBack(byte[] response) {
@@ -99,10 +105,11 @@ public class TestClient {
 		
 		Thread tpsThread = new Thread(){
 			public void run(){
+				long lastRequest = 0;
 				while(true){
 					long totalRequest = 1;
 					try {
-						count.await(5,TimeUnit.SECONDS);
+						count.await(1,TimeUnit.SECONDS);
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
@@ -115,7 +122,9 @@ public class TestClient {
 					sb.append("rt[>500ms] :").append(rtArray[10].get()).append("\r\n");
 					totalRequest += rtArray[10].get();
 					sb.append("average rt:").append(totalCost.get() / totalRequest ).append("(").append(totalCost.get()).append("/").append(totalRequest).append(")");
+					sb.append("\r\n").append("qps:").append((totalRequest -lastRequest));
 					
+					lastRequest = totalRequest;
 					logger.debug(sb.toString());
 					if(count.getCount() == 0){
 						break;

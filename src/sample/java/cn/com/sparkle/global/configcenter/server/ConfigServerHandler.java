@@ -117,11 +117,10 @@ public class ConfigServerHandler extends HandlerInterface {
 
 	}
 
-	public byte[] onLoged(byte[] bytes) {
+	public byte[] onLoged(byte[] bytes,int offset, int length) {
 		// 写入paxos cluster 成功
 		try {
-
-			Add add = Add.parseFrom(bytes);
+			Add add = Add.parseFrom(ByteString.copyFrom(bytes, offset, length));
 			Value v = map.get(add.getKey());
 			// 修改内存
 			if (v == null) {

@@ -12,9 +12,11 @@ public class AdminCommand {
 		this.address = address;
 		this.type = type;
 	}
-
 	public AdminCommand(byte[] bytes) {
-		String[] s = new String(bytes).split(" ");
+		this(bytes,0,bytes.length);
+	}
+	public AdminCommand(byte[] bytes,int offset ,int length) {
+		String[] s = new String(bytes,offset,length).split(" ");
 		type = s[0];
 		address = s[1];
 	}

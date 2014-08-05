@@ -26,21 +26,22 @@ public class RaptorClient implements NetClient {
 	}
 
 	@Override
-	public void init(String path, int heartBeatInterval, NetHandler netHandler) throws IOException {
+	public void init(String path, int heartBeatInterval, NetHandler netHandler,String name) throws IOException {
 
 		Conf conf = new Conf(path);
-		String threadName = "client" + INSTANCE_NUM.incrementAndGet();
+		String threadName = name + INSTANCE_NUM.incrementAndGet();
 
 		NioSocketConfigure nsc = new NioSocketConfigure();
 		nsc.setProcessorNum(conf.getIothreadnum());
 		nsc.setTcpNoDelay(true);
 		nsc.setClearTimeoutSessionInterval(2 * heartBeatInterval);
-		nsc.setCycleRecieveBuffCellSize(conf.getRecieveCell());
+		nsc.setCycleRecieveBuffCellSize(conf.getCycleRecieveCell());
 		nsc.setRecieveBuffSize(conf.getRecieveBuffSize());
+		nsc.setSentBuffSize(conf.getSendBuffSize());
 		nsc.setBackLog(conf.getBacklog());
 		client = new NioSocketClient(nsc, threadName);
-		handler = new MultiThreadProtecolHandler(conf.getSendCell(), conf.getSendBuffSize(), conf.getWorkthreadMinNum(), conf.getWorkthreadMaxNum(), 60,
-				TimeUnit.SECONDS, new BufProtocol(), new RaptorHandler(netHandler), threadName);
+		handler = new MultiThreadProtecolHandler(conf.getCycleSendCell(), conf.getCycleSendBuffSize(), conf.getWorkthreadMinNum(), conf.getWorkthreadMaxNum(),
+				60, TimeUnit.SECONDS, new BufProtocol(), new RaptorHandler(netHandler), threadName);
 		this.netHandler = netHandler;
 	}
 

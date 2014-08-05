@@ -12,7 +12,7 @@ import cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.MessagePack
 public abstract class AbstractProtocolV0_0_1Processor extends AbstractChainProtocolProcessor<MessagePackage> {
 	private final static Logger logger = Logger.getLogger(AbstractProtocolV0_0_1Processor.class);
 
-	protected void sendResponse(PaxosSession session, byte[] response) {
+	public void sendResponse(PaxosSession session, byte[] response) {
 		try {
 			FrameBody body = new FrameBody(response, session.getChecksumType());
 			session.write(body);

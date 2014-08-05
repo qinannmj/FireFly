@@ -1,13 +1,17 @@
 #normal config
 io_thread_num=1
 timeout=500
-recieve_mem_size=65536
-send_mem_size=65536
+recv_mem_size=1048576
+send_mem_size=1048576
 backlog=1000
 
 #raptor config
-recieve_cell_size=1000
-send_mem_cell_size=1000
+
+cycle_recv_mem_size=8192
+cycle_recv_cell_size=5000
+
+cycle_send_mem_size=32768
+cycle_send_mem_cell_size=500
 
 worker_thread_min_num=5
 worker_thread_max_num=10

@@ -337,6 +337,7 @@ public class NioSocketProcessor {
 				break;
 			}
 			entity.getElement().closeSession();
+			logger.debug("close timeout connection!" + (now - entity.getElement().getLastActiveTime()));
 			activeSessionLinedLinkedList.remove(entity);
 		}
 	}
@@ -352,10 +353,11 @@ public class NioSocketProcessor {
 					for (int j = 0; j < 3; j++) {
 						if ((buff = memPool.tryGet()) != null) {
 							break;
-						} else if (TimeUtil.currentTimeMillis() - lastWarnMemLack > 2000) {
+						} else if (TimeUtil.currentTimeMillis() - lastWarnMemLack > 1000) {
 							lastWarnMemLack = TimeUtil.currentTimeMillis();
-							buff = new AllocateBytesBuff(memPool.getCellCapacity() * 2 / 3, false);
+							buff = new AllocateBytesBuff(memPool.getCellCapacity(), false);
 							logger.warn("Recieve mem pool is empty!Creat a heap buff!May be you need to increase size of the pool!");
+							break;
 						}
 					}
 					if (buff == null) {
@@ -366,6 +368,7 @@ public class NioSocketProcessor {
 				if (readSize <= 0) {
 					break;
 				}
+				
 				if (!buff.getByteBuffer().hasRemaining()) {
 					buff.getByteBuffer().limit(buff.getByteBuffer().position()).position(0);
 					session.getHandler().onMessageRecieved(session, buff);

@@ -30,7 +30,7 @@ public class TestServerProtobufProtocol {
 		// TODO Auto-generated method stub
 		NioSocketConfigure nsc = new NioSocketConfigure();
 		nsc.setProcessorNum(2);
-		nsc.setCycleRecieveBuffCellSize(1000);
+		nsc.setCycleRecieveBuffCellSize(10);
 		nsc.setTcpNoDelay(true);
 		nsc.setReuseAddress(true);
 //		nsc.setRecieveBuffSize(32* 1024);

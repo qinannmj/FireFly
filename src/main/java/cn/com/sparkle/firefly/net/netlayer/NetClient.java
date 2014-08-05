@@ -5,7 +5,7 @@ import java.util.concurrent.Future;
 public interface NetClient {
 	public Future<Boolean> connect(String ip, int port, Object connectAttachment) throws Throwable;
 
-	public void init(String path, int heartBeatInterval, NetHandler netHandler) throws Throwable;
+	public void init(String path, int heartBeatInterval, NetHandler netHandler,String threadName) throws Throwable;
 
 	NetHandler getHandler();
 }

@@ -29,11 +29,7 @@ public class PrepareCallBackV0_0_1 implements CallBack<MessagePackage> {
 			Id id = new Id(response.getLastVotedId().getAddress(), response.getLastVotedId().getIncreaseId());
 			Value v = null;
 			if (response.hasValue()) {
-				byte[][] byteArray = new byte[response.getValue().getValuesCount()][];
-				for (int i = 0; i < byteArray.length; ++i) {
-					byteArray[i] = response.getValue().getValues(0).toByteArray();
-				}
-				v = new Value(ValueType.getValueType(response.getValue().getType()), byteArray);
+				v = ValueTranslator.toValue(response.getValue());
 			}
 			callback.callGood(id, v);
 		}

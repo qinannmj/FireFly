@@ -23,9 +23,8 @@ import cn.com.sparkle.firefly.state.ClusterState;
 import cn.com.sparkle.firefly.state.NodeState;
 import cn.com.sparkle.firefly.util.QuorumCalcUtil;
 
-public class DefaultRouteManager implements RouteManage, MasterDistanceChangeListener, NodeStateChangeEventListener,
-		ConfigureEventListener {
-	//	@SuppressWarnings("unused")
+public class DefaultRouteManager implements RouteManage, MasterDistanceChangeListener, NodeStateChangeEventListener, ConfigureEventListener {
+	@SuppressWarnings("unused")
 	private final static Logger logger = Logger.getLogger(DefaultRouteManager.class);
 
 	private Configuration conf;

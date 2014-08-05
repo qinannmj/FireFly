@@ -20,6 +20,7 @@ public class NioSocketConfigure {
 	private int clearTimeoutSessionInterval = 300000;
 	private int trySendNum = 60;
 	private boolean isDaemon = false;
+	private int cycleRecieveBuffSize = 8 * 1024;
 	private int cycleRecieveBuffCellSize = 20000;
 	private int soTimeOut = 500;
 	private int backLog = 500;
@@ -38,6 +39,14 @@ public class NioSocketConfigure {
 
 	public void setCycleRecieveBuffCellSize(int cycleRecieveBuffCellSize) {
 		this.cycleRecieveBuffCellSize = cycleRecieveBuffCellSize;
+	}
+
+	public int getCycleRecieveBuffSize() {
+		return cycleRecieveBuffSize;
+	}
+
+	public void setCycleRecieveBuffSize(int cycleRecieveBuffSize) {
+		this.cycleRecieveBuffSize = cycleRecieveBuffSize;
 	}
 
 	public void setProcessorNum(int processorNum) {

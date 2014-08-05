@@ -32,7 +32,9 @@ import cn.com.sparkle.firefly.paxosinstance.paxossender.InstancePaxosMessageSend
 import cn.com.sparkle.firefly.paxosinstance.paxossender.PaxosMessageSender;
 import cn.com.sparkle.firefly.paxosinstance.paxossender.builder.SenderBuilder;
 import cn.com.sparkle.firefly.stablestorage.AccountBook;
+import cn.com.sparkle.firefly.stablestorage.model.StoreModel;
 import cn.com.sparkle.firefly.stablestorage.model.StoreModel.SuccessfulRecord;
+import cn.com.sparkle.firefly.stablestorage.util.IdTranslator;
 import cn.com.sparkle.firefly.stablestorage.util.ValueTranslator;
 import cn.com.sparkle.firefly.state.ClusterState;
 import cn.com.sparkle.firefly.util.QuorumCalcUtil;
@@ -48,15 +50,15 @@ public class AddRequestDealer implements InstanceExecuteEventListener, InstanceP
 
 	public final int MAX_TCP_PACKAGE_SIZE;
 
-	public final static int MIN_TCP_PACKAGE_SIZE = 1024;
+	public final int MIN_TCP_PACKAGE_SIZE;
 
-	public final static int MAX_EXECUTING_INSTANCE_NUM = 100;
+	public final static int MAX_EXECUTING_INSTANCE_NUM = 3;
 
 	public final static int MAX_SESSION_WAIT_QUEUE_SIZE = 3;
 
 	private int executable_instances_num = MAX_EXECUTING_INSTANCE_NUM;
 
-	public volatile int curTcpPackageByteSize = MIN_TCP_PACKAGE_SIZE;
+	public volatile int curTcpPackageByteSize;
 
 	private LinkedList<AddRequestPackage> requestQueue = new LinkedList<AddRequestPackage>();
 
@@ -88,6 +90,8 @@ public class AddRequestDealer implements InstanceExecuteEventListener, InstanceP
 										// waitQueue
 
 	private long withoutPreparePhaseTime;
+	
+	private long lastSuccessTime = -1; // record the time when last instance succeed to fix a instance start time
 
 	public AddRequestDealer(Context context) {
 		super();
@@ -97,10 +101,12 @@ public class AddRequestDealer implements InstanceExecuteEventListener, InstanceP
 		this.selfAddress = conf.getSelfAddress();
 		this.aBook = context.getAccountBook();
 		this.eventsManager = context.getEventsManager();
-		if (conf.getMaxMessagePackageSize() < MIN_TCP_PACKAGE_SIZE * 128) {
-			this.MAX_TCP_PACKAGE_SIZE = MIN_TCP_PACKAGE_SIZE * 128;
+		this.MIN_TCP_PACKAGE_SIZE = context.getConfiguration().getMinInstanceMergePackageSize();
+		curTcpPackageByteSize = MIN_TCP_PACKAGE_SIZE;
+		if (conf.getMaxInstanceMergePackageSize() < MIN_TCP_PACKAGE_SIZE) {
+			this.MAX_TCP_PACKAGE_SIZE = MIN_TCP_PACKAGE_SIZE * 2;
 		} else {
-			this.MAX_TCP_PACKAGE_SIZE = conf.getMaxMessagePackageSize();
+			this.MAX_TCP_PACKAGE_SIZE = conf.getMaxInstanceMergePackageSize();
 		}
 		eventsManager.registerListener(this);
 		builder = InstancePaxosMessageSenderBuilderFactory.getBuilder(conf);
@@ -170,8 +176,8 @@ public class AddRequestDealer implements InstanceExecuteEventListener, InstanceP
 
 	public void add(PaxosSession session, AddRequest addRequest) {
 		try {
+			
 			lock.lock();
-
 			if (!isOpend) {
 				session.closeSession();
 				return;
@@ -187,7 +193,9 @@ public class AddRequestDealer implements InstanceExecuteEventListener, InstanceP
 				AddRequestPackage lastPackage = dealState.peekLast();
 				if (lastPackage != null && lastPackage.getValueByteSize() < curTcpPackageByteSize && !addRequest.getCommandType().isAdmin()
 						&& !lastPackage.isManageCommand()) {
+					
 					lastPackage.addRequest(addRequest);
+//					logger.debug("merge ~~~~~~~~~~~~~" + lastPackage.getValueByteSize());
 				} else {
 					dealState.add(new AddRequestPackage(addRequest, session, context));
 				}
@@ -210,7 +218,7 @@ public class AddRequestDealer implements InstanceExecuteEventListener, InstanceP
 				executable_instances_num = MAX_EXECUTING_INSTANCE_NUM; // restore
 			}
 			int needExecute = executable_instances_num - executingInstanceNum;
-
+			
 			for (int i = 0; i < needExecute && requestQueue.size() > 0; ++i) {
 				int curByteCount = 0;
 				LinkedList<AddRequestPackage> list = new LinkedList<AddRequestPackage>();
@@ -339,8 +347,12 @@ public class AddRequestDealer implements InstanceExecuteEventListener, InstanceP
 
 				try {
 					//study actively
-					SuccessfulRecord.Builder record = SuccessfulRecord.newBuilder().setV(ValueTranslator.toStoreModelValue(value));
-					context.getAccountBook().writeSuccessfulRecord(instance.getInstanceId(), record, null);
+					if(value != null){
+						
+						StoreModel.Id.Builder sid = IdTranslator.toStoreModelId(id);
+						SuccessfulRecord.Builder record = SuccessfulRecord.newBuilder().setV(ValueTranslator.toStoreModelValue(value)).setHighestVoteNum(sid);
+						context.getAccountBook().writeSuccessfulRecord(instance.getInstanceId(), record, null);
+					}
 				} catch (Throwable e) {
 					logger.error("error", e);
 				}
@@ -408,8 +420,8 @@ public class AddRequestDealer implements InstanceExecuteEventListener, InstanceP
 		}
 
 	}
-
-	private int dealWait = 0;
+	
+	
 
 	@Override
 	public void instanceSuccess(InstancePaxosInstance instance, Value value) {
@@ -451,14 +463,15 @@ public class AddRequestDealer implements InstanceExecuteEventListener, InstanceP
 						AddRequestPackage waitArp = ds.pollFirst();
 						if (waitArp != null) {
 							requestQueue.addLast(waitArp);
-							++dealWait;
-							if (conf.isDebugLog()) {
-								logger.debug("dealWait:" + dealWait + "ds:" + ds.size());
-							}
 						} else {
 							ds.isDealing = false;
 						}
 					}
+					long realStartTime = Math.max(lastSuccessTime, instance.getStartTime());
+					if(conf.isDebugLog()){
+						logger.debug(String.format("instance success, cost %s", TimeUtil.currentTimeMillis() - realStartTime));
+					}
+					lastSuccessTime = TimeUtil.currentTimeMillis();
 				}
 				executeNeed();
 			}

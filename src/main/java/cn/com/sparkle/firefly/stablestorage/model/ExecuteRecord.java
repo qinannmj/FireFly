@@ -6,7 +6,7 @@ import java.util.zip.Checksum;
 
 import cn.com.sparkle.firefly.checksum.ChecksumUtil;
 import cn.com.sparkle.firefly.checksum.ChecksumUtil.UnsupportedChecksumAlgorithm;
-import cn.com.sparkle.firefly.stablestorage.io.BufferedFileOut;
+import cn.com.sparkle.firefly.stablestorage.io.RecordFileOut;
 
 public class ExecuteRecord {
 	private Long instanceId;
@@ -66,7 +66,7 @@ public class ExecuteRecord {
 		return instanceId;
 	}
 
-	public void writeToStream(BufferedFileOut out, Callable<Object> callable) throws IOException {
+	public void writeToStream(RecordFileOut out, Callable<Object> callable) throws IOException {
 		out.write(this.array, 0, 16, callable);
 	}
 

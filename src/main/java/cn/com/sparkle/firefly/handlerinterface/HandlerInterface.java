@@ -1,7 +1,7 @@
 package cn.com.sparkle.firefly.handlerinterface;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -11,6 +11,8 @@ import cn.com.sparkle.firefly.addprocess.AddRequestDealer;
 import cn.com.sparkle.firefly.addprocess.AddRequestPackage;
 import cn.com.sparkle.firefly.checksum.ChecksumUtil.UnsupportedChecksumAlgorithm;
 import cn.com.sparkle.firefly.model.AddRequest;
+import cn.com.sparkle.firefly.model.Value;
+import cn.com.sparkle.firefly.model.Value.IterElement;
 import cn.com.sparkle.firefly.net.frame.FrameBody;
 import cn.com.sparkle.firefly.net.netlayer.NetCloseException;
 import cn.com.sparkle.firefly.net.netlayer.PaxosSession;
@@ -24,6 +26,7 @@ import cn.com.sparkle.firefly.stablestorage.model.SuccessfulRecordWrap;
 public abstract class HandlerInterface {
 	private final static Logger logger = Logger.getLogger(HandlerInterface.class);
 	private AddRequestDealer addRequestDealer;
+	private AccountBook aBook;
 
 	public abstract void onClientConnect(PaxosSession session);
 
@@ -31,7 +34,7 @@ public abstract class HandlerInterface {
 
 	public abstract void onReceiveLookUp(PaxosSession session, AddRequest request);
 
-	public abstract byte[] onLoged(byte[] bytes);
+	public abstract byte[] onLoged(byte[] bytes,int offset,int length);
 	
 	public abstract void onInstanceIdExecuted(long instanceId);
 
@@ -46,19 +49,32 @@ public abstract class HandlerInterface {
 			onReceiveLookUp(session, request);
 		}
 	}
-
-	public final void onLoged(SuccessfulRecordWrap successfulRecordWrap, long instanceId, List<byte[]> customCommand, AccountBook aBook) throws IOException {
-		ArrayList<byte[]> customResult = new ArrayList<byte[]>(customCommand.size());
-		for (byte[] bs : customCommand) {
-			customResult.add(onLoged(bs));
+	
+	public final void setAccountBook(AccountBook aBook){
+		this.aBook = aBook;
+	}
+	
+	/**
+	 * 
+	 * @param successfulRecordWrap
+	 * @param instanceId
+	 * @param v
+	 * @param aBook
+	 * @return command num
+	 * @throws IOException
+	 */
+	public final int onLoged(SuccessfulRecordWrap successfulRecordWrap, long instanceId, Value v, AccountBook aBook) throws IOException {
+		LinkedList<byte[]>  customResult = new LinkedList<byte[]>();
+		Iterator<IterElement> iter = v.iterator();
+		int commCount = 0;
+		while(iter.hasNext()){
+			IterElement ie = iter.next();
+			customResult.add(onLoged(v.getValuebytes(),ie.getOffset(),ie.getSize()));
+			++commCount;
 		}
 		onInstanceIdExecuted(instanceId);
 		finishLogedProcess(successfulRecordWrap, customResult);
-		try {
-			writeExecuteLog(instanceId, aBook);
-		} catch (UnsupportedChecksumAlgorithm e) {
-			logger.error("unexcepted error", e);
-		}
+		return commCount;
 	}
 
 	public final void setAddRequestDealer(AddRequestDealer addRequestDealer) {
@@ -84,6 +100,7 @@ public abstract class HandlerInterface {
 	public final void sendResponseCommandResponse(PaxosSession session, AddRequest request, byte[] response) {
 		try {
 			sendMessage(session, request.getMessageId(), -1, response, true);
+			
 		} catch (UnsupportedChecksumAlgorithm e) {
 			session.closeSession();
 		}
@@ -114,29 +131,25 @@ public abstract class HandlerInterface {
 		}
 	}
 
-	public final void finishLogedProcess(SuccessfulRecordWrap recordWrap, ArrayList<byte[]> customResult) throws IOException {
+	public final void finishLogedProcess(SuccessfulRecordWrap recordWrap, List<byte[]> customResult) throws IOException {
 		if (recordWrap.getAddRequestPackages() != null) {
 			// send add response
 			LinkedList<AddRequestPackage> addRequestPackages = recordWrap.getAddRequestPackages();
-			int resultIndex = 0;
+			Iterator<byte[]> iter = customResult.iterator();
 			for (AddRequestPackage arp : addRequestPackages) {
 				for (AddRequest addRequest : arp.getValueList()) {
 					try {
-						arp.responseAddResponse(addRequest.getMessageId(), recordWrap.getInstanceId(), customResult.get(resultIndex++));
+						arp.responseAddResponse(addRequest.getMessageId(), recordWrap.getInstanceId(), iter.next());
 					} catch (UnsupportedChecksumAlgorithm e) {
 						logger.error("unexcepted error", e);
 					}
 				}
+				
 			}
 		}
 	}
 
-	public final void writeExecuteLog(long instanceId, AccountBook aBook) throws IOException, UnsupportedChecksumAlgorithm {
-		try {
-			aBook.finishCurInstance(instanceId);
-		} catch (IOException e) {
-			logger.error("fatal error", e);
-			throw e;
-		}
+	public final void writeExecuteLog(long instanceId) throws IOException, UnsupportedChecksumAlgorithm {
+		aBook.finishCurInstance(instanceId);
 	}
 }

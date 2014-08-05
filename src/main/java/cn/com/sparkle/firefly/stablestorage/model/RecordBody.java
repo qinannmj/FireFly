@@ -8,7 +8,7 @@ import org.apache.log4j.Logger;
 
 import cn.com.sparkle.firefly.checksum.ChecksumUtil;
 import cn.com.sparkle.firefly.checksum.ChecksumUtil.UnsupportedChecksumAlgorithm;
-import cn.com.sparkle.firefly.stablestorage.io.BufferedFileOut;
+import cn.com.sparkle.firefly.stablestorage.io.RecordFileOut;
 
 /**
  * 
@@ -54,7 +54,7 @@ public final class RecordBody {
 		return checksum;
 	}
 
-	public void writeToStream(BufferedFileOut out, Callable<Object> callable) throws IOException {
+	public void writeToStream(RecordFileOut out, Callable<Object> callable) throws IOException {
 		out.write(this.body, 0, this.body.length, null);
 		out.write(this.checksum, 0, this.checksum.length, callable);
 	}

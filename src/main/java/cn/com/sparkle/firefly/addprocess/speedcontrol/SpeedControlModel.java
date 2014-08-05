@@ -11,6 +11,7 @@ import cn.com.sparkle.firefly.event.listeners.InstancePaxosEventListener;
 import cn.com.sparkle.firefly.model.Id;
 import cn.com.sparkle.firefly.model.Value;
 import cn.com.sparkle.firefly.paxosinstance.InstancePaxosInstance;
+import cn.com.sparkle.raptor.core.util.TimeUtil;
 
 public class SpeedControlModel implements InstancePaxosEventListener, InstanceExecuteMaxPackageSizeEventListener {
 	private final static Logger logger = Logger.getLogger(SpeedControlModel.class);
@@ -20,6 +21,8 @@ public class SpeedControlModel implements InstancePaxosEventListener, InstanceEx
 	private Configuration conf;
 
 	private EventsManager eventsManager;
+	
+	private long lastSuccessTime = -1;
 
 	public SpeedControlModel(Context context) {
 		this.conf = context.getConfiguration();
@@ -29,14 +32,12 @@ public class SpeedControlModel implements InstancePaxosEventListener, InstanceEx
 
 	@Override
 	public void instanceSuccess(InstancePaxosInstance instance, Value value) {
-		int valueSize = 0;
-		for (byte[] bs : value.getValue()) {
-			valueSize += bs.length;
-		}
+		int valueSize = value.length();
 		if (conf.isDebugLog()) {
-			logger.debug("valuesize:" + valueSize);
+			logger.debug(String.format("valuesize:%s instanceStartTime:%s lastSuccessTime:%s",valueSize,instance.getStartTime(),lastSuccessTime) );
 		}
-		if (System.currentTimeMillis() - instance.getStartTime() < conf.getResponseDelay()) {
+		long curRealStartTime = Math.max(instance.getStartTime(), lastSuccessTime);
+		if (TimeUtil.currentTimeMillis() - curRealStartTime < conf.getResponseDelay()) {
 			int promoteSize = valueSize * 2;
 
 			if (conf.isDebugLog()) {
@@ -54,7 +55,7 @@ public class SpeedControlModel implements InstancePaxosEventListener, InstanceEx
 				SpeedControlEvent.doSuggestMaxPackageSizeEvent(eventsManager, promoteSize);
 			}
 		}
-
+//		lastSuccessTime = TimeUtil.currentTimeMillis();
 	}
 
 	@Override

@@ -75,7 +75,7 @@ public class NettyClient implements NetClient {
 	}
 
 	@Override
-	public void init(String path, final int heartBeatInterval, final NetHandler netHandler) throws Throwable {
+	public void init(String path, final int heartBeatInterval, final NetHandler netHandler,String threadName) throws Throwable {
 		final Conf conf = new Conf(path);
 		this.netHandler = netHandler;
 		NioEventLoopGroup group = new NioEventLoopGroup(conf.getIothreadnum());

@@ -15,6 +15,7 @@ import cn.com.sparkle.firefly.config.Configuration;
 import cn.com.sparkle.firefly.deamon.InstanceExecutor;
 import cn.com.sparkle.firefly.event.events.AccountBookEvent;
 import cn.com.sparkle.firefly.stablestorage.event.PrepareRecordRealWriteEvent;
+import cn.com.sparkle.firefly.stablestorage.io.RecordFileOutFactory;
 import cn.com.sparkle.firefly.stablestorage.model.StoreModel.Id;
 import cn.com.sparkle.firefly.stablestorage.model.StoreModel.InstanceVoteRecord;
 import cn.com.sparkle.firefly.stablestorage.model.StoreModel.SuccessfulRecord;
@@ -27,7 +28,7 @@ public class AccountBook {
 	private final ReentrantLock writeLock = new ReentrantLock();
 	private ExecuteLogOperator executeLogOperator;
 	private RecordFileOperator fileOperator;
-	private long lastWaitExecuteInstanceId;
+	private Long lastWaitExecuteInstanceId;
 	private Context context;
 	private boolean isInitAndNoDamage = false;
 
@@ -38,6 +39,13 @@ public class AccountBook {
 	public AccountBook(Context context, Long lastExceptInstanceId) throws IOException, UnsupportedChecksumAlgorithm {
 
 		this.context = context;
+		lastWaitExecuteInstanceId = lastExceptInstanceId;
+		
+
+		
+	}
+
+	public void init(InstanceExecutor instanceExecutor) throws ClassNotFoundException, IOException, UnsupportedChecksumAlgorithm, InstantiationException, IllegalAccessException {
 		Configuration configuration = context.getConfiguration();
 		String dir = configuration.getStableStorage() + "/" + configuration.getSelfAddress().replaceAll(":", "-");
 		File file = new File(dir);
@@ -45,21 +53,18 @@ public class AccountBook {
 			file.mkdirs();
 		}
 		File executelogDir = new File(dir + "/executelog");
+		
+		
 
+		//init executeLog
 		executeLogOperator = new ExecuteLogOperator(executelogDir);
-		lastWaitExecuteInstanceId = executeLogOperator.init();
-		if (lastExceptInstanceId != null) {
-			lastWaitExecuteInstanceId = lastExceptInstanceId;
+		if (lastWaitExecuteInstanceId == null) {
+			lastWaitExecuteInstanceId = executeLogOperator.init();
 		}
 		logger.info("last waited execute instanceId:" + lastWaitExecuteInstanceId);
-	}
-
-	public void init(InstanceExecutor instanceExecutor) throws ClassNotFoundException, IOException, UnsupportedChecksumAlgorithm {
-		Configuration configuration = context.getConfiguration();
-		String dir = configuration.getStableStorage() + "/" + configuration.getSelfAddress().replaceAll(":", "-");
+		
+		
 		fileOperator = StoreVersion.loadRecordFileOperator(dir, lastWaitExecuteInstanceId, instanceExecutor, configuration);
-		//		fileOperator = new RecordFileOperator(logDir, lastWaitExecuteInstanceId, instanceExecutor, configuration.getFileChecksumType(),
-		//				configuration.isDebugLog());
 		fileOperator.loadData();
 		if (!fileOperator.isDamaged() && !isInitAndNoDamage) {
 			isInitAndNoDamage = true;

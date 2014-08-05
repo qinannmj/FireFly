@@ -11,6 +11,7 @@ public class FrameBody {
 	private int checksumType;
 	private byte[] body;
 	private byte[] checksum;
+	private FrameHead head;
 
 	public FrameBody(byte[] body, byte[] checksum, int checksumType) {
 		this.body = body;
@@ -31,6 +32,14 @@ public class FrameBody {
 			logger.warn("May be error program logic error or data be damaged!", e);
 			return false;
 		}
+	}
+
+	public FrameHead getHead() {
+		return head;
+	}
+
+	public void setHead(FrameHead head) {
+		this.head = head;
 	}
 
 	public int getBodySize() {

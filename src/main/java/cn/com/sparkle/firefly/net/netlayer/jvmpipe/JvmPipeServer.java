@@ -17,9 +17,9 @@ public class JvmPipeServer implements NetServer {
 	}
 
 	@Override
-	public void init(String confPath, int heartBeatInterval, NetHandler handler) throws Throwable {
+	public void init(String confPath, int heartBeatInterval, NetHandler handler,String threadName) throws Throwable {
 		this.handler = handler;
-		netServer.init(confPath, heartBeatInterval, handler);
+		netServer.init(confPath, heartBeatInterval, handler,threadName);
 	}
 
 	@Override

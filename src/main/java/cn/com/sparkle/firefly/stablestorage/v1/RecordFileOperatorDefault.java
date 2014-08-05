@@ -8,7 +8,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.RandomAccessFile;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -24,8 +23,6 @@ import javax.management.RuntimeErrorException;
 
 import org.apache.log4j.Logger;
 
-import com.google.protobuf.GeneratedMessage.Builder;
-
 import cn.com.sparkle.firefly.addprocess.AddRequestPackage;
 import cn.com.sparkle.firefly.checksum.ChecksumUtil.UnsupportedChecksumAlgorithm;
 import cn.com.sparkle.firefly.config.Configuration;
@@ -33,15 +30,18 @@ import cn.com.sparkle.firefly.deamon.InstanceExecutor;
 import cn.com.sparkle.firefly.stablestorage.ReadRecordCallback;
 import cn.com.sparkle.firefly.stablestorage.RecordFileOperator;
 import cn.com.sparkle.firefly.stablestorage.event.PrepareRecordRealWriteEvent;
-import cn.com.sparkle.firefly.stablestorage.io.BufferedFileOut;
+import cn.com.sparkle.firefly.stablestorage.io.RecordFileOut;
+import cn.com.sparkle.firefly.stablestorage.io.RecordFileOutFactory;
 import cn.com.sparkle.firefly.stablestorage.model.Record;
 import cn.com.sparkle.firefly.stablestorage.model.RecordBody;
 import cn.com.sparkle.firefly.stablestorage.model.RecordHead;
 import cn.com.sparkle.firefly.stablestorage.model.RecordType;
-import cn.com.sparkle.firefly.stablestorage.model.SuccessfulRecordWrap;
 import cn.com.sparkle.firefly.stablestorage.model.StoreModel.InstanceVoteRecord;
 import cn.com.sparkle.firefly.stablestorage.model.StoreModel.SuccessfulRecord;
+import cn.com.sparkle.firefly.stablestorage.model.SuccessfulRecordWrap;
 import cn.com.sparkle.firefly.util.IdComparator;
+
+import com.google.protobuf.GeneratedMessage.Builder;
 
 public class RecordFileOperatorDefault implements RecordFileOperator {
 	private final static Logger logger = Logger.getLogger(RecordFileOperatorDefault.class);
@@ -62,6 +62,7 @@ public class RecordFileOperatorDefault implements RecordFileOperator {
 	private volatile long lastExpectSafeInstanceId;
 	private volatile long maxVoteInstanceId = -1;
 	private int preferChecksum;
+	private RecordFileOutFactory outFactory;
 
 	private Condition unsafeRecordQueueFull = writeLock.newCondition(); // unsafeRecordQueue
 																		// max
@@ -73,7 +74,7 @@ public class RecordFileOperatorDefault implements RecordFileOperator {
 
 	private static class RecordFileBean {
 		private File file;
-		private BufferedFileOut out;
+		private RecordFileOut out;
 		private long fileFlag;
 
 		public RecordFileBean(File file) {
@@ -84,13 +85,14 @@ public class RecordFileOperatorDefault implements RecordFileOperator {
 	}
 
 	@Override
-	public void initOperator(File dir, long lastExpectSafeInstanceId, InstanceExecutor instanceExecutor, Configuration conf) {
+	public void initOperator(File dir, long lastExpectSafeInstanceId, InstanceExecutor instanceExecutor, RecordFileOutFactory recordOutFactory ,Configuration conf) {
 		this.debugLog = conf.isDebugLog();
 		this.dir = dir;
 		this.lastExpectSafeInstanceId = lastExpectSafeInstanceId;
 		this.maxVoteInstanceId = lastExpectSafeInstanceId - 1;
 		this.instanceExecutor = instanceExecutor;
 		this.preferChecksum = conf.getFileChecksumType();
+		this.outFactory = recordOutFactory;
 		if (!dir.exists()) {
 			dir.mkdirs();
 		}
@@ -212,9 +214,7 @@ public class RecordFileOperatorDefault implements RecordFileOperator {
 						}
 						// check file count
 						if (lastExpectSafeInstanceId != nextStartInstanceId) {
-							RandomAccessFile raff = new RandomAccessFile(f, "rws");
-							raff.seek(pos);
-							recordFileBean.out = new BufferedFileOut(raff);
+							recordFileBean.out = outFactory.makeRecordFileOut(f, pos);
 						} else {
 							while (recordFileBeanList.size() > 1) {
 								if (recordFileBeanList.getFirst().out == null) {
@@ -285,8 +285,8 @@ public class RecordFileOperatorDefault implements RecordFileOperator {
 					//notify the id to this node,we need to assemble the value to record.
 					successfulRecord.setV(voteRecord.getHighestValue());
 				} else {
-					logger.error("fatal error,the program logic is error ,please check code");
-					throw new RuntimeErrorException(new Error("fatal error,the program logic is error ,please check code"));
+					logger.warn("This node has not voted this instance!");
+					return false;
 				}
 			}
 			//build a object
@@ -403,7 +403,7 @@ public class RecordFileOperatorDefault implements RecordFileOperator {
 
 	private boolean writeRecordLog(Record record, Callable<Object> callable) throws FileNotFoundException, IOException {
 		RecordFileBean curFb = null;
-		BufferedFileOut out = null;
+		RecordFileOut out = null;
 		long fileFlag = getFileFlagOfInstanceId(record.getHead().getInstanceId());
 		if (badFileSet.contains(fileFlag) && record.getHead().getType() != RecordType.SUCCESS) {// successful
 																								// record
@@ -433,7 +433,7 @@ public class RecordFileOperatorDefault implements RecordFileOperator {
 			if (curFb.fileFlag == fileFlag) {
 				out = curFb.out;
 				if (out == null) {
-					curFb.out = new BufferedFileOut(new RandomAccessFile(curFb.file, "rws"));
+					curFb.out = outFactory.makeRecordFileOut(curFb.file, 0);
 					out = curFb.out;
 				}
 				break;
@@ -597,5 +597,6 @@ public class RecordFileOperatorDefault implements RecordFileOperator {
 			return Integer.parseInt(files[0].getName()) * DIR_FILE_NUM * SPLIT_SUCCESSFUL_RECORD_COUNT;
 		}
 	}
+	
 
 }

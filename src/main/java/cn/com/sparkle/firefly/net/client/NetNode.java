@@ -63,6 +63,7 @@ public abstract class NetNode implements Comparable<NetNode> {
 	public void recieve(long id, boolean isLast, Object o) {
 		if (id == -1)
 			return;
+		
 		CallBack<? extends Object> callBack = waitFinishMap.get(id);
 		if (callBack != null) {
 			((CallBack<Object>) callBack).call(this, o);
@@ -70,7 +71,7 @@ public abstract class NetNode implements Comparable<NetNode> {
 				callBack = waitFinishMap.remove(id);
 			}
 		} else {
-			logger.warn("callback is null,maybe there is a bug!");
+			logger.warn("callback is null,maybe there is a bug!messageId:" + id);
 		}
 	}
 
@@ -105,7 +106,7 @@ public abstract class NetNode implements Comparable<NetNode> {
 			if (oldVal == Long.MAX_VALUE) {
 				session.closeSession();
 			}
-			newVal = (oldVal + 1) % Long.MAX_VALUE;
+			newVal = oldVal + 1;
 			if (packageId.compareAndSet(oldVal, newVal)) {
 				break;
 			}

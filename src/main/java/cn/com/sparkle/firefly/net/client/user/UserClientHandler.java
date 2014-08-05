@@ -75,6 +75,7 @@ public class UserClientHandler implements NetHandler {
 		ConnectConfig connectConfig = (ConnectConfig) connectAttachment;
 		connectConfig.onRefused();
 		reConnect(connectConfig);
+		logger.error(String.format("connect to %s was refused!", connectConfig.getAddress()));
 
 	}
 

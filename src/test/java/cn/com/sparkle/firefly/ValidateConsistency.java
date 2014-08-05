@@ -1,6 +1,7 @@
 package cn.com.sparkle.firefly;
 
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -15,6 +16,7 @@ import cn.com.sparkle.firefly.Context;
 import cn.com.sparkle.firefly.checksum.ChecksumUtil.UnsupportedChecksumAlgorithm;
 import cn.com.sparkle.firefly.config.Configuration;
 import cn.com.sparkle.firefly.event.DefaultEventManager;
+import cn.com.sparkle.firefly.model.Value.IterElement;
 import cn.com.sparkle.firefly.stablestorage.AccountBook;
 import cn.com.sparkle.firefly.stablestorage.ReadRecordCallback;
 import cn.com.sparkle.firefly.stablestorage.ReadSuccessReadFilter;
@@ -22,6 +24,7 @@ import cn.com.sparkle.firefly.stablestorage.SortedReadCallback;
 import cn.com.sparkle.firefly.stablestorage.model.SuccessfulRecordWrap;
 import cn.com.sparkle.firefly.stablestorage.model.StoreModel.SuccessfulRecord;
 import cn.com.sparkle.firefly.stablestorage.model.StoreModel.Value;
+import cn.com.sparkle.firefly.stablestorage.util.ValueTranslator;
 
 public class ValidateConsistency {
 	public static void main(String[] args) throws InstantiationException, IllegalAccessException, ParserConfigurationException, SAXException, IOException, ClassNotFoundException, UnsupportedChecksumAlgorithm, InterruptedException {
@@ -82,15 +85,13 @@ public class ValidateConsistency {
 	}
 	private static boolean eq(Value v1,Value v2){
 		if(v1.getType() != v2.getType()) return false;
-		if(v1.getValuesCount()!= v2.getValuesCount()) return false;
-		for(int i = 0 ; i < v1.getValuesCount(); ++i){
-			ByteString b1 = v1.getValues(i);
-			ByteString b2 = v2.getValues(i);
-			if(b1.size() != b2.size()){
-				return false;
-			}
-			for(int j = 0 ; j < b1.size() ; ++j){
-				if(b1.byteAt(j) != b2.byteAt(j)){
+		cn.com.sparkle.firefly.model.Value mv1 = ValueTranslator.toValue(v1);
+		cn.com.sparkle.firefly.model.Value mv2 = ValueTranslator.toValue(v2);
+		if(mv1.length() != mv2.length()){
+			return false;
+		}else{
+			for(int i = 0 ; i < mv1.length() ; ++i){
+				if(mv1.getValuebytes()[i] != mv2.getValuebytes()[i]){
 					return false;
 				}
 			}

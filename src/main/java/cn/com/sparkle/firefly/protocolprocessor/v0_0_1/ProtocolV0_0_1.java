@@ -4,10 +4,10 @@ import java.util.List;
 
 import cn.com.sparkle.firefly.Context;
 import cn.com.sparkle.firefly.handlerinterface.HandlerInterface;
+import cn.com.sparkle.firefly.model.AddRequest.CommandType;
 import cn.com.sparkle.firefly.model.Id;
 import cn.com.sparkle.firefly.model.SuccessTransportConfig;
 import cn.com.sparkle.firefly.model.Value;
-import cn.com.sparkle.firefly.model.AddRequest.CommandType;
 import cn.com.sparkle.firefly.net.client.CallBack;
 import cn.com.sparkle.firefly.net.client.system.callback.CatchUpCallBack;
 import cn.com.sparkle.firefly.net.client.system.callback.HeartBeatCallBack;
@@ -38,6 +38,7 @@ import cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.InstanceVot
 import cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.LookUpLatestInstanceIdRequest;
 import cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.MessagePackage;
 import cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.SenatorHeartBeatResponse;
+import cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.ValueTrunk;
 import cn.com.sparkle.firefly.protocolprocessor.v0_0_1.system.ActiveHeartProcessor;
 import cn.com.sparkle.firefly.protocolprocessor.v0_0_1.system.CatchupRequestProcessor;
 import cn.com.sparkle.firefly.protocolprocessor.v0_0_1.system.ElectionPrepareRequestProcessor;
@@ -46,6 +47,7 @@ import cn.com.sparkle.firefly.protocolprocessor.v0_0_1.system.ElectionVoteReques
 import cn.com.sparkle.firefly.protocolprocessor.v0_0_1.system.InstancePrepareRequestProcessor;
 import cn.com.sparkle.firefly.protocolprocessor.v0_0_1.system.InstanceSuccessRequestProcessor;
 import cn.com.sparkle.firefly.protocolprocessor.v0_0_1.system.InstanceVoteRequestProcessor;
+import cn.com.sparkle.firefly.protocolprocessor.v0_0_1.system.InstanceVoteValueTransportProcessor;
 import cn.com.sparkle.firefly.protocolprocessor.v0_0_1.system.LookupLastestInstanceIdRequestProcessor;
 import cn.com.sparkle.firefly.protocolprocessor.v0_0_1.system.SenatorHeartBeatProcessor;
 import cn.com.sparkle.firefly.protocolprocessor.v0_0_1.system.callback.CatchUpCallBackV0_0_1;
@@ -80,9 +82,10 @@ public class ProtocolV0_0_1 extends AbstraceProtocol {
 		serverInprotocolChain.addFirst(new ElectionSuccessRequestProcessor(context));
 		serverInprotocolChain.addFirst(new ElectionPrepareRequestProcessor(context));
 		serverInprotocolChain.addFirst(new SenatorHeartBeatProcessor(context));
+		serverInprotocolChain.addFirst(new InstancePrepareRequestProcessor(context));
 		serverInprotocolChain.addFirst(new InstanceSuccessRequestProcessor(context));
 		serverInprotocolChain.addFirst(new InstanceVoteRequestProcessor(context));
-		serverInprotocolChain.addFirst(new InstancePrepareRequestProcessor(context));
+		serverInprotocolChain.addFirst(new InstanceVoteValueTransportProcessor(context));
 		serverInprotocolChain.addFirst(new ProtocolTransformProcessor());
 		
 
@@ -172,14 +175,14 @@ public class ProtocolV0_0_1 extends AbstraceProtocol {
 	}
 
 	@Override
-	public byte[] createInstanceVoteRequest(long packageId, long instanceId, Id id, Value v, List<String> chain) {
-		StoreModel.Value.Builder value = ValueTranslator.toStoreModelValue(v);
+	public byte[] createInstanceVoteRequest(long packageId, long instanceId, Id id,int valueType,int valueLength, List<String> chain) {
 
 		StoreModel.Id.Builder idBuilder = IdTranslator.toStoreModelId(id);
 
 		InstanceVoteRequest.Builder builder = InstanceVoteRequest.newBuilder();
 		builder.setInstanceId(instanceId);
-		builder.setValue(value);
+		builder.setValuetype(valueType);
+		builder.setValueLength(valueLength);
 		builder.setVoteId(idBuilder);
 		if (chain != null && chain.size() != 0) {
 			builder.addAllChain(chain);
@@ -200,12 +203,16 @@ public class ProtocolV0_0_1 extends AbstraceProtocol {
 	}
 
 	@Override
-	public byte[] createInstanceSuccessRequest(long packageId, long instanceId, Id id, Value value, List<String> notifyList,
+	public byte[] createInstanceSuccessRequest(long packageId, long instanceId, Id id,Value value, List<String> notifyList,
 			List<SuccessTransportConfig> notifyChain) {
 		InstanceSuccessMessage.Builder builder = InstanceSuccessMessage.newBuilder();
 		builder.setId(instanceId);
 		StoreModel.Id.Builder sid = IdTranslator.toStoreModelId(id);
 		builder.setHighestVoteNum(sid);
+		if(value != null){
+			builder.setValue(ValueTranslator.toStoreModelValue(value));
+		}
+		
 		if (notifyList != null && notifyList.size() != 0) {
 			builder.addAllNotifyAddress(notifyList);
 		}
@@ -221,10 +228,6 @@ public class ProtocolV0_0_1 extends AbstraceProtocol {
 			}
 		}
 
-		if (value != null) {
-			StoreModel.Value.Builder _value = ValueTranslator.toStoreModelValue(value);
-			builder.setValue(_value);
-		}
 		return makeMessagePackage(packageId).setInstanceSuccessMessage(builder).build().toByteArray();
 	}
 
@@ -330,6 +333,13 @@ public class ProtocolV0_0_1 extends AbstraceProtocol {
 	@Override
 	public CallBack<? extends Object> createConnectRequestCallBack(ConnectRequestCallBack callback) {
 		return new ConnectRequestCallBackV0_0_1(callback);
+	}
+
+	@Override
+	public byte[] createValueTrunk(long packageId, byte[] value,int valueOffset,int size) {
+		ValueTrunk.Builder vt = ValueTrunk.newBuilder();
+		vt.setPart(ByteString.copyFrom(value, valueOffset, size));
+		return makeMessagePackage(packageId, size == 0).setValueTrunk(vt).build().toByteArray();
 	}
 
 }

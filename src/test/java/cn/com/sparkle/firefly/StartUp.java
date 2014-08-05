@@ -1,7 +1,10 @@
 package cn.com.sparkle.firefly;
 
+import java.io.IOException;
+
 import org.apache.log4j.Logger;
 
+import cn.com.sparkle.firefly.checksum.ChecksumUtil.UnsupportedChecksumAlgorithm;
 import cn.com.sparkle.firefly.event.listeners.MasterChangePosEventListener;
 import cn.com.sparkle.firefly.handlerinterface.HandlerInterface;
 import cn.com.sparkle.firefly.model.AddRequest;
@@ -42,8 +45,9 @@ public class StartUp {
 			}
 
 			@Override
-			public byte[] onLoged(byte[] bytes) {
+			public byte[] onLoged(byte[] bytes,int offset,int length) {
 				//				logger.info("command:" + new String(bytes));
+				
 				return "³É¹¦".getBytes();
 			}
 
@@ -54,6 +58,13 @@ public class StartUp {
 
 			@Override
 			public void onInstanceIdExecuted(long instanceId) {
+				try {
+					writeExecuteLog(instanceId);
+				} catch (IOException e) {
+					e.printStackTrace();
+				} catch (UnsupportedChecksumAlgorithm e) {
+					e.printStackTrace();
+				}
 			}
 
 		});

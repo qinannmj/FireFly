@@ -32,6 +32,12 @@ message MessagePackage{
 
 	optional ActiveHeartBeatRequest ActiveHeartBeatRequest = 28;
 	optional ConnectResponse connectResponse=29;
+	
+	optional ValueTrunk valueTrunk=30;
+}
+
+message ValueTrunk{
+	required bytes part=1;
 }
 
 message HeartBeatRequest{
@@ -94,9 +100,12 @@ message PrepareResponseGood{
 message InstanceVoteRequest{
 	required int64 instanceId=1;
 	required Id voteId=2;
-	required Value value=3;
+	//required Value value=3
 	repeated string chain=4;
+	required int32 valuetype=5;
+	required int32 valueLength=6;
 }
+
 message VoteResponse{
 	required int64 refuseId=1;
 	optional Value successValue=2;

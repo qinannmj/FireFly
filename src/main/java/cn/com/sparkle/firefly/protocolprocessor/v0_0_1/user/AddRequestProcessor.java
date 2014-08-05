@@ -71,7 +71,7 @@ public class AddRequestProcessor extends AbstractProtocolV0_0_1Processor impleme
 					if (operator != null) { //wait until the request remained in queue are processed 
 						try {
 							operator.waitAllFinish(context.getConfiguration().getTransportTimeout());
-							session.put(PaxosSessionKeys.PAXOS_OPERATOR_KEY, null);// cancel the channel assigned to this session
+							session.remove(PaxosSessionKeys.PAXOS_OPERATOR_KEY);// cancel the channel assigned to this session
 						} catch (Exception e) {
 							logger.error("unexcepted error", e);
 							throw new RuntimeException(e); // just for close this connection
@@ -85,11 +85,13 @@ public class AddRequestProcessor extends AbstractProtocolV0_0_1Processor impleme
 				} else {
 					//transport to master
 					if (client != null) {
+
 						PaxosOperater operator = session.get(PaxosSessionKeys.PAXOS_OPERATOR_KEY);
 						if (operator == null) {
 							operator = client.getOperator();
 							session.put(PaxosSessionKeys.PAXOS_OPERATOR_KEY, operator);// assign a channel to master
 						}
+						final PaxosOperater oper = operator;
 						try {
 							context.getcState().getSelfState().addTransportToMasterCount();
 							//The timeout promise the mem is not used excessively
@@ -100,7 +102,8 @@ public class AddRequestProcessor extends AbstractProtocolV0_0_1Processor impleme
 										public void callBack(byte[] bytes) {
 
 											MessagePackage.Builder mp = MessagePackage.newBuilder().setIsLast(true).setId(packageId);
-											AddResponse.Builder response = AddResponse.newBuilder().setResult(ByteString.copyFrom(bytes));
+											AddResponse.Builder response = AddResponse.newBuilder().setResult(ByteString.copyFrom(bytes))
+													.setInstanceId(oper.getResponseInstanceId());
 											mp.setAddResponse(response);
 											sendResponse(session, mp.build().toByteArray());
 										}
@@ -142,7 +145,8 @@ public class AddRequestProcessor extends AbstractProtocolV0_0_1Processor impleme
 	public void masterDistanceChange(int distance) {
 		//find up level node
 		SystemNetNode node = context.getcState().getRouteManage().lookupUpLevelNode();
-		if (node == null && distance == 0) {
+
+		if (distance == 0) {
 			node = (SystemNetNode) context.getcState().getSenators().getAllActiveNodes().get(conf.getSelfAddress());
 		}
 		if (conf.isDebugLog()) {
@@ -154,7 +158,7 @@ public class AddRequestProcessor extends AbstractProtocolV0_0_1Processor impleme
 			try {
 				masterChangelock.lock();
 
-				masterAddress = node.getAddress().split(":")[0]  + ":"+ node.getUserPort();
+				masterAddress = node.getAddress().split(":")[0] + ":" + node.getUserPort();
 				if (conf.isDebugLog()) {
 					logger.debug("transport to " + masterAddress);
 				}
@@ -162,7 +166,7 @@ public class AddRequestProcessor extends AbstractProtocolV0_0_1Processor impleme
 					try {
 						client = new PaxosClient(new String[] { masterAddress }, conf.getFilePath() + "/service_out_net.prop", conf.getNetLayer(),
 								conf.getNetChecksumType(), conf.getHeartBeatInterval(), conf.getTransportTcpNum(), Constants.MAX_MASTER_INSTANCE,
-								protocolManager, conf.isDebugLog());
+								protocolManager,conf.getTransportMaxInstanceRunningSize(),conf.getTransportMaxWaitQueueSize(), conf.isDebugLog());
 					} catch (Throwable e) {
 						logger.error("fatal error", e);
 					}

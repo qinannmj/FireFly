@@ -9,7 +9,6 @@ import cn.com.sparkle.firefly.admin.AbstractAdminProcessor;
 import cn.com.sparkle.firefly.admin.AdminLookupHandler;
 import cn.com.sparkle.firefly.model.AddRequest;
 import cn.com.sparkle.firefly.net.netlayer.PaxosSession;
-import cn.com.sparkle.firefly.stablestorage.io.BufferedFileOut;
 import cn.com.sparkle.firefly.state.SelfState;
 
 public class StateProcessor extends AbstractAdminProcessor {
@@ -37,11 +36,10 @@ public class StateProcessor extends AbstractAdminProcessor {
 		pw.println(String.format("response-admin-add-request-count:%s", stat.getResponseAdminAddRequestCount()));
 		pw.println(String.format("response-custom-add-aequest-count:%s", stat.getResponseCustomAddRequestCount()));
 		pw.println(String.format("transport-to-master-count:%s", stat.getTransportToMasterCount()));
-		pw.println(String.format("io-wait-queue-size:%s", BufferedFileOut.getWaitQueue().size()));
 		pw.println(String.format("instance-executor-queue-size:%s(max:%s)", context.getInstanceExecutor().getSizeInQueue(), context.getInstanceExecutor()
 				.maxQueueSize()));
 		pw.println(String.format("cur-tcp-package-byte-size:%s(min:%s max:%s)", context.getAddRequestDealer().getCurTcpPackageByteSize(),
-				AddRequestDealer.MIN_TCP_PACKAGE_SIZE, context.getAddRequestDealer().MAX_TCP_PACKAGE_SIZE));
+				context.getAddRequestDealer().MIN_TCP_PACKAGE_SIZE, context.getAddRequestDealer().MAX_TCP_PACKAGE_SIZE));
 
 		return sw.toString();
 	}

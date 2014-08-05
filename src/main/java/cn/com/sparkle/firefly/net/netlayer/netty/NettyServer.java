@@ -20,7 +20,7 @@ public class NettyServer implements NetServer {
 	private ServerBootstrap bootstrap = new ServerBootstrap();
 
 	@Override
-	public void init(String confPath, final int heartBeatInterval, final NetHandler handler) throws FileNotFoundException, IOException {
+	public void init(String confPath, final int heartBeatInterval, final NetHandler handler,String threadName) throws FileNotFoundException, IOException {
 		final Conf conf = new Conf(confPath);
 		NioEventLoopGroup group = new NioEventLoopGroup(conf.getIothreadnum());
 		bootstrap.group(group).channel(NioServerSocketChannel.class).option(ChannelOption.TCP_NODELAY, true).option(ChannelOption.SO_REUSEADDR, true)

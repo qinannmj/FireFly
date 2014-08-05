@@ -3,7 +3,7 @@ package cn.com.sparkle.firefly.stablestorage.model;
 import java.io.IOException;
 import java.util.concurrent.Callable;
 
-import cn.com.sparkle.firefly.stablestorage.io.BufferedFileOut;
+import cn.com.sparkle.firefly.stablestorage.io.RecordFileOut;
 
 public class Record {
 	private RecordHead head;
@@ -14,7 +14,7 @@ public class Record {
 		this.body = body;
 	}
 
-	public void writeToStream(BufferedFileOut out, Callable<Object> callable) throws IOException {
+	public void writeToStream(RecordFileOut out, Callable<Object> callable) throws IOException {
 		head.writeToStream(out, null);
 		body.writeToStream(out, callable);
 	}

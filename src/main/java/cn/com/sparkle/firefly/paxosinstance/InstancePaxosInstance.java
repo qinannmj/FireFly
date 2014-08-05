@@ -42,16 +42,14 @@ public class InstancePaxosInstance extends PaxosInstance {
 			if (arp.isManageCommand()) {
 				valueType = ValueType.ADMIN;
 			}
-			byteCount += arp.getValueList().size();
+			byteCount += arp.getValueList().size() * 4 + arp.getValueByteSize();
 		}
-		byte[][] valueArray = new byte[byteCount][];
-		int flag = 0;
+		wantedValue = new Value(valueType, byteCount);
 		for (AddRequestPackage arp : addRequestPackages) {
 			for (AddRequest request : arp.getValueList()) {
-				valueArray[flag++] = request.getValue();
+				wantedValue.add(request.getValue());
 			}
 		}
-		wantedValue = new Value(valueType, valueArray);
 	}
 
 	public LinkedList<AddRequestPackage> getAddRequestPackages() {

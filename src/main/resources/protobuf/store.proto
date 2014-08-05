@@ -4,7 +4,7 @@ option java_outer_classname = "StoreModel";
 
 message Value{
 	required int32 type=1;
-	repeated bytes values=2;
+	required bytes values=2;
 }
 message Id{
 	required int64 increaseId=1;

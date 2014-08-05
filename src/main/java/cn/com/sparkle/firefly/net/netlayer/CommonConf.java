@@ -16,7 +16,7 @@ public class CommonConf {
 		Properties prop = new Properties();
 		prop.load(new InputStreamReader(new FileInputStream(path)));
 		iothreadnum = Integer.parseInt(prop.getProperty("io_thread_num"));
-		recieveBuffSize = Integer.parseInt(prop.getProperty("recieve_mem_size"));
+		recieveBuffSize = Integer.parseInt(prop.getProperty("recv_mem_size"));
 		sendBuffSize = Integer.parseInt(prop.getProperty("send_mem_size"));
 		backlog = Integer.parseInt(prop.getProperty("backlog"));
 	}

@@ -31,14 +31,17 @@ import cn.com.sparkle.firefly.state.NodeState;
 public class SystemNetNode extends NetNode {
 	private WaitStrategy syncSuccessfulMessageStrategy;
 	private final long INSERT_SUCCESSFUL_MESSAGE_BYTE_SIZE;
-	
+
 	private int userPort;
 	
-	public SystemNetNode(Configuration conf, PaxosSession session, String address,int userPort, Protocol protocol, String appVersion, int heartBeatnterval) {
+	private Configuration conf;
+
+	public SystemNetNode(Configuration conf, PaxosSession session, String address, int userPort, Protocol protocol, String appVersion, int heartBeatnterval) {
 		super(session, address, protocol, appVersion, heartBeatnterval);
 		this.syncSuccessfulMessageStrategy = SyncStrategyFactory.build(conf);
 		INSERT_SUCCESSFUL_MESSAGE_BYTE_SIZE = conf.getSessionSuccessSyncMaxMem() / 4;
 		this.userPort = userPort;
+		this.conf = conf;
 	}
 
 	void sendFirstHeartBeat(EventsManager eventsManager) {
@@ -79,12 +82,40 @@ public class SystemNetNode extends NetNode {
 	}
 
 	public void sendInstanceVoteRequest(long instanceId, Id id, Value v, List<String> chain, VoteCallBack callback) {
-		CallBack<? extends Object> _callback = getProtocol().createPaxosVoteCallBack(callback);
+		
+		long messageId = sendInstanceVoteRequest(instanceId, id,v.getValueType().getValue(),v.length(), chain);
+		//send value trunk
+		int totalSize = v.length();
+		int trunksize = (int)Math.ceil( (double)totalSize / conf.getVoteValueSplitSize());
+		int offset = 0;
+		int remained = totalSize;
+		for(int i = 0 ; i < trunksize-1 ; ++i ){
+			sendVoteValueTrunk(messageId, null, v.getValuebytes(),offset , conf.getVoteValueSplitSize());
+			offset += conf.getVoteValueSplitSize();
+			remained -= conf.getVoteValueSplitSize();
+		}
+		sendVoteValueTrunk(messageId, callback, v.getValuebytes(),offset , remained);
+	}
+
+	public long sendInstanceVoteRequest(long instanceId, Id id,int valueType,int valueLength, List<String> chain) {
 		long packageId = generatePackageId();
-		byte[] request = getProtocol().createInstanceVoteRequest(packageId, instanceId, id, v, chain);
+		byte[] request = getProtocol().createInstanceVoteRequest(packageId, instanceId, id,valueType,valueLength, chain);
 		try {
-			write(request, packageId, _callback);
+			write(request, packageId, null);
 		} catch (NetCloseException e) {
+		}
+		return packageId;
+	}
+
+	public void sendVoteValueTrunk(long packageId,VoteCallBack callback,byte[] bytes,int offset,int size){
+		byte[] request = getProtocol().createValueTrunk(packageId, bytes, offset, size);
+		CallBack<? extends Object> _callback = null;
+		if(callback != null){
+			_callback = getProtocol().createPaxosVoteCallBack(callback);
+		}
+		try{
+			write(request,packageId,_callback);
+		}catch(NetCloseException e){
 		}
 	}
 
@@ -107,9 +138,7 @@ public class SystemNetNode extends NetNode {
 		try {
 			successLock.lock();
 			if (value != null) {
-				for (byte[] bs : value.getValue()) {
-					successfulMessageMayBeHeldUp += bs.length;
-				}
+				successfulMessageMayBeHeldUp += value.length();
 			}
 			CallBack<? extends Object> _callBack = null;
 			if (successfulMessageMayBeHeldUp >= INSERT_SUCCESSFUL_MESSAGE_BYTE_SIZE) {

@@ -4,12 +4,13 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
-import cn.com.sparkle.firefly.stablestorage.io.BufferedFileOut;
+import cn.com.sparkle.firefly.stablestorage.io.rwsbuffered.BufferedFileOut;
+import cn.com.sparkle.firefly.stablestorage.io.rwsbuffered.FlushThreadGroup;
 
 public class TestBufferOut {
 	public static void main(String[] args) throws FileNotFoundException, IOException {
-		final BufferedFileOut out = new BufferedFileOut(new RandomAccessFile("d://jbpaxos//a.test1", "rws"));
-		out.init(false,10 * 1024 * 1024 , 10);
+		FlushThreadGroup flushThreadGroup = new FlushThreadGroup(10 * 1024 * 1024 , 20, "", false);
+		final BufferedFileOut out = new BufferedFileOut(new RandomAccessFile("d://jbpaxos//a.test1", "rws"),flushThreadGroup);
 		Thread t = new Thread(){
 			public void run(){
 				byte[] buf = new byte[128];

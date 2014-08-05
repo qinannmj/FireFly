@@ -51,7 +51,7 @@ public interface Protocol {
 
 	public byte[] createInstancePrepareRequest(long packageId, long instanceId, Id id, List<String> chain);
 
-	public byte[] createInstanceVoteRequest(long packageId, long instanceId, Id id, Value v, List<String> chain);
+	public byte[] createInstanceVoteRequest(long packageId, long instanceId, Id id, int valueType, int valueLength, List<String> chain);
 
 	public byte[] createLookUpLatestInstanceIdRequest(long packageId);
 
@@ -62,14 +62,15 @@ public interface Protocol {
 
 	public byte[] createCatchUpRequest(long packageId, long instanceId, int size);
 
-	public byte[] createAddResponse(long packageId,long instanceId, byte[] bytes, boolean isLast);
+	public byte[] createAddResponse(long packageId, long instanceId, byte[] bytes, boolean isLast);
 
 	public byte[] createAdminResponse(long packageId, boolean isSuccess, String error);
 
 	public byte[] createConnectRequsetRequest(long packageId, int masterDistance);
 
-	public byte[] createAddRequest(long packageId, CommandType commandType, byte[] value,long instanceId);
+	public byte[] createAddRequest(long packageId, CommandType commandType, byte[] value, long instanceId);
 
 	public byte[] createActiveHeartMessage(NodeState nodeState);
 
+	public byte[] createValueTrunk(long packageId, byte[] value, int offset, int size);
 }

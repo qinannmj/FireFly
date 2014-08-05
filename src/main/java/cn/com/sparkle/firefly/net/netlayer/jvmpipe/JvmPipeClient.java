@@ -5,7 +5,6 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.log4j.Logger;
 
-import cn.com.sparkle.firefly.Context;
 import cn.com.sparkle.firefly.future.SystemFuture;
 import cn.com.sparkle.firefly.net.netlayer.NetClient;
 import cn.com.sparkle.firefly.net.netlayer.NetHandler;
@@ -50,8 +49,8 @@ public class JvmPipeClient implements NetClient {
 	}
 
 	@Override
-	public void init(String path, int heartBeatInterval, NetHandler netHandler) throws Throwable {
-		netClient.init(path, heartBeatInterval, netHandler);
+	public void init(String path, int heartBeatInterval, NetHandler netHandler,String name) throws Throwable {
+		netClient.init(path, heartBeatInterval, netHandler,name);
 	}
 
 	@Override

@@ -9,8 +9,10 @@ import java.util.Properties;
 import cn.com.sparkle.firefly.net.netlayer.CommonConf;
 
 public class Conf extends CommonConf {
-	private int recieveCell;
-	private int sendCell;
+	private int cycleRecieveCell;
+	private int cycleSendCell;
+	private int cycleRecieveSize;
+	private int cycleSendBuffSize;
 	private int workthreadMinNum;
 	private int workthreadMaxNum;
 
@@ -18,18 +20,29 @@ public class Conf extends CommonConf {
 		super(path);
 		Properties prop = new Properties();
 		prop.load(new InputStreamReader(new FileInputStream(path)));
-		recieveCell = Integer.parseInt(prop.getProperty("recieve_cell_size"));
-		sendCell = Integer.parseInt(prop.getProperty("send_mem_cell_size"));
+		cycleRecieveCell = Integer.parseInt(prop.getProperty("cycle_recv_cell_size"));
+		cycleRecieveSize = Integer.parseInt(prop.getProperty("cycle_recv_mem_size"));
+		
+		cycleSendCell = Integer.parseInt(prop.getProperty("cycle_recv_cell_size"));
+		cycleSendBuffSize = Integer.parseInt(prop.getProperty("cycle_send_mem_size"));
 		workthreadMinNum = Integer.parseInt(prop.getProperty("worker_thread_min_num"));
 		workthreadMaxNum = Integer.parseInt(prop.getProperty("worker_thread_max_num"));
 	}
 
-	public int getRecieveCell() {
-		return recieveCell;
+	public int getCycleRecieveCell() {
+		return cycleRecieveCell;
 	}
 
-	public int getSendCell() {
-		return sendCell;
+	public int getCycleSendCell() {
+		return cycleSendCell;
+	}
+
+	public int getCycleRecieveSize() {
+		return cycleRecieveSize;
+	}
+
+	public int getCycleSendBuffSize() {
+		return cycleSendBuffSize;
 	}
 
 	public int getWorkthreadMinNum() {

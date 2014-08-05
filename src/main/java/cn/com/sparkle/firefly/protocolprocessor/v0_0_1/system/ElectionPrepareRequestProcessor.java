@@ -1,5 +1,7 @@
 package cn.com.sparkle.firefly.protocolprocessor.v0_0_1.system;
 
+import com.google.protobuf.ByteString;
+
 import cn.com.sparkle.firefly.Context;
 import cn.com.sparkle.firefly.model.ElectionId;
 import cn.com.sparkle.firefly.model.Value.ValueType;
@@ -31,7 +33,7 @@ public class ElectionPrepareRequestProcessor extends AbstractProtocolV0_0_1Proce
 			MessagePackage.Builder responseBuilder = MessagePackage.newBuilder();
 
 			if (id == returnId) {
-				Value t = Value.newBuilder().setType(ValueType.ADMIN.getValue()).build();
+				Value t = Value.newBuilder().setType(ValueType.ADMIN.getValue()).setValues(ByteString.EMPTY).build();
 				PrepareResponseGood response = PrepareResponseGood.newBuilder().setLastVotedId(request.getId().getId()).setValue(t).build();
 				responseBuilder.setPrepareResponseGood(response);
 			} else {

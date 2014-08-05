@@ -30,22 +30,30 @@ public class BufProtocol implements Protocol {
 	@Override
 	public IoBuffer[] encode(BuffPool buffpool, Object message, IoBuffer lastWaitSendBuff) throws IOException, PoolEmptyException {
 		Buf[] bufs = (Buf[]) message;
-		BufferPoolOutputStream bufferPoolOutputStream = new BufferPoolOutputStream(buffpool, 0, lastWaitSendBuff);
-
-		for (IoBuffer b : bufs) {
-			bufferPoolOutputStream.write(b);
+		try{
+			BufferPoolOutputStream bufferPoolOutputStream = new BufferPoolOutputStream(buffpool, 0, lastWaitSendBuff);
+	
+			for (IoBuffer b : bufs) {
+				bufferPoolOutputStream.write(b);
+			}
+	
+			for (IoBuffer b : bufs) {
+				b.close();// release pooled buff
+			}
+	
+			List<IoBuffer> list = bufferPoolOutputStream.getBuffArray();
+			if (lastWaitSendBuff != null) {
+				list.remove(0);
+			}
+			bufferPoolOutputStream.close();
+			return list.toArray(new IoBuffer[list.size()]);
+		}catch(PoolEmptyException e){
+			//restore bufs position
+			for(Buf b : bufs){
+				b.getByteBuffer().position(0);
+			}
+			throw e;
 		}
-
-		for (IoBuffer b : bufs) {
-			b.close();// release pooled buff
-		}
-
-		List<IoBuffer> list = bufferPoolOutputStream.getBuffArray();
-		if (lastWaitSendBuff != null) {
-			list.remove(0);
-		}
-		bufferPoolOutputStream.close();
-		return list.toArray(new IoBuffer[list.size()]);
 	}
 
 	@Override

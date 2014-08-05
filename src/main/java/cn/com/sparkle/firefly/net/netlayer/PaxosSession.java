@@ -39,6 +39,9 @@ public abstract class PaxosSession {
 	public void put(AttributeKey<?> key, Object obj) {
 		attachment.put(key, obj);
 	}
+	public void remove(AttributeKey<?> key){
+		attachment.remove(key);
+	}
 
 	public int getChecksumType() {
 		return checksumType;

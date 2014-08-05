@@ -1,20 +1,20 @@
 package cn.com.sparkle.firefly.event;
 
-import java.util.concurrent.TimeUnit;
-
 import cn.com.sparkle.firefly.event.events.Event;
 
 import com.lmax.disruptor.BatchEventProcessor;
+import com.lmax.disruptor.BlockingWaitStrategy;
 import com.lmax.disruptor.EventFactory;
 import com.lmax.disruptor.EventHandler;
-import com.lmax.disruptor.PhasedBackoffWaitStrategy;
 import com.lmax.disruptor.RingBuffer;
 
 public class DisruptorEventExecutor implements EventExecutor {
 	private RingBuffer<WaitingEvent> ringBuffer;
 	private Thread executeThread;
 	public DisruptorEventExecutor() {
-		ringBuffer = RingBuffer.createMultiProducer(WaitingEvent.EVENT_FACTORY, 128, PhasedBackoffWaitStrategy.withLock(1, 1, TimeUnit.MILLISECONDS));
+//		ringBuffer = RingBuffer.createMultiProducer(WaitingEvent.EVENT_FACTORY, 128, PhasedBackoffWaitStrategy.withLock(1, 1, TimeUnit.MILLISECONDS));
+		ringBuffer = RingBuffer.createMultiProducer(WaitingEvent.EVENT_FACTORY, 128, new BlockingWaitStrategy());
+		
 		BatchEventProcessor<WaitingEvent> processor = new BatchEventProcessor<WaitingEvent>(ringBuffer, ringBuffer.newBarrier(), new DisruptorHandler());
 		ringBuffer.addGatingSequences(processor.getSequence());
 		executeThread = new Thread(processor);

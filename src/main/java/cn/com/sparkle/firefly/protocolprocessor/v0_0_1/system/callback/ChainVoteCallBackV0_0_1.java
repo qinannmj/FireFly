@@ -5,9 +5,9 @@ import cn.com.sparkle.firefly.model.Value;
 import cn.com.sparkle.firefly.net.client.system.callback.QuorumCallBack;
 import cn.com.sparkle.firefly.net.client.system.callback.VoteCallBack;
 import cn.com.sparkle.firefly.net.netlayer.PaxosSession;
+import cn.com.sparkle.firefly.protocolprocessor.v0_0_1.AbstractProtocolV0_0_1Processor;
 import cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.MessagePackage;
 import cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.VoteResponse;
-import cn.com.sparkle.firefly.protocolprocessor.v0_0_1.system.InstanceVoteRequestProcessor;
 import cn.com.sparkle.firefly.stablestorage.util.ValueTranslator;
 
 public class ChainVoteCallBackV0_0_1 extends QuorumCallBack<Value> implements VoteCallBack {
@@ -15,9 +15,9 @@ public class ChainVoteCallBackV0_0_1 extends QuorumCallBack<Value> implements Vo
 	private long instanceId; //just for trace
 	private long messageId;
 	private PaxosSession session;
-	private InstanceVoteRequestProcessor processor;
+	private AbstractProtocolV0_0_1Processor processor;
 
-	public ChainVoteCallBackV0_0_1(long instanceId, int needResponseCount, long messageId, PaxosSession session, InstanceVoteRequestProcessor processor,
+	public ChainVoteCallBackV0_0_1(long instanceId, int needResponseCount, long messageId, PaxosSession session, AbstractProtocolV0_0_1Processor processor,
 			boolean isDebug) {
 		super(needResponseCount, needResponseCount, isDebug);
 		this.instanceId = instanceId;

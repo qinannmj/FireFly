@@ -13,6 +13,7 @@ import cn.com.sparkle.firefly.checksum.ChecksumUtil.UnsupportedChecksumAlgorithm
 import cn.com.sparkle.firefly.config.Configuration;
 import cn.com.sparkle.firefly.deamon.InstanceExecutor;
 import cn.com.sparkle.firefly.stablestorage.event.PrepareRecordRealWriteEvent;
+import cn.com.sparkle.firefly.stablestorage.io.RecordFileOutFactory;
 import cn.com.sparkle.firefly.stablestorage.model.StoreModel.InstanceVoteRecord;
 import cn.com.sparkle.firefly.stablestorage.model.StoreModel.SuccessfulRecord;
 
@@ -21,7 +22,7 @@ public interface RecordFileOperator {
 	/**
 	 * just for init operator
 	 */
-	public void initOperator(File dir, long lastExpectSafeInstanceId, InstanceExecutor instanceExecutor, Configuration conf);
+	public void initOperator(File dir, long lastExpectSafeInstanceId, InstanceExecutor instanceExecutor,RecordFileOutFactory outFactory, Configuration conf);
 
 	public long loadData() throws IOException, ClassNotFoundException, UnsupportedChecksumAlgorithm;
 

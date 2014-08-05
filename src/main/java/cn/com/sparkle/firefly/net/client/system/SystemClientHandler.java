@@ -84,6 +84,7 @@ public class SystemClientHandler implements NetHandler {
 	public void onRefuse(Object connectAttachment) {
 		ConfigNode node = (ConfigNode) connectAttachment;
 		reConnect(node);
+		logger.error(String.format("connect to %s was refused!", node.getAddress()));
 	}
 
 	private final class ReConnect implements ReConnectMethod {

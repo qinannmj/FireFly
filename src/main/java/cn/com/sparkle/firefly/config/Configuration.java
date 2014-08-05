@@ -30,10 +30,6 @@ public class Configuration {
 
 	private ConfigNodeSet configNodeSet;
 
-	//	private volatile HashSet<ConfigNode> senators = new HashSet<ConfigNode>();
-	//	private volatile HashMap<String,ConfigNode> senatorsMap = new HashMap<String, ConfigNode>();
-	//	private HashMap<String,HashSet<String>> roomDisributedMap = new HashMap<String, HashSet<String>>();
-	//	private HashSet<ConfigNode> followers = new HashSet<ConfigNode>();
 	private int port;
 	private int clientPort;
 	private String stableStorage;
@@ -43,12 +39,14 @@ public class Configuration {
 	private String filePath;
 	private long responseDelay;
 	private int transportTcpNum;
+	private int transportMaxInstanceRunningSize;
+	private int transportMaxWaitQueueSize;
 	private String netLayer;
 	private int diskMemLost;
 	private boolean debugLog;
 	private int catchUpDelay;
 	private boolean electSelfMaster;
-	private int maxMessagePackageSize;
+	private int voteValueSplitSize;
 	private int netChecksumType;
 	private int fileChecksumType;
 	private String sessionSuccessSyncMaxMemStrategy;
@@ -58,11 +56,17 @@ public class Configuration {
 	private int heartBeatInterval;
 	private int electionPriority;
 	private long transportTimeout;
-	private int fileIoBuffsize;
-	private int fileIoQueueDeep;
+	private String fileOutFacotryClass;
+	private int maxInstanceMergePackageSize;
+	private int minInstanceMergePackageSize;
+	
+	
+	
 	private boolean isMergeClientRequest;
 	private String room;
-
+	
+	private HashMap<String,String> allConfig = new HashMap<String, String>();
+	
 	public Configuration(String filePath, EventsManager eventsManager) throws ParserConfigurationException, SAXException, IOException {
 		this.eventsManager = eventsManager;
 		this.filePath = filePath;
@@ -124,7 +128,10 @@ public class Configuration {
 		}
 		// format file path
 		this.stableStorage = file.getCanonicalPath();
-
+		
+		for(Entry<Object, Object> e : confProp.entrySet()){
+			allConfig.put((String)e.getKey(), (String)e.getValue());
+		}
 	}
 
 	private void parseConfiguration(Properties confProp) {
@@ -168,6 +175,26 @@ public class Configuration {
 				this.transportTcpNum = Integer.parseInt(confProp.getProperty("transport-tcp-num").trim());
 			} catch (NumberFormatException e) {
 				throw new ConfigurationError("transport-tcp-num must be number, please check your configuration!");
+			}
+		}
+		
+		if (confProp.getProperty("transport-max-instance-running-size") == null) {
+			throw new ConfigurationError("transport-max-instance-running-size not be set, please check your configuration!");
+		} else {
+			try {
+				this.transportMaxInstanceRunningSize = Integer.parseInt(confProp.getProperty("transport-max-instance-running-size").trim());
+			} catch (NumberFormatException e) {
+				throw new ConfigurationError("transport-max-instance-running-size must be number, please check your configuration!");
+			}
+		}
+		
+		if (confProp.getProperty("transport-max-wait-queue-size") == null) {
+			throw new ConfigurationError("transport-max-wait-queue-size not be set, please check your configuration!");
+		} else {
+			try {
+				this.transportMaxWaitQueueSize = Integer.parseInt(confProp.getProperty("transport-max-wait-queue-size").trim());
+			} catch (NumberFormatException e) {
+				throw new ConfigurationError("transport-max-wait-queue-size must be number, please check your configuration!");
 			}
 		}
 
@@ -227,13 +254,35 @@ public class Configuration {
 			}
 
 		}
-		if (confProp.getProperty("max-message-package-size") == null) {
-			throw new ConfigurationError("max-message-package-size not be set, please check your configuration!");
+		
+		if (confProp.getProperty("max-instance-merge-package-size") == null) {
+			throw new ConfigurationError("max-instance-merge-package-size not be set, please check your configuration!");
 		} else {
 			try {
-				this.maxMessagePackageSize = Integer.parseInt(confProp.getProperty("max-message-package-size").trim());
+				this.maxInstanceMergePackageSize = Integer.parseInt(confProp.getProperty("max-instance-merge-package-size").trim());
 			} catch (NumberFormatException e) {
-				throw new ConfigurationError("max-message-package-size must be number, please check your configuration!");
+				throw new ConfigurationError("max-instance-merge-package-size must be number, please check your configuration!");
+			}
+
+		}
+		if (confProp.getProperty("min-instance-merge-package-size") == null) {
+			throw new ConfigurationError("min-instance-merge-package-size not be set, please check your configuration!");
+		} else {
+			try {
+				this.minInstanceMergePackageSize = Integer.parseInt(confProp.getProperty("min-instance-merge-package-size").trim());
+			} catch (NumberFormatException e) {
+				throw new ConfigurationError("min-instance-merge-package-size must be number, please check your configuration!");
+			}
+
+		}
+		
+		if (confProp.getProperty("vote-value-split-size") == null) {
+			throw new ConfigurationError("vote-value-split-size not be set, please check your configuration!");
+		} else {
+			try {
+				this.voteValueSplitSize = Integer.parseInt(confProp.getProperty("vote-value-split-size").trim());
+			} catch (NumberFormatException e) {
+				throw new ConfigurationError("vote-value-split-size must be number, please check your configuration!");
 			}
 
 		}
@@ -344,24 +393,7 @@ public class Configuration {
 				throw new ConfigurationError("transport-timeout must be number, please check your configuration!");
 			}
 		}
-		if(confProp.getProperty("file-io-buffsize") == null){
-			throw new ConfigurationError("file-io-buffsize  not be set, please check your configuration!");
-		}else{
-			try {
-				this.fileIoBuffsize = Integer.parseInt(confProp.getProperty("file-io-buffsize"));
-			} catch (NumberFormatException e) {
-				throw new ConfigurationError("file-io-buffsize must be number, please check your configuration!");
-			}
-		}
-		if(confProp.getProperty("file-io-queue-deep") == null){
-			throw new ConfigurationError("file-io-queue-deep  not be set, please check your configuration!");
-		}else{
-			try {
-				this.fileIoQueueDeep = Integer.parseInt(confProp.getProperty("file-io-queue-deep"));
-			} catch (NumberFormatException e) {
-				throw new ConfigurationError("file-io-queue-deep must be number, please check your configuration!");
-			}
-		}
+		
 		
 		if (confProp.getProperty("is-merge-client-request") == null) {
 			throw new ConfigurationError("debug-log not be set, please check your configuration!");
@@ -371,6 +403,11 @@ public class Configuration {
 				throw new ConfigurationError("is-merge-client-request must be true or false, please check your configuration!");
 			}
 			this.isMergeClientRequest = Boolean.parseBoolean(temp);
+		}
+		if (confProp.getProperty("fileOutFacotry-class") == null) {
+			throw new ConfigurationError("fileOutFacotry-class not be set, please check your configuration!");
+		} else {
+			this.fileOutFacotryClass = confProp.getProperty("fileOutFacotry-class").trim();
 		}
 		
 		
@@ -388,7 +425,8 @@ public class Configuration {
 		logger.info("stable-storage-path:" + this.stableStorage);
 		logger.info("transport-tcp-num:" + this.transportTcpNum);
 		logger.info("elect-self-master:" + this.electSelfMaster);
-		logger.info("max-message-package-size:" + this.maxMessagePackageSize);
+		logger.info("vote-value-split-size:" + this.voteValueSplitSize);
+		logger.info("max-instance-merge-package-size:" + this.maxInstanceMergePackageSize);
 		logger.info("net-checksum-type:" + this.netChecksumType);
 		logger.info("file-checksum-type:" + this.fileChecksumType);
 		logger.info("session-success-sync-max-mem-strategy:" + this.sessionSuccessSyncMaxMemStrategy);
@@ -398,9 +436,20 @@ public class Configuration {
 		logger.info("heart-beat-interval:" + this.heartBeatInterval);
 		logger.info("election-priority:" + this.electionPriority);
 		logger.info("transport-timeout:" + this.transportTimeout);
-		logger.info("file-io-buffsize:" + this.fileIoBuffsize);
-		logger.info("file-io-queue-deep:" + this.fileIoQueueDeep);
-		logger.info("is-merge-client-request" + this.isMergeClientRequest);
+		logger.info("fileOutFacotry-class:" + this.fileOutFacotryClass );
+		logger.info("is-merge-client-request:" + this.isMergeClientRequest);
+	}
+
+	public int getMinInstanceMergePackageSize() {
+		return minInstanceMergePackageSize;
+	}
+
+	public int getTransportMaxInstanceRunningSize() {
+		return transportMaxInstanceRunningSize;
+	}
+
+	public int getTransportMaxWaitQueueSize() {
+		return transportMaxWaitQueueSize;
 	}
 
 	public String getRoom() {
@@ -499,9 +548,14 @@ public class Configuration {
 	public int getCatchUpDelay() {
 		return catchUpDelay;
 	}
+	
+	
+	public int getVoteValueSplitSize() {
+		return voteValueSplitSize;
+	}
 
-	public int getMaxMessagePackageSize() {
-		return maxMessagePackageSize;
+	public int getMaxInstanceMergePackageSize() {
+		return maxInstanceMergePackageSize;
 	}
 
 	public long getTransportTimeout() {
@@ -666,13 +720,15 @@ public class Configuration {
 	public int getElectionPriority() {
 		return electionPriority;
 	}
-
-	public int getFileIoBuffsize() {
-		return fileIoBuffsize;
+	
+	
+	
+	public String getFileOutFacotryClass() {
+		return fileOutFacotryClass;
 	}
 
-	public int getFileIoQueueDeep() {
-		return fileIoQueueDeep;
+	public String getConfigValue(String key){
+		return allConfig.get(key);
 	}
 	
 }

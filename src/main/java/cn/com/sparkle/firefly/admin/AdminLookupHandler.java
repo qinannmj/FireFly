@@ -98,7 +98,7 @@ public class AdminLookupHandler extends HandlerInterface {
 	}
 
 	@Override
-	public byte[] onLoged(byte[] bytes) {
+	public byte[] onLoged(byte[] bytes,int offset ,int length) {
 		//the method will be not invoked!
 		throw new RuntimeException("unsupported method!");
 	}

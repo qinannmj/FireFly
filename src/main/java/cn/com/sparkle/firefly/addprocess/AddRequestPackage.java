@@ -92,7 +92,7 @@ public class AddRequestPackage {
 	}
 	
 	public String testAdminToPaxosAble(){
-		if(!isManageCommand()){
+		if(!isManageCommand() || getValueByteSize() == 0){
 			return null;
 		}else{
 			AdminCommand adminCommand = new AdminCommand(valueList.get(0).getValue());

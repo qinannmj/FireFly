@@ -1,18 +1,23 @@
 stable-storage=d:/jbpaxos
-file-io-buffsize=10485760
-file-io-queue-deep=10
+fileOutFacotry-class=cn.com.sparkle.firefly.stablestorage.io.rwsbuffered.RwsBufferedRecordFileOutFactory
+rwsbuffered-file-io-buffsize=10485760
+rwsbuffered-file-io-queue-deep=10
 ip=127.0.0.1
 listen-port=11000
 listen-port-client=11001
 max-response-delay=100
 transport-tcp-num=10
+transport-max-instance-running-size=5000
+transport-max-wait-queue-size=2000
 net-layer=raptor
 #net-layer=netty
 disk-mem-lost=0
 catchup-delay=5000
-debug-log=false
+debug-log=true
 elect-self-master=true
-max-message-package-size=65535
+vote-value-split-size=65535
+min-instance-merge-package-size=524288
+max-instance-merge-package-size=1048576
 transport-timeout=5000
 is-merge-client-request=true
 

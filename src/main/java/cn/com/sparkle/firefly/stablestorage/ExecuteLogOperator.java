@@ -16,7 +16,9 @@ import java.util.concurrent.Callable;
 import org.apache.log4j.Logger;
 
 import cn.com.sparkle.firefly.checksum.ChecksumUtil.UnsupportedChecksumAlgorithm;
-import cn.com.sparkle.firefly.stablestorage.io.BufferedFileOut;
+import cn.com.sparkle.firefly.stablestorage.io.RecordFileOut;
+import cn.com.sparkle.firefly.stablestorage.io.rwsbuffered.BufferedFileOut;
+import cn.com.sparkle.firefly.stablestorage.io.rwsbuffered.FlushThreadGroup;
 import cn.com.sparkle.firefly.stablestorage.model.ExecuteRecord;
 
 public class ExecuteLogOperator {
@@ -24,14 +26,17 @@ public class ExecuteLogOperator {
 	private final static int SPLIT_EXECUTE_LOG_COUNT = 500000;
 	private File dir;
 	private int lastLogCount = 0;
-	private BufferedFileOut executeOutputStream;
+	private RecordFileOut executeOutputStream;
 	private LinkedList<File> executeFileList = new LinkedList<File>();
-
+	private FlushThreadGroup flushThreadGroup;
+	
+	
 	public ExecuteLogOperator(File dir) throws IOException {
 		this.dir = dir;
 		if (!dir.exists()) {
 			dir.mkdirs();
 		}
+		flushThreadGroup = new FlushThreadGroup(10 * 1024 * 1024, 3, "executelog", false);
 	}
 
 	public long init() throws IOException, UnsupportedChecksumAlgorithm {
@@ -86,7 +91,8 @@ public class ExecuteLogOperator {
 		}
 		RandomAccessFile rs = new RandomAccessFile(executeFileList.getLast(), "rws");
 		rs.seek(pos);
-		executeOutputStream = new BufferedFileOut(rs);
+		executeOutputStream = new BufferedFileOut(rs,flushThreadGroup);
+		
 		return lastWaitExecuteInstanceId + 1;
 	}
 
@@ -105,7 +111,9 @@ public class ExecuteLogOperator {
 			executeFileList.addLast(f);
 			executeOutputStream.close();
 			RandomAccessFile rs = new RandomAccessFile(executeFileList.getLast(), "rws");
-			executeOutputStream = new BufferedFileOut(rs);
+			executeOutputStream = new BufferedFileOut(rs,flushThreadGroup);
+			
+			
 			// check mount of file
 			while (executeFileList.size() > 2) {
 				File ff = executeFileList.removeFirst();
@@ -123,15 +131,4 @@ public class ExecuteLogOperator {
 		}
 	}
 
-	public static void main(String[] args) throws IOException, UnsupportedChecksumAlgorithm {
-		ExecuteLogOperator eo = new ExecuteLogOperator(new File("C:\\jbpaxos\\127.0.0.1-9000\\executelog"));
-		System.out.println(eo.init());
-		// int testSize = 1000;
-		// long ct = System.currentTimeMillis();
-		// for (int i = 0; i < testSize; i++) {
-		// eo.writeExecuteLog(i, null);
-		// }
-		// System.out.println(testSize
-		// / ((double) (System.currentTimeMillis() - ct) / 1000) + "/s");
-	}
 }

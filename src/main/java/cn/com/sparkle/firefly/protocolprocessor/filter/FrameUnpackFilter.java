@@ -38,10 +38,8 @@ public class FrameUnpackFilter extends AbstractChainProtocolProcessor<Buf> {
 			if (bean.head == null) {
 				if (bean.recieveSize >= 1) {
 					//unpack head
-
 					int pos = bean.buff.get(0).getByteBuffer().position();
 					byte first = bean.buff.get(0).getByteBuffer().get(pos);
-
 					int checksumLength = FrameHead.calcChecksumLength(first);
 					if (bean.recieveSize >= checksumLength + 4) {
 						byte[] head = new byte[4];
@@ -68,6 +66,7 @@ public class FrameUnpackFilter extends AbstractChainProtocolProcessor<Buf> {
 					}
 				}
 			}
+			
 
 			if (bean.head != null) {
 				//unpack body
@@ -95,6 +94,7 @@ public class FrameUnpackFilter extends AbstractChainProtocolProcessor<Buf> {
 
 					bean.recieveSize -= body.length + checksum.length;
 					FrameBody frameBody = new FrameBody(body, checksum, bean.head.getChecksumType());
+					frameBody.setHead(bean.head);
 					bean.head = null;//clear last time head 
 					return frameBody;
 				}

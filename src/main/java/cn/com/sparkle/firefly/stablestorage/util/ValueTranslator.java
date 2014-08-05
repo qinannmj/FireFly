@@ -1,10 +1,10 @@
 package cn.com.sparkle.firefly.stablestorage.util;
 
-import com.google.protobuf.ByteString;
-
 import cn.com.sparkle.firefly.model.Value;
 import cn.com.sparkle.firefly.model.Value.ValueType;
 import cn.com.sparkle.firefly.stablestorage.model.StoreModel;
+
+import com.google.protobuf.ByteString;
 
 public class ValueTranslator {
 	public static StoreModel.Value.Builder toStoreModelValue(Value value) {
@@ -13,22 +13,15 @@ public class ValueTranslator {
 		}
 		StoreModel.Value.Builder b = StoreModel.Value.newBuilder();
 		b.setType(value.getValueType().getValue());
-		if (value.getValue() != null) {
-			for (byte[] bytes : value.getValue()) {
-				b.addValues(ByteString.copyFrom(bytes));
-			}
-		}
+		b.setValues(ByteString.copyFrom(value.getValuebytes(), 0, value.length()));
 		return b;
 	}
 
 	public static Value toValue(StoreModel.ValueOrBuilder svalue) {
 		Value value = null;
 		if (svalue != null) {
-			byte[][] bytes = new byte[svalue.getValuesCount()][];
-			for (int i = 0; i < bytes.length; ++i) {
-				bytes[i] = svalue.getValues(i).toByteArray();
-			}
-			value = new Value(ValueType.getValueType(svalue.getType()), bytes);
+			byte[] bytes = svalue.getValues().toByteArray();
+			value = new Value(ValueType.getValueType(svalue.getType()), bytes, bytes.length);
 		}
 		return value;
 	}

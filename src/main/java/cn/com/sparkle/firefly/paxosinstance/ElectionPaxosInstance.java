@@ -17,7 +17,7 @@ import cn.com.sparkle.firefly.state.ClusterState;
 public class ElectionPaxosInstance extends PaxosInstance {
 	private final static Logger logger = Logger.getLogger(ElectionPaxosInstance.class);
 
-	private final static Value value = new Value(ValueType.COMM, new byte[0][]);
+	private final static Value value = new Value(ValueType.COMM, 0);
 	private ClusterState cState;
 	private ElectionId id;
 
