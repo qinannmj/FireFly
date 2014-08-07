@@ -15,7 +15,6 @@ import cn.com.sparkle.firefly.config.Configuration;
 import cn.com.sparkle.firefly.deamon.InstanceExecutor;
 import cn.com.sparkle.firefly.event.events.AccountBookEvent;
 import cn.com.sparkle.firefly.stablestorage.event.PrepareRecordRealWriteEvent;
-import cn.com.sparkle.firefly.stablestorage.io.RecordFileOutFactory;
 import cn.com.sparkle.firefly.stablestorage.model.StoreModel.Id;
 import cn.com.sparkle.firefly.stablestorage.model.StoreModel.InstanceVoteRecord;
 import cn.com.sparkle.firefly.stablestorage.model.StoreModel.SuccessfulRecord;
@@ -170,6 +169,19 @@ public class AccountBook {
 				return -1;
 			} else {
 				return fileOperator.getMaxVoteInstanceId();
+			}
+		} finally {
+			writeLock.unlock();
+		}
+	}
+	
+	public long getKnowedMaxInstanceId(){
+		try {
+			writeLock.lock();
+			if (fileOperator == null) {
+				return -1;
+			} else {
+				return fileOperator.getKnowedMaxId();
 			}
 		} finally {
 			writeLock.unlock();

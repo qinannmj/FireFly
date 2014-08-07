@@ -27,7 +27,7 @@ public class HeartBeatCheckDeamon extends Thread implements NodeStateChangeEvent
 	private Context context;
 	private boolean isAccountBookInit = false;
 	private boolean isUptoDate = false;
-	private volatile int distance = Constants.MAX_MASTER_INSTANCE;
+	private volatile int distance = Constants.MAX_MASTER_DISTANCE;
 
 	public HeartBeatCheckDeamon(Context context) {
 		this.eventsManager = context.getEventsManager();
@@ -58,11 +58,11 @@ public class HeartBeatCheckDeamon extends Thread implements NodeStateChangeEvent
 							nodeState.setLastBeatHeatTime(TimeUtil.currentTimeMillis());
 							nodeState.setLastCanExecuteInstanceId(context.getAccountBook().getLastCanExecutableInstanceId());
 							nodeState.setLastElectionId(context.getcState().getLastElectionId());
-							nodeState.setMasterConnected(distance == 1);
+							nodeState.setMasterConnected(context.getcState().getSenators().getValidActiveNodes().containsKey(context.getcState().getLastElectionId().getAddress()));
 							nodeState.setMasterDistance(distance);
 							nodeState.setUpToDate(isUptoDate);
 							nodeState.setConnectedValidNode(list);
-							node.sendActiveHeartBeat(nodeState);
+							node.sendActiveHeartBeat(nodeState,distance);
 							if (context.getConfiguration().isDebugLog()) {
 								logger.debug("send active heartbeat to master by pass!");
 							}

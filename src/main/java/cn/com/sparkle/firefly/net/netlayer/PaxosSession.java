@@ -93,7 +93,11 @@ public abstract class PaxosSession {
 	public abstract void closeSession();
 	
 	public abstract boolean isClose();
-
+	
+	public abstract String getRemoteAddress();
+	
+	public abstract String getLocalAddress();
+	
 	public static class ObjectProtocolCacheBean {
 		public volatile FrameHead head = null;
 		public volatile int recieveSize = 0;

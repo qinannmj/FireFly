@@ -45,7 +45,7 @@ public class SelfState implements ConfigureEventListener{
 		this.context = context;
 		electionVoteIdBySelf = new ElectionId("", 0, context.getConfiguration().getConfigNodeSet().getVersion());
 		electionPrepareId = new ElectionId("", -1, context.getConfiguration().getConfigNodeSet().getVersion());
-		electionLastVoteId = context.getAccountBook().getMaxInstanceIdInVote();
+		electionLastVoteId = context.getAccountBook().getKnowedMaxInstanceId();
 		isDebug = context.getConfiguration().isDebugLog();
 		isSenator = context.getConfiguration().getConfigNodeSet().getSenatorsMap().containsKey(context.getConfiguration().getSelfAddress());
 	}
@@ -60,7 +60,7 @@ public class SelfState implements ConfigureEventListener{
 			electionPrepareIdLock.lock();
 			int compareResult = id.compareTo(electionPrepareId);
 
-			electionLastVoteId = context.getAccountBook().getMaxInstanceIdInVote() > electionLastVoteId ? context.getAccountBook().getMaxInstanceIdInVote()
+			electionLastVoteId = context.getAccountBook().getKnowedMaxInstanceId() > electionLastVoteId ? context.getAccountBook().getKnowedMaxInstanceId()
 					: electionLastVoteId;
 
 			if (isDebug) {

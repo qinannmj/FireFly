@@ -30,7 +30,7 @@ public class ElectionPaxosMessageSender extends AbstractPaxosMessageSender {
 	public void sendPrepareRequest(PaxosInstance paxosInstance, long instanceId, Id id) {
 		PrepareCallBack callback = new PaxosPrepareCallBack(this.quorum, voteSet.size(), paxosInstance);
 		for (NetNode node : voteSet.values()) {
-			((SystemNetNode) node).sendElectionPrepareRequest((ElectionId) id, context.getAccountBook().getMaxInstanceIdInVote(), callback);
+			((SystemNetNode) node).sendElectionPrepareRequest((ElectionId) id, context.getAccountBook().getKnowedMaxInstanceId(), callback);
 		}
 	}
 
@@ -38,7 +38,7 @@ public class ElectionPaxosMessageSender extends AbstractPaxosMessageSender {
 	public void sendVoteRequest(PaxosInstance paxosInstance, long instanceId, Id id, Value value) {
 		VoteCallBack callback = new PaxosVoteCallBack(quorum, voteSet.size(), paxosInstance);
 		for (NetNode node : voteSet.values()) {
-			((SystemNetNode) node).sendElectionVoteRequest((ElectionId) id, context.getAccountBook().getMaxInstanceIdInVote(), callback);
+			((SystemNetNode) node).sendElectionVoteRequest((ElectionId) id, context.getAccountBook().getKnowedMaxInstanceId(), callback);
 		}
 	}
 

@@ -45,6 +45,7 @@ message HeartBeatRequest{
 message ActiveHeartBeatRequest{
 	required string address=1;
 	required SenatorHeartBeatResponse heartBeatResponse=2;
+	required int32 lifecycle=3;//for avoid boardcast storm
 	
 }
 message SenatorHeartBeatResponse{

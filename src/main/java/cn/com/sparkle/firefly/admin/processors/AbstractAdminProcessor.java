@@ -1,9 +1,10 @@
-package cn.com.sparkle.firefly.admin;
+package cn.com.sparkle.firefly.admin.processors;
 
+import cn.com.sparkle.firefly.admin.AdminLookupHandler;
 import cn.com.sparkle.firefly.model.AddRequest;
 import cn.com.sparkle.firefly.net.netlayer.PaxosSession;
 
-public abstract class AbstractAdminProcessor {
+public abstract class AbstractAdminProcessor implements AdminProcessor{
 	public void process(String[] command,AdminLookupHandler handler,PaxosSession session,AddRequest request){
 		int commLen = commandLength();
 		if(command.length < commLen){

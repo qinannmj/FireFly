@@ -13,8 +13,6 @@ public interface RouteManage {
 
 	public SystemNetNode lookupUpLevelNode();
 
-	public String lookupUpLevelNodeAddress(int distance);
-
 	public LinkedNodeList lookupValidedVoteLink();
 
 	public final static class LinkedNodeList {

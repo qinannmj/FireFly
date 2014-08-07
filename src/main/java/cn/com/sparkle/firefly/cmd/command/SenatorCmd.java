@@ -10,8 +10,7 @@ import cn.com.sparkle.firefly.client.PaxosOperater;
 import cn.com.sparkle.firefly.model.AdminCommand;
 import cn.com.sparkle.firefly.model.AddRequest.CommandType;
 
-public class SenatorCmd implements Cmd {
-	public final static SenatorCmd DEFAULT = new SenatorCmd();
+public abstract class SenatorCmd implements Cmd {
 
 	@Override
 	public void process(PaxosOperater operater, String cmd) throws InterruptedException, MasterMayBeLostException {

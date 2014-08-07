@@ -1,5 +1,7 @@
 package cn.com.sparkle.firefly;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
 import org.apache.log4j.LogManager;
@@ -9,6 +11,7 @@ import org.apache.log4j.PropertyConfigurator;
 import cn.com.sparkle.firefly.addprocess.AddRequestDealer;
 import cn.com.sparkle.firefly.addprocess.speedcontrol.SpeedControlModel;
 import cn.com.sparkle.firefly.admin.AdminLookupHandler;
+import cn.com.sparkle.firefly.admin.processors.AdminProcessor;
 import cn.com.sparkle.firefly.config.ConfigNode;
 import cn.com.sparkle.firefly.config.Configuration;
 import cn.com.sparkle.firefly.deamon.CatchUpDeamon;
@@ -58,8 +61,12 @@ public class ClassicPaxosServer implements AccountBookEventListener, ConfigureEv
 	public ClassicPaxosServer() throws InstantiationException, IllegalAccessException {
 		this(null);
 	}
-
-	public void init(String filePath, HandlerInterface userHandlerInterface) throws Throwable {
+	
+	public void init(String filePath, HandlerInterface userHandlerInterface) throws Throwable{
+		init(filePath,userHandlerInterface,null);
+	}
+	
+	public void init(String filePath, HandlerInterface userHandlerInterface, List<AdminProcessor> adminList) throws Throwable {
 		this.userHandlerInterface = userHandlerInterface;
 
 		//relocate the conf of log4j
@@ -82,7 +89,7 @@ public class ClassicPaxosServer implements AccountBookEventListener, ConfigureEv
 		ie.start();
 
 		//init admin lookup processor
-		AdminLookupHandler adminHandler = new AdminLookupHandler(context);
+		AdminLookupHandler adminHandler = new AdminLookupHandler(context, adminList == null ? new LinkedList<AdminProcessor>() : adminList);
 
 		//init protocol manager
 		ProtocolManager protocolManager = ProtocolManager.createServerProtocol(context, userHandlerInterface, adminHandler);

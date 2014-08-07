@@ -33,14 +33,14 @@ import cn.com.sparkle.firefly.route.RouteManage;
  * @author nanqi
  * 
  */
-public class ClusterState implements ConfigureEventListener,HeartBeatEventListener, NodeStateChangeEventListener {
+public class ClusterState implements ConfigureEventListener, HeartBeatEventListener, NodeStateChangeEventListener {
 	private final static Logger logger = Logger.getLogger(ClusterState.class);
 
 	private Configuration conf;
 
 	// cur master
 	private volatile ElectionId lastElectionId;
-	private volatile int masterDistance = Constants.MAX_MASTER_INSTANCE;
+	private volatile int masterDistance = Constants.MAX_MASTER_DISTANCE;
 
 	private volatile NodesCollection senators;
 	//	private volatile NodesCollection followers;
@@ -56,7 +56,7 @@ public class ClusterState implements ConfigureEventListener,HeartBeatEventListen
 	public ClusterState(EventsManager eventsManager, final Configuration conf) {
 
 		this.conf = conf;
-		this.selfState = new SelfState(eventsManager,conf.getSelfAddress());
+		this.selfState = new SelfState(eventsManager, conf.getSelfAddress());
 		this.eventsManager = eventsManager;
 		this.lastElectionId = new ElectionId("", -1, conf.getConfigNodeSet().getVersion());
 		HashMap<String, NodeState> temp = new HashMap<String, NodeState>();
@@ -84,7 +84,7 @@ public class ClusterState implements ConfigureEventListener,HeartBeatEventListen
 				}
 				if (this.lastElectionId.getAddress().equals(conf.getSelfAddress())) {
 					if (!lastElectionId.getAddress().equals(conf.getSelfAddress())) {
-						setMasterDistance(Constants.MAX_MASTER_INSTANCE);
+						setMasterDistance(Constants.MAX_MASTER_DISTANCE);
 						MasterChangePosEvent.doLostPosEvent(eventsManager);
 					}
 				} else if (lastElectionId.getAddress().equals(conf.getSelfAddress())) {
@@ -93,7 +93,7 @@ public class ClusterState implements ConfigureEventListener,HeartBeatEventListen
 						MasterChangePosEvent.doGetMasterPosEvent(eventsManager);
 					}
 				} else {
-					setMasterDistance(Constants.MAX_MASTER_INSTANCE);
+					setMasterDistance(Constants.MAX_MASTER_DISTANCE);
 				}
 				this.lastElectionId = lastElectionId;
 				this.selfState.getElectionVoteIdBySelf().setIncreaseId(lastElectionId.getIncreaseId() + 1);
@@ -112,7 +112,7 @@ public class ClusterState implements ConfigureEventListener,HeartBeatEventListen
 				if (conf.isDebugLog()) {
 					logger.debug("master change:" + lastElectionId.getIncreaseId() + "  " + lastElectionId.getAddress());
 				}
-				setMasterDistance(Constants.MAX_MASTER_INSTANCE);
+				setMasterDistance(Constants.MAX_MASTER_DISTANCE);
 				MasterChangePosEvent.doLostPosEvent(eventsManager);
 			}
 		} finally {
@@ -123,6 +123,9 @@ public class ClusterState implements ConfigureEventListener,HeartBeatEventListen
 	private void setMasterDistance(int distance) {
 		try {
 			nodeLock.lock();
+			if(conf.isDebugLog()){
+				logger.debug(String.format("set master distance to %s",distance));
+			}
 			this.masterDistance = distance;
 			MasterDistanceChangeEvent.masterDistanceChange(eventsManager, distance);
 		} finally {
@@ -159,7 +162,7 @@ public class ClusterState implements ConfigureEventListener,HeartBeatEventListen
 			}
 			//reset distance ,and wait heartbeat to fix the distance
 			if (masterDistance != 0) {
-				setMasterDistance(Constants.MAX_MASTER_INSTANCE);
+				setMasterDistance(Constants.MAX_MASTER_DISTANCE);
 			}
 			if (conf.isDebugLog()) {
 				logger.debug("lost a node " + address);
@@ -224,10 +227,15 @@ public class ClusterState implements ConfigureEventListener,HeartBeatEventListen
 			} else {
 				followerConnect(nState);
 			}
+			
 			//modify distance
 			if (!nState.getAddress().equals(conf.getSelfAddress())) {
-				int distance = nState.getMasterDistance() == Constants.MAX_MASTER_INSTANCE ?Constants.MAX_MASTER_INSTANCE :  nState.getMasterDistance() + 1;
-				if (masterDistance > distance) {
+				int distance = nState.getMasterDistance() == Constants.MAX_MASTER_DISTANCE ? Constants.MAX_MASTER_DISTANCE : nState.getMasterDistance() + 1;
+				NetNode upLevelNode = routeManage.lookupUpLevelNode();
+				NodeState upLevelNodeState = upLevelNode == null ? null : senators.getNodeStates().get(upLevelNode.getAddress());
+				int upLevelDistance = upLevelNodeState == null ? Constants.MAX_MASTER_DISTANCE : upLevelNodeState.getMasterDistance();
+				logger.info(String.format("state from %s distance %s upLevelDistance %s masterDistance %s", nState.getAddress(),nState.getMasterDistance(),upLevelDistance,masterDistance));
+				if (masterDistance > distance || (masterDistance == distance && upLevelDistance >= distance)) {
 					setMasterDistance(distance);
 				}
 			}
@@ -246,7 +254,8 @@ public class ClusterState implements ConfigureEventListener,HeartBeatEventListen
 				newNodeState.putAll(senators.getNodeStates());
 				NodeState old = newNodeState.put(nState.getAddress(), nState);
 				senators = new NodesCollection(senators.getNodeMembers(), senators.getValidActiveNodes(), senators.getAllActiveNodes(), newNodeState);
-			NodeStateChangeEvent.doNodeStateChange(eventsManager, fromAddress, old, nState);
+				NodeStateChangeEvent.doNodeStateChange(eventsManager, fromAddress, old, nState);
+//				logger.info(String.format("state from %s distance %s transport by %s", nState.getAddress(),nState.getMasterDistance(),fromAddress));
 			} else {
 				followerConnect(nState);
 			}
@@ -290,7 +299,7 @@ public class ClusterState implements ConfigureEventListener,HeartBeatEventListen
 			senators = new NodesCollection(newSenators, validActiveNodes, allActiveNodes, temp);
 			lostAuthorizationOfMaster();
 			selfState.reInit();
-			
+
 		} finally {
 			nodeLock.unlock();
 		}
@@ -392,7 +401,7 @@ public class ClusterState implements ConfigureEventListener,HeartBeatEventListen
 
 	@Override
 	public void nodeStateChange(String fromNetNodeAddress, NodeState oldState, NodeState newState) {
-		
+
 	}
 
 }

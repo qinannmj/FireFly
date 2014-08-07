@@ -249,12 +249,22 @@ public class IoSession {
 	}
 
 	public String getRemoteAddress() {
-		SocketAddress address = channel.socket().getRemoteSocketAddress();
+		SocketAddress address = null;
+		try {
+			address = channel.socket().getRemoteSocketAddress();
+		} catch (Throwable e) {
+			logger.error(e);
+		}
 		return address == null ? "" : address.toString();
 	}
 
 	public String getLocalAddress() {
-		InetAddress address = channel.socket().getLocalAddress();
+		SocketAddress address = null;
+		try {
+			address = channel.socket().getLocalSocketAddress();
+		} catch (Throwable e) {
+			logger.error(e);
+		}
 		return address == null ? "" : address.toString();
 	}
 

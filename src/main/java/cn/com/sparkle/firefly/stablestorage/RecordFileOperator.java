@@ -50,6 +50,8 @@ public interface RecordFileOperator {
 	public HashMap<Long, InstanceVoteRecord> getVotedInstanceRecordMap();
 
 	public long getMaxVoteInstanceId();
+	
+	public long getKnowedMaxId();
 
 	public boolean isSuccessful(long instanceId);
 

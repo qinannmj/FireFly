@@ -39,4 +39,14 @@ public class NettyPaxosSession extends PaxosSession {
 		this.isClose = isClose;
 	}
 
+	@Override
+	public String getRemoteAddress() {
+		return ctx.channel().remoteAddress().toString();
+	}
+
+	@Override
+	public String getLocalAddress() {
+		return ctx.channel().localAddress().toString();
+	}
+
 }

@@ -42,9 +42,9 @@ public class ActiveHeartProcessor extends AbstractProtocolV0_0_1Processor {
 			nodeState.setConnectedValidNode(heart.getConnectedValidNodesList());
 
 			SystemNetNode upLevelNode = context.getcState().getRouteManage().lookupUpLevelNode();
-			if (upLevelNode != null) {
+			if (upLevelNode != null && request.getLifecycle() > 0) {
 				try {
-					upLevelNode.sendActiveHeartBeat(nodeState);
+					upLevelNode.sendActiveHeartBeat(nodeState,request.getLifecycle() - 1);
 				} catch (NetCloseException e) {
 				}
 			}

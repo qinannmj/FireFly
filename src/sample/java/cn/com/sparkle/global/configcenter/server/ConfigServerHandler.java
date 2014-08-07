@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.log4j.Logger;
@@ -31,6 +32,8 @@ public class ConfigServerHandler extends HandlerInterface {
 	private int curModifyNum = 0;
 	private ConcurrentHashMap<String, Value> map; // 内存键值对
 	private HashMap<String, HashSet<PaxosSession>> watch = new HashMap<String, HashSet<PaxosSession>>(10000);// watch 关系
+	public final AtomicLong clientCount = new AtomicLong();
+	public final ConcurrentHashMap<PaxosSession,PaxosSession> clientset = new ConcurrentHashMap<PaxosSession,PaxosSession>();
 
 	private String path;// 文件路径
 	private ReentrantLock lock = new ReentrantLock();
@@ -42,10 +45,19 @@ public class ConfigServerHandler extends HandlerInterface {
 
 	@Override
 	public void onClientConnect(PaxosSession session) {
+		try{
+		logger.debug(String.format("user connected remote %s to local %s", session.getRemoteAddress(),session.getLocalAddress()));
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		clientCount.incrementAndGet();
+		clientset.put(session, session);
 	}
 
 	@Override
 	public void onClientClose(PaxosSession session) {
+		clientCount.decrementAndGet();
+		clientset.remove(session);
 		// 清除 session 注册的所有watch
 
 		HashMap<String, AddRequest> sessionWatch = session.get(MAP_KEY);

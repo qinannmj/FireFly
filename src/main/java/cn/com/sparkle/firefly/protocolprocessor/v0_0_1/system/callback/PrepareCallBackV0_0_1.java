@@ -2,7 +2,6 @@ package cn.com.sparkle.firefly.protocolprocessor.v0_0_1.system.callback;
 
 import cn.com.sparkle.firefly.model.Id;
 import cn.com.sparkle.firefly.model.Value;
-import cn.com.sparkle.firefly.model.Value.ValueType;
 import cn.com.sparkle.firefly.net.client.CallBack;
 import cn.com.sparkle.firefly.net.client.NetNode;
 import cn.com.sparkle.firefly.net.client.system.callback.PrepareCallBack;

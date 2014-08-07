@@ -56,5 +56,5 @@ public interface PaxosOperater {
 	public byte[] syncAdd(byte[] value, CommandType commandType, int timeout, TimeUnit unit) throws InterruptedException, MasterMayBeLostException,
 			TimeoutException ;
 	public CommandAsyncProcessor getProcessor();
-	public long getResponseInstanceId();
+//	public long getResponseInstanceId();
 }

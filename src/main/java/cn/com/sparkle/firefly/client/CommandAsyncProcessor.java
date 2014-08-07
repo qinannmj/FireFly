@@ -1,6 +1,6 @@
 package cn.com.sparkle.firefly.client;
 
-import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -36,12 +36,12 @@ public class CommandAsyncProcessor implements Runnable {
 
 	private ConnectConfig firstPriorConfig;
 
-	private ArrayBlockingQueue<Command> commandQueue;
+	private BlockingQueue<Command> commandQueue;
 
 	private EntryNode root = new EntryNode();
 	private AtomicInteger runningSize = new AtomicInteger(0);
 
-	private final int maxRunningSize;
+//	private final int maxRunningMemSize;
 
 	private int masterDistance;
 
@@ -83,6 +83,7 @@ public class CommandAsyncProcessor implements Runnable {
 	private ConnectEvent connectEvent = new ConnectEvent() {
 		@Override
 		public void disconnect(String address, NetNode node) {
+			
 			wakeup();//may be first node is disconnected
 		}
 
@@ -100,6 +101,7 @@ public class CommandAsyncProcessor implements Runnable {
 
 	public static void init(String confPath, String netLayerType, int preferChecksumType, int heartBeatInterval, ProtocolManager protocolManager,
 			boolean debugLog) throws Throwable {
+		
 		nioSocketClient = NetFactory.makeClient(netLayerType,debugLog);
 		handler = new UserClientHandler(nioSocketClient, preferChecksumType, heartBeatInterval, protocolManager, reConnectThread, debugLog);
 		nioSocketClient.init(confPath, heartBeatInterval, handler,"userclient");
@@ -107,14 +109,13 @@ public class CommandAsyncProcessor implements Runnable {
 
 	}
 
-	public CommandAsyncProcessor(String[] senator, int maxRunningSize, int maxWaitRunSize, int masterDistance, MasterHeartBeatDeamon heartBeatDeamon,
+	public CommandAsyncProcessor(String[] senator, int masterDistance,BlockingQueue<Command> queue, MasterHeartBeatDeamon heartBeatDeamon,
 			boolean debugLog) throws Throwable {
 		this.newSenator = senator;
-		this.maxRunningSize = maxRunningSize;
 		this.debugLog = debugLog;
 		this.masterDistance = masterDistance;
 		this.heartBeatDeamon = heartBeatDeamon;
-		commandQueue = new ArrayBlockingQueue<Command>(maxWaitRunSize);
+		commandQueue = queue;
 		wakeup();//notify to process first
 	}
 
@@ -122,6 +123,10 @@ public class CommandAsyncProcessor implements Runnable {
 		try {
 			nodeChangeLock.lock();
 			newSenator = senator;
+			StringBuffer sb = new StringBuffer();
+			for(String s : senator){
+				sb.append(" ").append(s);
+			}
 			wakeup();
 
 		} finally {
@@ -211,7 +216,8 @@ public class CommandAsyncProcessor implements Runnable {
 					}
 				}
 				if (curConnectConfig != null) {
-					while (commandQueue.peek() != null && runningSize.get() != maxRunningSize) {
+//					while (commandQueue.peek() != null && runningSize.get() != maxRunningSize) {
+					while (commandQueue.peek() != null) {
 						EntryNode e = new EntryNode();
 						e.c = commandQueue.poll();
 						synchronized (root) {

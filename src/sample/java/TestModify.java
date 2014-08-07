@@ -6,7 +6,7 @@ public class TestModify {
 		ConfigClient cc = new ConfigClient(new String[]{"127.0.0.1:11001","127.0.0.1:10001","127.0.0.1:9001"},"target/classes/configcenter/conf9000/service_in_net.prop");
 		
 		for(int i = 0 ; i < 10000 ; i++){
-			boolean r = cc.set("1111", "都收到了呀" + i);
+			boolean r = cc.set("1111", "都收到了呀good good 测试中文娃儿娃儿" + i);
 			System.out.println("modify result:" + r);
 		}
 		

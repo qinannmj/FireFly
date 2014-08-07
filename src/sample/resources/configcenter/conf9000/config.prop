@@ -7,6 +7,7 @@ listen-port=9000
 listen-port-client=9001
 max-response-delay=100
 transport-tcp-num=10
+transport-singletcp-max-waiting-mem-size=5242880
 net-layer=raptor
 #net-layer=netty
 disk-mem-lost=0
@@ -14,7 +15,9 @@ catchup-delay=5000
 debug-log=true
 elect-self-master=true
 vote-value-split-size=65535
+min-instance-merge-package-size=524288
 max-instance-merge-package-size=1048576
+
 transport-timeout=5000
 is-merge-client-request=true
 

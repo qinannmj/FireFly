@@ -41,7 +41,7 @@ public class AddRequestProcessor extends AbstractProtocolV0_0_1Processor impleme
 
 	private ReentrantLock masterChangelock = new ReentrantLock();
 
-	private String masterAddress;
+	private String masterAddress = "";
 
 	private ProtocolManager protocolManager;
 
@@ -91,7 +91,7 @@ public class AddRequestProcessor extends AbstractProtocolV0_0_1Processor impleme
 							operator = client.getOperator();
 							session.put(PaxosSessionKeys.PAXOS_OPERATOR_KEY, operator);// assign a channel to master
 						}
-						final PaxosOperater oper = operator;
+						//						final PaxosOperater oper = operator;
 						try {
 							context.getcState().getSelfState().addTransportToMasterCount();
 							//The timeout promise the mem is not used excessively
@@ -103,7 +103,7 @@ public class AddRequestProcessor extends AbstractProtocolV0_0_1Processor impleme
 
 											MessagePackage.Builder mp = MessagePackage.newBuilder().setIsLast(true).setId(packageId);
 											AddResponse.Builder response = AddResponse.newBuilder().setResult(ByteString.copyFrom(bytes))
-													.setInstanceId(oper.getResponseInstanceId());
+													.setInstanceId(client.getResponseInstanceId());
 											mp.setAddResponse(response);
 											sendResponse(session, mp.build().toByteArray());
 										}
@@ -146,43 +146,42 @@ public class AddRequestProcessor extends AbstractProtocolV0_0_1Processor impleme
 		//find up level node
 		SystemNetNode node = context.getcState().getRouteManage().lookupUpLevelNode();
 
-		if (distance == 0) {
-			node = (SystemNetNode) context.getcState().getSenators().getAllActiveNodes().get(conf.getSelfAddress());
-		}
-		if (conf.isDebugLog()) {
-			logger.debug("distance change to " + distance + " uplevel node:" + (node != null ? node.getAddress() : null));
-		}
-
-		if (node != null) {
-
-			try {
-				masterChangelock.lock();
-
+		try {
+			masterChangelock.lock();
+			String[] senator = null;
+			if (node != null) {
 				masterAddress = node.getAddress().split(":")[0] + ":" + node.getUserPort();
 				if (conf.isDebugLog()) {
 					logger.debug("transport to " + masterAddress);
 				}
-				if (client == null && masterAddress != null) {
-					try {
-						client = new PaxosClient(new String[] { masterAddress }, conf.getFilePath() + "/service_out_net.prop", conf.getNetLayer(),
-								conf.getNetChecksumType(), conf.getHeartBeatInterval(), conf.getTransportTcpNum(), Constants.MAX_MASTER_INSTANCE,
-								protocolManager,conf.getTransportMaxInstanceRunningSize(),conf.getTransportMaxWaitQueueSize(), conf.isDebugLog());
-					} catch (Throwable e) {
-						logger.error("fatal error", e);
-					}
-				} else {
-					if (conf.isDebugLog()) {
-						logger.debug("change address");
-					}
-					try {
-						client.changeSenator(new String[] { masterAddress });
-					} catch (Throwable e) {
-						logger.error("fatal error", e);
-					}
-				}
-			} finally {
-				masterChangelock.unlock();
+				senator = new String[]{masterAddress};
+			}else if(context.getcState().getMasterDistance() == 0){
+				masterAddress = conf.getSelfAddress();
+				senator = new String[]{masterAddress};
+			}else{
+				senator = new String[]{};
 			}
+			
+			if (client == null) {
+				try {
+					client = new PaxosClient(senator, conf.getFilePath() + "/service_out_net.prop", conf.getNetLayer(),
+							conf.getNetChecksumType(), conf.getHeartBeatInterval(), conf.getTransportTcpNum(), Constants.MAX_MASTER_DISTANCE,
+							protocolManager, conf.getTransportSingleTcpMaxWaitingMemSize(), conf.isDebugLog());
+				} catch (Throwable e) {
+					logger.error("fatal error", e);
+				}
+			} else {
+				if (conf.isDebugLog()) {
+					logger.debug("change address");
+				}
+				try {
+					client.changeSenator(senator);
+				} catch (Throwable e) {
+					logger.error("fatal error", e);
+				}
+			}
+		} finally {
+			masterChangelock.unlock();
 		}
 	}
 

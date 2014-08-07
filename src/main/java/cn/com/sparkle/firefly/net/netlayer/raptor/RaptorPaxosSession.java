@@ -39,4 +39,14 @@ public class RaptorPaxosSession extends PaxosSession {
 		return session.isClose();
 	}
 
+	@Override
+	public String getRemoteAddress() {
+		return session.getRemoteAddress();
+	}
+
+	@Override
+	public String getLocalAddress() {
+		return session.getLocalAddress();
+	}
+
 }

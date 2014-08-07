@@ -39,8 +39,8 @@ public class Configuration {
 	private String filePath;
 	private long responseDelay;
 	private int transportTcpNum;
-	private int transportMaxInstanceRunningSize;
-	private int transportMaxWaitQueueSize;
+//	private int transportMaxInstanceRunningSize;
+	private int transportSingleTcpMaxWaitingMemSize;
 	private String netLayer;
 	private int diskMemLost;
 	private boolean debugLog;
@@ -178,25 +178,25 @@ public class Configuration {
 			}
 		}
 		
-		if (confProp.getProperty("transport-max-instance-running-size") == null) {
-			throw new ConfigurationError("transport-max-instance-running-size not be set, please check your configuration!");
+		if (confProp.getProperty("transport-singletcp-max-waiting-mem-size") == null) {
+			throw new ConfigurationError("transport-singletcp-max-waiting-mem-size not be set, please check your configuration!");
 		} else {
 			try {
-				this.transportMaxInstanceRunningSize = Integer.parseInt(confProp.getProperty("transport-max-instance-running-size").trim());
+				this.transportSingleTcpMaxWaitingMemSize = Integer.parseInt(confProp.getProperty("transport-singletcp-max-waiting-mem-size").trim());
 			} catch (NumberFormatException e) {
-				throw new ConfigurationError("transport-max-instance-running-size must be number, please check your configuration!");
+				throw new ConfigurationError("transport-singletcp-max-waiting-mem-size must be number, please check your configuration!");
 			}
 		}
 		
-		if (confProp.getProperty("transport-max-wait-queue-size") == null) {
-			throw new ConfigurationError("transport-max-wait-queue-size not be set, please check your configuration!");
-		} else {
-			try {
-				this.transportMaxWaitQueueSize = Integer.parseInt(confProp.getProperty("transport-max-wait-queue-size").trim());
-			} catch (NumberFormatException e) {
-				throw new ConfigurationError("transport-max-wait-queue-size must be number, please check your configuration!");
-			}
-		}
+//		if (confProp.getProperty("transport-max-wait-queue-size") == null) {
+//			throw new ConfigurationError("transport-max-wait-queue-size not be set, please check your configuration!");
+//		} else {
+//			try {
+//				this.transportMaxWaitQueueSize = Integer.parseInt(confProp.getProperty("transport-max-wait-queue-size").trim());
+//			} catch (NumberFormatException e) {
+//				throw new ConfigurationError("transport-max-wait-queue-size must be number, please check your configuration!");
+//			}
+//		}
 
 		if (confProp.getProperty("net-layer") == null) {
 			throw new ConfigurationError("net-layer not be set, please check your configuration!");
@@ -424,6 +424,7 @@ public class Configuration {
 		logger.info("response-delay:" + this.responseDelay);
 		logger.info("stable-storage-path:" + this.stableStorage);
 		logger.info("transport-tcp-num:" + this.transportTcpNum);
+		logger.info("transport-singletcp-max-waiting-mem-size:" + this.transportSingleTcpMaxWaitingMemSize);
 		logger.info("elect-self-master:" + this.electSelfMaster);
 		logger.info("vote-value-split-size:" + this.voteValueSplitSize);
 		logger.info("max-instance-merge-package-size:" + this.maxInstanceMergePackageSize);
@@ -444,12 +445,10 @@ public class Configuration {
 		return minInstanceMergePackageSize;
 	}
 
-	public int getTransportMaxInstanceRunningSize() {
-		return transportMaxInstanceRunningSize;
-	}
+	
 
-	public int getTransportMaxWaitQueueSize() {
-		return transportMaxWaitQueueSize;
+	public int getTransportSingleTcpMaxWaitingMemSize() {
+		return transportSingleTcpMaxWaitingMemSize;
 	}
 
 	public String getRoom() {

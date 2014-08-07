@@ -30,7 +30,6 @@ public class DefaultRouteManager implements RouteManage, MasterDistanceChangeLis
 	private Configuration conf;
 	private ClusterState clusterState;
 	private int curDistance = Integer.MAX_VALUE;
-	private volatile int cacheDistance = Integer.MIN_VALUE;
 
 	private volatile String upLevelAddress = null;
 	private volatile SystemNetNode upLevelNetNode = null;
@@ -65,32 +64,36 @@ public class DefaultRouteManager implements RouteManage, MasterDistanceChangeLis
 		return upLevelAddress;
 	}
 
-	@Override
-	public String lookupUpLevelNodeAddress(int distance) {
-		if (cacheDistance != distance) {
-			NodesCollection senator = clusterState.getSenators();
-			upLevelAddress = null;
-			upLevelNetNode = null;
-			for (NetNode n : senator.getAllActiveNodes().values()) {
-				NodeState ns = senator.getNodeStates().get(n.getAddress());
-				if (!conf.getSelfAddress().equals(n.getAddress()) && ns.getMasterDistance() + 1 == distance) { //except self
-					upLevelAddress = n.getAddress();
-					upLevelNetNode = (SystemNetNode) n;
-					break;
-				}
+	public String calcUpLevelNodeAddress(int distance) {
+		NodesCollection senator = clusterState.getSenators();
+		String upAddress = null;
+		SystemNetNode upNode = null;
+		int minDistance = distance;
+		
+		for (NetNode n : senator.getAllActiveNodes().values()) {
+			NodeState ns = senator.getNodeStates().get(n.getAddress());
+			if (!conf.getSelfAddress().equals(n.getAddress()) && minDistance > ns.getMasterDistance()) { //except self
+				minDistance = ns.getMasterDistance();
+				upAddress = n.getAddress();
+				upNode = (SystemNetNode) n;
 			}
-			cacheDistance = distance;
+		}
+		upLevelAddress = upAddress;
+		upLevelNetNode = upNode;
+		if(conf.isDebugLog()){
+			logger.debug("uplevel node :" + upLevelAddress);
 		}
 		return upLevelAddress;
 	}
 
 	@Override
 	public void masterDistanceChange(int distance) {
-		lookupUpLevelNodeAddress(distance);//active modify uplevelNode address
+		calcUpLevelNodeAddress(distance);//active modify uplevelNode address
 		if (distance == 0) {
 			//this is master
 			curDistance = distance;
 			recalc();
+			upLevelAddress = null;
 		}
 	}
 

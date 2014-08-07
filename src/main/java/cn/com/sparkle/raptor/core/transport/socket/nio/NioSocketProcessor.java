@@ -337,6 +337,7 @@ public class NioSocketProcessor {
 				break;
 			}
 			entity.getElement().closeSession();
+			logger.debug(entity.getElement() + "  ---" + entity.getElement().getLastActiveTime());
 			logger.debug("close timeout connection!" + (now - entity.getElement().getLastActiveTime()));
 			activeSessionLinedLinkedList.remove(entity);
 		}

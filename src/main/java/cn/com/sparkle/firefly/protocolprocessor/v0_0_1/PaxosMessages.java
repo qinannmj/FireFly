@@ -6300,6 +6300,24 @@ public final class PaxosMessages {
      * <code>required .protocolbuffer.SenatorHeartBeatResponse heartBeatResponse = 2;</code>
      */
     cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.SenatorHeartBeatResponseOrBuilder getHeartBeatResponseOrBuilder();
+
+    // required int32 lifecycle = 3;
+    /**
+     * <code>required int32 lifecycle = 3;</code>
+     *
+     * <pre>
+     *for avoid boardcast storm
+     * </pre>
+     */
+    boolean hasLifecycle();
+    /**
+     * <code>required int32 lifecycle = 3;</code>
+     *
+     * <pre>
+     *for avoid boardcast storm
+     * </pre>
+     */
+    int getLifecycle();
   }
   /**
    * Protobuf type {@code protocolbuffer.ActiveHeartBeatRequest}
@@ -6368,6 +6386,11 @@ public final class PaxosMessages {
                 heartBeatResponse_ = subBuilder.buildPartial();
               }
               bitField0_ |= 0x00000002;
+              break;
+            }
+            case 24: {
+              bitField0_ |= 0x00000004;
+              lifecycle_ = input.readInt32();
               break;
             }
           }
@@ -6475,9 +6498,34 @@ public final class PaxosMessages {
       return heartBeatResponse_;
     }
 
+    // required int32 lifecycle = 3;
+    public static final int LIFECYCLE_FIELD_NUMBER = 3;
+    private int lifecycle_;
+    /**
+     * <code>required int32 lifecycle = 3;</code>
+     *
+     * <pre>
+     *for avoid boardcast storm
+     * </pre>
+     */
+    public boolean hasLifecycle() {
+      return ((bitField0_ & 0x00000004) == 0x00000004);
+    }
+    /**
+     * <code>required int32 lifecycle = 3;</code>
+     *
+     * <pre>
+     *for avoid boardcast storm
+     * </pre>
+     */
+    public int getLifecycle() {
+      return lifecycle_;
+    }
+
     private void initFields() {
       address_ = "";
       heartBeatResponse_ = cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.SenatorHeartBeatResponse.getDefaultInstance();
+      lifecycle_ = 0;
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -6489,6 +6537,10 @@ public final class PaxosMessages {
         return false;
       }
       if (!hasHeartBeatResponse()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      if (!hasLifecycle()) {
         memoizedIsInitialized = 0;
         return false;
       }
@@ -6509,6 +6561,9 @@ public final class PaxosMessages {
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
         output.writeMessage(2, heartBeatResponse_);
       }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        output.writeInt32(3, lifecycle_);
+      }
       getUnknownFields().writeTo(output);
     }
 
@@ -6525,6 +6580,10 @@ public final class PaxosMessages {
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(2, heartBeatResponse_);
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(3, lifecycle_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -6651,6 +6710,8 @@ public final class PaxosMessages {
           heartBeatResponseBuilder_.clear();
         }
         bitField0_ = (bitField0_ & ~0x00000002);
+        lifecycle_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000004);
         return this;
       }
 
@@ -6691,6 +6752,10 @@ public final class PaxosMessages {
         } else {
           result.heartBeatResponse_ = heartBeatResponseBuilder_.build();
         }
+        if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
+          to_bitField0_ |= 0x00000004;
+        }
+        result.lifecycle_ = lifecycle_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -6715,6 +6780,9 @@ public final class PaxosMessages {
         if (other.hasHeartBeatResponse()) {
           mergeHeartBeatResponse(other.getHeartBeatResponse());
         }
+        if (other.hasLifecycle()) {
+          setLifecycle(other.getLifecycle());
+        }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
@@ -6725,6 +6793,10 @@ public final class PaxosMessages {
           return false;
         }
         if (!hasHeartBeatResponse()) {
+          
+          return false;
+        }
+        if (!hasLifecycle()) {
           
           return false;
         }
@@ -6943,6 +7015,55 @@ public final class PaxosMessages {
           heartBeatResponse_ = null;
         }
         return heartBeatResponseBuilder_;
+      }
+
+      // required int32 lifecycle = 3;
+      private int lifecycle_ ;
+      /**
+       * <code>required int32 lifecycle = 3;</code>
+       *
+       * <pre>
+       *for avoid boardcast storm
+       * </pre>
+       */
+      public boolean hasLifecycle() {
+        return ((bitField0_ & 0x00000004) == 0x00000004);
+      }
+      /**
+       * <code>required int32 lifecycle = 3;</code>
+       *
+       * <pre>
+       *for avoid boardcast storm
+       * </pre>
+       */
+      public int getLifecycle() {
+        return lifecycle_;
+      }
+      /**
+       * <code>required int32 lifecycle = 3;</code>
+       *
+       * <pre>
+       *for avoid boardcast storm
+       * </pre>
+       */
+      public Builder setLifecycle(int value) {
+        bitField0_ |= 0x00000004;
+        lifecycle_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required int32 lifecycle = 3;</code>
+       *
+       * <pre>
+       *for avoid boardcast storm
+       * </pre>
+       */
+      public Builder clearLifecycle() {
+        bitField0_ = (bitField0_ & ~0x00000004);
+        lifecycle_ = 0;
+        onChanged();
+        return this;
       }
 
       // @@protoc_insertion_point(builder_scope:protocolbuffer.ActiveHeartBeatRequest)
@@ -23235,63 +23356,64 @@ public final class PaxosMessages {
       "e\030\035 \001(\0132\037.protocolbuffer.ConnectResponse" +
       "\022.\n\nvalueTrunk\030\036 \001(\0132\032.protocolbuffer.Va" +
       "lueTrunk\"\032\n\nValueTrunk\022\014\n\004part\030\001 \002(\014\"\022\n\020" +
-      "HeartBeatRequest\"n\n\026ActiveHeartBeatReque" +
-      "st\022\017\n\007address\030\001 \002(\t\022C\n\021heartBeatResponse" +
-      "\030\002 \002(\0132(.protocolbuffer.SenatorHeartBeat" +
-      "Response\"\206\002\n\030SenatorHeartBeatResponse\022 \n" +
-      "\030lastCanExecuteInstanceId\030\001 \002(\003\022\031\n\021isMas" +
-      "terConnected\030\002 \002(\010\022\027\n\017electionAddress\030\003 ",
-      "\002(\t\022\022\n\nelectionId\030\004 \002(\003\022\027\n\017electionVersi" +
-      "on\030\005 \002(\003\022\020\n\010isInited\030\006 \002(\010\022\022\n\nisUpToDate" +
-      "\030\007 \002(\010\022\026\n\016masterDistance\030\010 \002(\005\022\014\n\004room\030\t" +
-      " \002(\t\022\033\n\023connectedValidNodes\030\n \003(\t\"\037\n\035Loo" +
-      "kUpLatestInstanceIdRequest\"\030\n\026GetNewsSen" +
-      "atorsRequest\"`\n\027GetNewsSenatorsResponse\022" +
-      "\017\n\007version\030\001 \002(\003\022\020\n\010senators\030\002 \003(\t\022\"\n\006ma" +
-      "ster\030\003 \002(\0132\022.protocolbuffer.Id\"7\n\016CatchU" +
-      "pRequest\022\027\n\017startInstanceId\030\001 \002(\003\022\014\n\004siz" +
-      "e\030\002 \002(\005\"K\n\017CatchUpResponse\0228\n\021successful",
-      "Records\030\001 \003(\0132\035.protocolbuffer.CatchUpRe" +
-      "cord\"T\n\rCatchUpRecord\022\022\n\ninstanceId\030\001 \002(" +
-      "\003\022/\n\005value\030\002 \002(\0132 .protocolbuffer.Succes" +
-      "sfulRecord\"[\n\026InstancePrepareRequest\022\022\n\n" +
-      "instanceId\030\001 \002(\003\022\036\n\002id\030\002 \002(\0132\022.protocolb" +
-      "uffer.Id\022\r\n\005chain\030\003 \003(\t\"X\n\022PrepareRespon" +
-      "seBad\022\025\n\rlastPrepareId\030\001 \002(\003\022+\n\014successV" +
-      "alue\030\002 \001(\0132\025.protocolbuffer.Value\"d\n\023Pre" +
-      "pareResponseGood\022\'\n\013lastVotedId\030\001 \002(\0132\022." +
-      "protocolbuffer.Id\022$\n\005value\030\002 \001(\0132\025.proto",
-      "colbuffer.Value\"\204\001\n\023InstanceVoteRequest\022" +
-      "\022\n\ninstanceId\030\001 \002(\003\022\"\n\006voteId\030\002 \002(\0132\022.pr" +
-      "otocolbuffer.Id\022\r\n\005chain\030\004 \003(\t\022\021\n\tvaluet" +
-      "ype\030\005 \002(\005\022\023\n\013valueLength\030\006 \002(\005\"M\n\014VoteRe" +
-      "sponse\022\020\n\010refuseId\030\001 \002(\003\022+\n\014successValue" +
-      "\030\002 \001(\0132\025.protocolbuffer.Value\"T\n\026Electio" +
-      "nPrepareRequest\022&\n\002id\030\001 \002(\0132\032.protocolbu" +
-      "ffer.ElectionId\022\022\n\nlastVoteId\030\002 \002(\003\"Q\n\023E" +
-      "lectionVoteRequest\022&\n\002id\030\001 \002(\0132\032.protoco" +
-      "lbuffer.ElectionId\022\022\n\nlastVoteId\030\002 \002(\003\"@",
-      "\n\026ElectionSuccessMessage\022&\n\002id\030\001 \002(\0132\032.p" +
-      "rotocolbuffer.ElectionId\"4\n\036LookUpLatest" +
-      "InstanceIdResponse\022\022\n\ninstanceId\030\001 \002(\003\"\314" +
-      "\001\n\026InstanceSuccessMessage\022\n\n\002id\030\001 \002(\003\022$\n" +
-      "\005value\030\002 \001(\0132\025.protocolbuffer.Value\022*\n\016h" +
-      "ighestVoteNum\030\003 \002(\0132\022.protocolbuffer.Id\022" +
-      "\025\n\rnotifyAddress\030\004 \003(\t\022=\n\013notifyChain\030\005 " +
-      "\003(\0132(.protocolbuffer.InstanceSuccessTran" +
-      "sport\"X\n\030InstanceSuccessTransport\022\017\n\007add" +
-      "ress\030\001 \002(\t\022\025\n\rnotifyAddress\030\002 \003(\t\022\024\n\014isT",
-      "ransValue\030\003 \002(\010\"\031\n\027InstanceSuccessRespon" +
-      "se\"=\n\nElectionId\022\036\n\002id\030\001 \002(\0132\022.protocolb" +
-      "uffer.Id\022\017\n\007version\030\002 \002(\003\"6\n\017CommandResp" +
-      "onse\022\024\n\014isSuccessful\030\001 \002(\010\022\r\n\005error\030\002 \002(" +
-      "\t\"D\n\nAddRequest\022\023\n\013commandType\030\001 \002(\005\022\r\n\005" +
-      "value\030\002 \002(\014\022\022\n\ninstanceId\030\003 \001(\003\"1\n\013AddRe" +
-      "sponse\022\016\n\006result\030\001 \002(\014\022\022\n\ninstanceId\030\002 \001" +
-      "(\003\"(\n\016ConnectRequest\022\026\n\016masterDistance\030\001" +
-      " \002(\005\"\'\n\017ConnectResponse\022\024\n\014isSuccessful\030" +
-      "\001 \002(\010B@\n/cn.com.sparkle.firefly.protocol",
-      "processor.v0_0_1B\rPaxosMessages"
+      "HeartBeatRequest\"\201\001\n\026ActiveHeartBeatRequ" +
+      "est\022\017\n\007address\030\001 \002(\t\022C\n\021heartBeatRespons" +
+      "e\030\002 \002(\0132(.protocolbuffer.SenatorHeartBea" +
+      "tResponse\022\021\n\tlifecycle\030\003 \002(\005\"\206\002\n\030Senator" +
+      "HeartBeatResponse\022 \n\030lastCanExecuteInsta" +
+      "nceId\030\001 \002(\003\022\031\n\021isMasterConnected\030\002 \002(\010\022\027",
+      "\n\017electionAddress\030\003 \002(\t\022\022\n\nelectionId\030\004 " +
+      "\002(\003\022\027\n\017electionVersion\030\005 \002(\003\022\020\n\010isInited" +
+      "\030\006 \002(\010\022\022\n\nisUpToDate\030\007 \002(\010\022\026\n\016masterDist" +
+      "ance\030\010 \002(\005\022\014\n\004room\030\t \002(\t\022\033\n\023connectedVal" +
+      "idNodes\030\n \003(\t\"\037\n\035LookUpLatestInstanceIdR" +
+      "equest\"\030\n\026GetNewsSenatorsRequest\"`\n\027GetN" +
+      "ewsSenatorsResponse\022\017\n\007version\030\001 \002(\003\022\020\n\010" +
+      "senators\030\002 \003(\t\022\"\n\006master\030\003 \002(\0132\022.protoco" +
+      "lbuffer.Id\"7\n\016CatchUpRequest\022\027\n\017startIns" +
+      "tanceId\030\001 \002(\003\022\014\n\004size\030\002 \002(\005\"K\n\017CatchUpRe",
+      "sponse\0228\n\021successfulRecords\030\001 \003(\0132\035.prot" +
+      "ocolbuffer.CatchUpRecord\"T\n\rCatchUpRecor" +
+      "d\022\022\n\ninstanceId\030\001 \002(\003\022/\n\005value\030\002 \002(\0132 .p" +
+      "rotocolbuffer.SuccessfulRecord\"[\n\026Instan" +
+      "cePrepareRequest\022\022\n\ninstanceId\030\001 \002(\003\022\036\n\002" +
+      "id\030\002 \002(\0132\022.protocolbuffer.Id\022\r\n\005chain\030\003 " +
+      "\003(\t\"X\n\022PrepareResponseBad\022\025\n\rlastPrepare" +
+      "Id\030\001 \002(\003\022+\n\014successValue\030\002 \001(\0132\025.protoco" +
+      "lbuffer.Value\"d\n\023PrepareResponseGood\022\'\n\013" +
+      "lastVotedId\030\001 \002(\0132\022.protocolbuffer.Id\022$\n",
+      "\005value\030\002 \001(\0132\025.protocolbuffer.Value\"\204\001\n\023" +
+      "InstanceVoteRequest\022\022\n\ninstanceId\030\001 \002(\003\022" +
+      "\"\n\006voteId\030\002 \002(\0132\022.protocolbuffer.Id\022\r\n\005c" +
+      "hain\030\004 \003(\t\022\021\n\tvaluetype\030\005 \002(\005\022\023\n\013valueLe" +
+      "ngth\030\006 \002(\005\"M\n\014VoteResponse\022\020\n\010refuseId\030\001" +
+      " \002(\003\022+\n\014successValue\030\002 \001(\0132\025.protocolbuf" +
+      "fer.Value\"T\n\026ElectionPrepareRequest\022&\n\002i" +
+      "d\030\001 \002(\0132\032.protocolbuffer.ElectionId\022\022\n\nl" +
+      "astVoteId\030\002 \002(\003\"Q\n\023ElectionVoteRequest\022&" +
+      "\n\002id\030\001 \002(\0132\032.protocolbuffer.ElectionId\022\022",
+      "\n\nlastVoteId\030\002 \002(\003\"@\n\026ElectionSuccessMes" +
+      "sage\022&\n\002id\030\001 \002(\0132\032.protocolbuffer.Electi" +
+      "onId\"4\n\036LookUpLatestInstanceIdResponse\022\022" +
+      "\n\ninstanceId\030\001 \002(\003\"\314\001\n\026InstanceSuccessMe" +
+      "ssage\022\n\n\002id\030\001 \002(\003\022$\n\005value\030\002 \001(\0132\025.proto" +
+      "colbuffer.Value\022*\n\016highestVoteNum\030\003 \002(\0132" +
+      "\022.protocolbuffer.Id\022\025\n\rnotifyAddress\030\004 \003" +
+      "(\t\022=\n\013notifyChain\030\005 \003(\0132(.protocolbuffer" +
+      ".InstanceSuccessTransport\"X\n\030InstanceSuc" +
+      "cessTransport\022\017\n\007address\030\001 \002(\t\022\025\n\rnotify",
+      "Address\030\002 \003(\t\022\024\n\014isTransValue\030\003 \002(\010\"\031\n\027I" +
+      "nstanceSuccessResponse\"=\n\nElectionId\022\036\n\002" +
+      "id\030\001 \002(\0132\022.protocolbuffer.Id\022\017\n\007version\030" +
+      "\002 \002(\003\"6\n\017CommandResponse\022\024\n\014isSuccessful" +
+      "\030\001 \002(\010\022\r\n\005error\030\002 \002(\t\"D\n\nAddRequest\022\023\n\013c" +
+      "ommandType\030\001 \002(\005\022\r\n\005value\030\002 \002(\014\022\022\n\ninsta" +
+      "nceId\030\003 \001(\003\"1\n\013AddResponse\022\016\n\006result\030\001 \002" +
+      "(\014\022\022\n\ninstanceId\030\002 \001(\003\"(\n\016ConnectRequest" +
+      "\022\026\n\016masterDistance\030\001 \002(\005\"\'\n\017ConnectRespo" +
+      "nse\022\024\n\014isSuccessful\030\001 \002(\010B@\n/cn.com.spar",
+      "kle.firefly.protocolprocessor.v0_0_1B\rPa" +
+      "xosMessages"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -23321,7 +23443,7 @@ public final class PaxosMessages {
           internal_static_protocolbuffer_ActiveHeartBeatRequest_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_protocolbuffer_ActiveHeartBeatRequest_descriptor,
-              new java.lang.String[] { "Address", "HeartBeatResponse", });
+              new java.lang.String[] { "Address", "HeartBeatResponse", "Lifecycle", });
           internal_static_protocolbuffer_SenatorHeartBeatResponse_descriptor =
             getDescriptor().getMessageTypes().get(4);
           internal_static_protocolbuffer_SenatorHeartBeatResponse_fieldAccessorTable = new

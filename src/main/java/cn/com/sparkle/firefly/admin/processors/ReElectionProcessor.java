@@ -1,8 +1,8 @@
 package cn.com.sparkle.firefly.admin.processors;
 
 import cn.com.sparkle.firefly.Context;
-import cn.com.sparkle.firefly.admin.AbstractAdminProcessor;
 import cn.com.sparkle.firefly.admin.AdminLookupHandler;
+import cn.com.sparkle.firefly.admin.Commands;
 import cn.com.sparkle.firefly.event.events.ElectionEvent;
 import cn.com.sparkle.firefly.model.AddRequest;
 import cn.com.sparkle.firefly.net.netlayer.PaxosSession;
@@ -36,6 +36,11 @@ public class ReElectionProcessor extends AbstractAdminProcessor {
 	@Override
 	public int commandLength() {
 		return 2;
+	}
+
+	@Override
+	public String[] getName() {
+		return new String[]{Commands.RE_ELECTION,Commands.RE_ELECTION1};
 	}
 
 }

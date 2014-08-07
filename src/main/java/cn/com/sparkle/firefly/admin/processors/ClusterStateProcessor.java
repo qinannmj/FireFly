@@ -10,8 +10,8 @@ import org.apache.log4j.Logger;
 import cn.com.sparkle.firefly.Constants;
 import cn.com.sparkle.firefly.Context;
 import cn.com.sparkle.firefly.NodesCollection;
-import cn.com.sparkle.firefly.admin.AbstractAdminProcessor;
 import cn.com.sparkle.firefly.admin.AdminLookupHandler;
+import cn.com.sparkle.firefly.admin.Commands;
 import cn.com.sparkle.firefly.model.AddRequest;
 import cn.com.sparkle.firefly.net.netlayer.PaxosSession;
 import cn.com.sparkle.firefly.paxosinstance.paxossender.PaxosMessageSender;
@@ -75,6 +75,11 @@ public class ClusterStateProcessor extends AbstractAdminProcessor {
 	@Override
 	public int commandLength() {
 		return 1;
+	}
+
+	@Override
+	public String[] getName() {
+		return new String[]{Commands.CLSTUER_STATE,Commands.CLSTUER_STATE1};
 	}
 
 }

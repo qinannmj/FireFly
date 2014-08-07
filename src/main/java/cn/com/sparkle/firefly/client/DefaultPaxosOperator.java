@@ -5,6 +5,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -25,7 +26,7 @@ public class DefaultPaxosOperator implements PaxosOperater{
 	private Condition allDoCondition = waitLock.newCondition();
 	private boolean isWaitFinish = false;
 
-	private volatile long responseInstanceId = -1;
+	private AtomicLong responseInstanceId;
 
 	private class ASyncCommandCallBack implements CommandCallBack {
 		private SystemFuture<byte[]> future;
@@ -43,8 +44,14 @@ public class DefaultPaxosOperator implements PaxosOperater{
 			waitFinishCounter.decrementAndGet();
 			try {
 				waitLock.lock();
-				if (instanceId > responseInstanceId) {
-					responseInstanceId = instanceId;
+				while(true){
+					long old = responseInstanceId.get();
+					if (instanceId > old) {
+						if(!responseInstanceId.compareAndSet(old, instanceId)){
+							continue;
+						}
+					}
+					break;
 				}
 				if (isWaitFinish && waitFinishCounter.get() == 0) {
 					allDoCondition.signal();
@@ -65,8 +72,9 @@ public class DefaultPaxosOperator implements PaxosOperater{
 		}
 	}
 
-	public DefaultPaxosOperator(CommandAsyncProcessor processor) {
+	public DefaultPaxosOperator(CommandAsyncProcessor processor,AtomicLong responseInstanceId) {
 		super();
+		this.responseInstanceId = responseInstanceId;
 		this.processor = processor;
 	}
 
@@ -120,7 +128,7 @@ public class DefaultPaxosOperator implements PaxosOperater{
 	 */
 	public Future<byte[]> add(byte[] value, long timeout, CommandType commandType, CallBack customCallback) throws InterruptedException,
 			MasterMayBeLostException {
-		return add(value, timeout, commandType, commandType.isConsistentlyRead() ? responseInstanceId : -1, customCallback);
+		return add(value, timeout, commandType, commandType.isConsistentlyRead() ? responseInstanceId.get() : -1, customCallback);
 	}
 
 	public Future<byte[]> add(byte[] value, long timeout, CommandType commandType, long instanceId, CallBack customCallback) throws InterruptedException,
@@ -164,7 +172,4 @@ public class DefaultPaxosOperator implements PaxosOperater{
 		return processor;
 	}
 
-	public long getResponseInstanceId() {
-		return responseInstanceId;
-	}
 }

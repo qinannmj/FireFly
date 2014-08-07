@@ -4,9 +4,8 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 
 import cn.com.sparkle.firefly.Context;
-import cn.com.sparkle.firefly.addprocess.AddRequestDealer;
-import cn.com.sparkle.firefly.admin.AbstractAdminProcessor;
 import cn.com.sparkle.firefly.admin.AdminLookupHandler;
+import cn.com.sparkle.firefly.admin.Commands;
 import cn.com.sparkle.firefly.model.AddRequest;
 import cn.com.sparkle.firefly.net.netlayer.PaxosSession;
 import cn.com.sparkle.firefly.state.SelfState;
@@ -42,5 +41,10 @@ public class StateProcessor extends AbstractAdminProcessor {
 				context.getAddRequestDealer().MIN_TCP_PACKAGE_SIZE, context.getAddRequestDealer().MAX_TCP_PACKAGE_SIZE));
 
 		return sw.toString();
+	}
+
+	@Override
+	public String[] getName() {
+		return new String[]{Commands.STATE,Commands.STATE1};
 	}
 }

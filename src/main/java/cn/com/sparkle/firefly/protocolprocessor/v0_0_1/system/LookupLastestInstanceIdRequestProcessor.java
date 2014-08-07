@@ -20,7 +20,7 @@ public class LookupLastestInstanceIdRequestProcessor extends AbstractProtocolV0_
 	@Override
 	public void receive(MessagePackage messagePackage, PaxosSession session) throws InterruptedException {
 		if (messagePackage.hasLookUpLatestInstanceIdRequest()) {
-			LookUpLatestInstanceIdResponse response = LookUpLatestInstanceIdResponse.newBuilder().setInstanceId(aBook.getMaxInstanceIdInVote()).build();
+			LookUpLatestInstanceIdResponse response = LookUpLatestInstanceIdResponse.newBuilder().setInstanceId(aBook.getKnowedMaxInstanceId()).build();
 			MessagePackage.Builder responseBuilder = MessagePackage.newBuilder();
 			responseBuilder.setLookUpLatestInstanceIdResponse(response);
 			responseBuilder.setId(messagePackage.getId());

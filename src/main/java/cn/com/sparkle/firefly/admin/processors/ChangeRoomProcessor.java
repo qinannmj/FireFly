@@ -1,8 +1,8 @@
 package cn.com.sparkle.firefly.admin.processors;
 
 import cn.com.sparkle.firefly.Context;
-import cn.com.sparkle.firefly.admin.AbstractAdminProcessor;
 import cn.com.sparkle.firefly.admin.AdminLookupHandler;
+import cn.com.sparkle.firefly.admin.Commands;
 import cn.com.sparkle.firefly.model.AddRequest;
 import cn.com.sparkle.firefly.net.netlayer.PaxosSession;
 
@@ -23,4 +23,10 @@ public class ChangeRoomProcessor extends AbstractAdminProcessor {
 		context.getConfiguration().changeRoom(command[2]);
 		return "changed!";
 	}
+
+	@Override
+	public String[] getName() {
+		return new String[]{Commands.CH_ROOM,Commands.CH_ROOM1};
+	}
+	
 }

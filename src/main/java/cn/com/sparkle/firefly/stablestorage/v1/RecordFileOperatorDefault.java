@@ -61,6 +61,7 @@ public class RecordFileOperatorDefault implements RecordFileOperator {
 	private LinkedList<RecordFileBean> recordFileBeanList = new LinkedList<RecordFileBean>();
 	private volatile long lastExpectSafeInstanceId;
 	private volatile long maxVoteInstanceId = -1;
+	private volatile long maxKnowedInstanceId = -1;
 	private int preferChecksum;
 	private RecordFileOutFactory outFactory;
 
@@ -90,6 +91,7 @@ public class RecordFileOperatorDefault implements RecordFileOperator {
 		this.dir = dir;
 		this.lastExpectSafeInstanceId = lastExpectSafeInstanceId;
 		this.maxVoteInstanceId = lastExpectSafeInstanceId - 1;
+		this.maxKnowedInstanceId =  this.maxVoteInstanceId;
 		this.instanceExecutor = instanceExecutor;
 		this.preferChecksum = conf.getFileChecksumType();
 		this.outFactory = recordOutFactory;
@@ -140,6 +142,9 @@ public class RecordFileOperatorDefault implements RecordFileOperator {
 								RecordHead head = RecordHead.readFromStream(in);
 								if (head != null) {
 									if (head.isValid()) {
+										if(head.getInstanceId() > maxKnowedInstanceId){
+											maxKnowedInstanceId = head.getInstanceId();
+										}
 										if (head.getInstanceId() < lastExpectSafeInstanceId) {
 											in.skipBytes(head.getBodySize() + head.getBodyChecksumLength());
 											pos += head.getSerializeSize() + head.getBodySize() + head.getBodyChecksumLength();
@@ -303,8 +308,8 @@ public class RecordFileOperatorDefault implements RecordFileOperator {
 				}
 			});
 			if (isSuccess) {
-				if(instanceId > maxVoteInstanceId){
-					maxVoteInstanceId = instanceId;
+				if(instanceId > maxKnowedInstanceId){
+					maxKnowedInstanceId = instanceId;
 				}
 				unsafeSet.put(recordWrap.getInstanceId(), recordWrap);
 				unsafeRecordQueue.add(recordWrap);
@@ -358,6 +363,9 @@ public class RecordFileOperatorDefault implements RecordFileOperator {
 			//just for look up state
 			if (instanceId > maxVoteInstanceId) {
 				maxVoteInstanceId = instanceId;
+			}
+			if(instanceId > maxKnowedInstanceId){
+				maxKnowedInstanceId = instanceId;
 			}
 
 			RecordBody body = new RecordBody(record.toByteArray(), preferChecksum);
@@ -596,6 +604,11 @@ public class RecordFileOperatorDefault implements RecordFileOperator {
 		}else{
 			return Integer.parseInt(files[0].getName()) * DIR_FILE_NUM * SPLIT_SUCCESSFUL_RECORD_COUNT;
 		}
+	}
+
+	@Override
+	public long getKnowedMaxId() {
+		return maxKnowedInstanceId;
 	}
 	
 

@@ -94,4 +94,14 @@ public class JvmPipePaxosSession extends PaxosSession {
 	public boolean isClose() {
 		return isClose;
 	}
+
+	@Override
+	public String getRemoteAddress() {
+		return "jvmpipe";
+	}
+
+	@Override
+	public String getLocalAddress() {
+		return "jvmpipe";
+	}
 }

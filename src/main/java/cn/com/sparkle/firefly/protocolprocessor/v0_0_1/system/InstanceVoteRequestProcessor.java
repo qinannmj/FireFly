@@ -17,19 +17,16 @@ import cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.InstanceVot
 import cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.MessagePackage;
 import cn.com.sparkle.firefly.protocolprocessor.v0_0_1.system.callback.ChainVoteCallBackV0_0_1;
 import cn.com.sparkle.firefly.protocolprocessor.votevaluetransport.ValueTransportPipeState;
-import cn.com.sparkle.firefly.stablestorage.AccountBook;
 
 public class InstanceVoteRequestProcessor extends AbstractProtocolV0_0_1Processor {
 	private final static Logger logger = Logger.getLogger(InstanceVoteRequestProcessor.class);
 
 	private Configuration conf;
-	private AccountBook aBook;
 	private Context context;
 
 	public InstanceVoteRequestProcessor(Context context) {
 		super();
 		this.conf = context.getConfiguration();
-		this.aBook = context.getAccountBook();
 		this.context = context;
 	}
 

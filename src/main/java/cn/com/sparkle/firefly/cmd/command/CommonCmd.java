@@ -9,8 +9,7 @@ import cn.com.sparkle.firefly.client.MasterMayBeLostException;
 import cn.com.sparkle.firefly.client.PaxosOperater;
 import cn.com.sparkle.firefly.model.AddRequest.CommandType;
 
-public class CommonCmd implements Cmd{
-	public final static CommonCmd DEFAULT = new CommonCmd();
+public abstract class CommonCmd implements Cmd{
 	public void process(PaxosOperater operater, String line) throws InterruptedException, MasterMayBeLostException {
 		Future<byte[]> f = operater.add(line.getBytes(), CommandType.ADMIN_READ_TRANSPORT_MASTER);
 		try {

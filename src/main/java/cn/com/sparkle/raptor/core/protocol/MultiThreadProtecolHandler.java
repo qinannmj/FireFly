@@ -540,6 +540,14 @@ public class MultiThreadProtecolHandler implements IoHandler {
 		public Entity<IoSession> getLastAccessTimeLinkedListwrapSession() {
 			return session.getLastAccessTimeLinkedListwrapSession();
 		}
+		@Override
+		public String getLocalAddress() {
+			return session.getLocalAddress();
+		}
+		@Override
+		public String getRemoteAddress() {
+			return session.getRemoteAddress();
+		}
 	}
 
 }

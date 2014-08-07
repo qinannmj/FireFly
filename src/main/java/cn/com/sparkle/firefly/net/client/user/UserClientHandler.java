@@ -88,9 +88,11 @@ public class UserClientHandler implements NetHandler {
 			String[] a = connectConfig.getAddress().split(":");
 			try {
 				if (debugLog) {
-					log.debug("reConnect " + connectConfig.getAddress());
+					log.debug("reConnect " + connectConfig.getAddress() + ",autoReConnect=" + connectConfig.isAutoReConnect());
 				}
-				client.connect(a[0], Integer.parseInt(a[1]), connectConfig);
+				if(connectConfig.isAutoReConnect()){
+					client.connect(a[0], Integer.parseInt(a[1]), connectConfig);
+				}
 			} catch (Throwable e) {
 				reConnectThread.add(connectConfig, this, 2000);
 			}

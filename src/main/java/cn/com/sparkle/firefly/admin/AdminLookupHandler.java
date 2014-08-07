@@ -1,10 +1,12 @@
 package cn.com.sparkle.firefly.admin;
 
 import java.util.HashMap;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 
 import cn.com.sparkle.firefly.Context;
+import cn.com.sparkle.firefly.admin.processors.AdminProcessor;
 import cn.com.sparkle.firefly.admin.processors.ChangeRoomProcessor;
 import cn.com.sparkle.firefly.admin.processors.ClusterStateProcessor;
 import cn.com.sparkle.firefly.admin.processors.ReElectionProcessor;
@@ -26,25 +28,30 @@ public class AdminLookupHandler extends HandlerInterface {
 	private final static Logger logger = Logger.getLogger(AdminLookupHandler.class);
 	
 	private Context context;
-	private HashMap<String, AbstractAdminProcessor> processorMap = new HashMap<String, AbstractAdminProcessor>();
+	private HashMap<String, AdminProcessor> processorMap = new HashMap<String, AdminProcessor>();
 
-	public AdminLookupHandler(Context context) {
+	public AdminLookupHandler(Context context,List<AdminProcessor> processors) {
 		this.context = context;
+		
+		
 		ReElectionProcessor electionProcessor= new ReElectionProcessor(context);
-		processorMap.put(Commands.RE_ELECTION, electionProcessor);
-		processorMap.put(Commands.RE_ELECTION1, electionProcessor);
-		
 		ClusterStateProcessor clusterStateProcessor = new ClusterStateProcessor(context);
-		processorMap.put(Commands.CLSTUER_STATE, clusterStateProcessor);
-		processorMap.put(Commands.CLSTUER_STATE1, clusterStateProcessor);
-		
 		StateProcessor stateProcessor = new StateProcessor(context);
-		processorMap.put(Commands.STATE, stateProcessor);
-		processorMap.put(Commands.STATE1, stateProcessor);
-		
 		ChangeRoomProcessor changeRoomProcessor = new ChangeRoomProcessor(context);
-		processorMap.put(Commands.CH_ROOM, changeRoomProcessor);
-		processorMap.put(Commands.CH_ROOM1, changeRoomProcessor);
+
+		processors.add(electionProcessor);
+		processors.add(clusterStateProcessor);
+		processors.add(stateProcessor);
+		processors.add(changeRoomProcessor);
+		
+		//load into command map
+		for(AdminProcessor processor : processors){
+			for(String name : processor.getName()){
+				if(processorMap.put(name, processor) != null){
+					throw new RuntimeException(String.format("repeat name of adminprocessor,name:%s", name));
+				}
+			}
+		}
 	}
 
 	@Override
@@ -61,7 +68,7 @@ public class AdminLookupHandler extends HandlerInterface {
 		String[] r = (new String(b)).split(" ");
 		if (r.length  <2 || context.getConfiguration().getSelfAddress().equals(r[1]) ) {
 			//process by self
-			AbstractAdminProcessor p = processorMap.get(r[0]);
+			AdminProcessor p = processorMap.get(r[0]);
 			if(context.getConfiguration().isDebugLog()){
 				logger.info("command: " + new String(b));
 			}

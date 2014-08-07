@@ -70,7 +70,8 @@ public interface Protocol {
 
 	public byte[] createAddRequest(long packageId, CommandType commandType, byte[] value, long instanceId);
 
-	public byte[] createActiveHeartMessage(NodeState nodeState);
 
 	public byte[] createValueTrunk(long packageId, byte[] value, int offset, int size);
+
+	public byte[] createActiveHeartMessage(NodeState nodeState, int lifecycle);
 }

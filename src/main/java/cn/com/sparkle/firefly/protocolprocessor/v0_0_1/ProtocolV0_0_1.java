@@ -312,7 +312,7 @@ public class ProtocolV0_0_1 extends AbstraceProtocol {
 
 
 	@Override
-	public byte[] createActiveHeartMessage(NodeState nodeState) {
+	public byte[] createActiveHeartMessage(NodeState nodeState,int lifecycle) {
 		SenatorHeartBeatResponse.Builder heart = SenatorHeartBeatResponse.newBuilder();
 		heart.addAllConnectedValidNodes(nodeState.getConnectedValidNode());
 		heart.setElectionAddress(nodeState.getLastElectionId().getAddress());
@@ -325,7 +325,7 @@ public class ProtocolV0_0_1 extends AbstraceProtocol {
 		heart.setMasterDistance(nodeState.getMasterDistance());
 		heart.setRoom(nodeState.getRoom());
 
-		ActiveHeartBeatRequest.Builder request = ActiveHeartBeatRequest.newBuilder().setAddress(nodeState.getAddress()).setHeartBeatResponse(heart);
+		ActiveHeartBeatRequest.Builder request = ActiveHeartBeatRequest.newBuilder().setAddress(nodeState.getAddress()).setHeartBeatResponse(heart).setLifecycle(lifecycle);
 
 		return makeMessagePackage(-1).setActiveHeartBeatRequest(request).build().toByteArray();
 	}

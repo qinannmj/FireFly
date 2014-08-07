@@ -1,5 +1,6 @@
 package cn.com.sparkle.firefly.cmd.command;
 
+import cn.com.sparkle.firefly.admin.Commands;
 import cn.com.sparkle.firefly.client.MasterMayBeLostException;
 import cn.com.sparkle.firefly.client.PaxosOperater;
 
@@ -25,5 +26,20 @@ public class SenatorChangeRoomCmd extends CommonCmd {
 				System.out.println("error:systemport is not number");
 			}
 			super.process(operater, cmd);
+	}
+
+	@Override
+	public String cmdInfo() {
+		return Commands.CH_ROOM + "/" + Commands.CH_ROOM1 + " id room: change the room of a senator";
+	}
+
+	@Override
+	public String helpInfo() {
+		return "";
+	}
+
+	@Override
+	public String[] cmd() {
+		return new String[]{Commands.CH_ROOM,Commands.CH_ROOM1};
 	}
 }

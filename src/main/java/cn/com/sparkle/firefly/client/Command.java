@@ -1,9 +1,10 @@
 package cn.com.sparkle.firefly.client;
 
 import cn.com.sparkle.firefly.client.PaxosClient.CommandCallBack;
+import cn.com.sparkle.firefly.client.queue.CostValuable;
 import cn.com.sparkle.firefly.model.AddRequest.CommandType;
 
-public class Command {
+public class Command implements CostValuable{
 	private CommandType commandType;
 	private byte[] value;
 	private long instanceId = -1;
@@ -37,5 +38,10 @@ public class Command {
 		if (callBack != null) {
 			callBack.response(response,instanceId);
 		}
+	}
+
+	@Override
+	public int cost() {
+		return value == null ? 1 : value.length;
 	}
 }
