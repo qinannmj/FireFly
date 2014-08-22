@@ -4,10 +4,13 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.channels.ServerSocketChannel;
 
+import org.apache.log4j.Logger;
+
 import cn.com.sparkle.raptor.core.collections.MaximumSizeArrayCycleQueue.QueueFullException;
 import cn.com.sparkle.raptor.core.handler.IoHandler;
 
 public class NioSocketServer {
+	private final static Logger logger = Logger.getLogger(NioSocketServer.class);
 	private NioSocketAccepter accepter;
 	private NioSocketConfigure nioSocketConfigure;
 
@@ -27,7 +30,7 @@ public class NioSocketServer {
 		server.socket().bind(address, this.nioSocketConfigure.getBackLog());
 		server.configureBlocking(false);
 		accepter.registerAccept(server, handler);
-		System.out.println("raptor listening :" + address.toString());
+		logger.info(String.format("raptor listening : %s", address.toString()));
 	}
 
 	public void waitToBind(InetSocketAddress address, IoHandler handler) throws IOException {

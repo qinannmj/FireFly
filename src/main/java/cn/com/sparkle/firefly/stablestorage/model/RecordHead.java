@@ -125,7 +125,12 @@ public final class RecordHead {
 			byte[] checksum = new byte[ChecksumUtil.checksumLength((head[0] >> 3) & ChecksumUtil.MASK, 12)];
 			size = inputStream.read(checksum);
 			if (size == checksum.length) {
-				return new RecordHead(head, checksum);
+				RecordHead rh = new RecordHead(head, checksum);
+				if(rh.isValid() && rh.getBodySize() == 0){
+					return null;//write normally
+				}else{
+					return rh;
+				}
 			} else {
 				return null;
 			}
@@ -134,8 +139,8 @@ public final class RecordHead {
 		}
 	}
 
-	public void writeToStream(RecordFileOut out, Callable<Object> callable) throws IOException {
-		out.write(this.head, 0, 12, null);
-		out.write(this.checksum, 0, this.checksum.length, callable);
+	public void writeToStream(RecordFileOut out, Callable<Object> callable,boolean isSync) throws IOException {
+		out.write(this.head, 0, 12, null,false);
+		out.write(this.checksum, 0, this.checksum.length, callable,isSync);
 	}
 }

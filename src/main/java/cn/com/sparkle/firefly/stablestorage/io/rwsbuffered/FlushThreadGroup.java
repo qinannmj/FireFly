@@ -1,12 +1,15 @@
 package cn.com.sparkle.firefly.stablestorage.io.rwsbuffered;
 
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.Callable;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import org.apache.log4j.Logger;
 
 import cn.com.sparkle.firefly.stablestorage.WriteQueue;
+import cn.com.sparkle.raptor.core.util.TimeUtil;
 
 public class FlushThreadGroup {
 	private final static Logger logger = Logger.getLogger(FlushThreadGroup.class);
@@ -18,8 +21,10 @@ public class FlushThreadGroup {
 	private final WriteQueue<BufferedFileOut, BufferPackage, MyNode> waitQueue = new WriteQueue<BufferedFileOut, BufferPackage, MyNode>();
 
 	private ArrayBlockingQueue<MyNode> idleBufferPool = new ArrayBlockingQueue<MyNode>(1000);
-
-	public FlushThreadGroup(int buffSize, int idleBufferPoolSize, String groupName,boolean debug) {
+	
+	private LinkedBlockingQueue<BufferedFileOut> allOpenedOut = new LinkedBlockingQueue<BufferedFileOut>();
+	
+	public FlushThreadGroup(int buffSize, int idleBufferPoolSize, String groupName,final boolean debug) {
 		this.debug = debug;
 		for (int i = 0; i < idleBufferPoolSize; ++i) {
 			idleBufferPool.add(new MyNode(null, new BufferPackage(buffSize)));
@@ -36,16 +41,31 @@ public class FlushThreadGroup {
 				while (true) {
 					MyNode n;
 					try {
-						n = waitQueue.take();
-						BufferPackage bp = n.getElement();
-						n.getTag().getRaf().write(bp.buff, 0, bp.used);
-						LinkedList<Callable<Object>> calllist = bp.callAbleList;
-						bp.callAbleList = new LinkedList<Callable<Object>>();
-						n.getTag().finish(n);
-						n.getElement().used = 0;
-						idleBufferPool.add(n);
-						for (Callable<Object> callable : calllist) {
-							finishRealEventThread.addFinishEvent(callable);
+						n = waitQueue.take(1000);
+						if(n != null){
+							BufferPackage bp = n.getElement();
+							long ct = TimeUtil.currentTimeMillis();
+							n.getTag().getRaf().write(bp.buff, 0, bp.used);
+							if(debug){
+								logger.debug(String.format("flush to disk cost:%s size:%s from:%s",TimeUtil.currentTimeMillis() - ct,bp.used,n.getTag().getRaf().getFD().toString()));
+							}
+							LinkedList<Callable<Object>> calllist = bp.callAbleList;
+							bp.callAbleList = new LinkedList<Callable<Object>>();
+							n.getTag().finish(n);
+							n.getElement().used = 0;
+							idleBufferPool.add(n);
+							finishRealEventThread.addFinishEvent(calllist);
+						}else{
+							//flush bufferout
+							Iterator<BufferedFileOut> iter = allOpenedOut.iterator();
+							while(iter.hasNext()){
+								BufferedFileOut out = iter.next();
+								if(!out.isClose()){
+									out.flush();
+								}else{
+									iter.remove();
+								}
+							}
 						}
 					} catch (Throwable e) {
 						logger.error("fatal error", e);
@@ -62,7 +82,9 @@ public class FlushThreadGroup {
 		t.setName("Paxos-File-Flush-Thread");
 		t.start();
 	}
-
+	public void open(BufferedFileOut out){
+		allOpenedOut.add(out);
+	}
 	public WriteQueue<BufferedFileOut, BufferPackage, MyNode> getWaitQueue() {
 		return waitQueue;
 	}
@@ -96,6 +118,9 @@ public class FlushThreadGroup {
 
 		public BufferPackage(int size) {
 			this.buff = new byte[size];
+		}
+		public boolean isFull(){
+			return used == buff.length;
 		}
 	}
 }

@@ -14,9 +14,9 @@ public class Record {
 		this.body = body;
 	}
 
-	public void writeToStream(RecordFileOut out, Callable<Object> callable) throws IOException {
-		head.writeToStream(out, null);
-		body.writeToStream(out, callable);
+	public void writeToStream(RecordFileOut out, Callable<Object> callable,boolean isSync) throws IOException {
+		head.writeToStream(out, null,false);
+		body.writeToStream(out, callable,isSync);
 	}
 
 	public RecordHead getHead() {
@@ -26,5 +26,8 @@ public class Record {
 	public RecordBody getBody() {
 		return body;
 	}
-
+	
+	public int getSerializeSize(){
+		return this.head.getSerializeSize() + this.body.getSerializeSize();
+	}
 }

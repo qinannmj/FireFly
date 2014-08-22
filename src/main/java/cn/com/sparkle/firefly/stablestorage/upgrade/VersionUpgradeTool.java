@@ -20,9 +20,9 @@ public class VersionUpgradeTool {
 	public boolean update(RecordFileOperator source, RecordFileOperator target) throws IOException, UnsupportedChecksumAlgorithm {
 		try {
 			SplitReader splitReader = new SplitReader(target, 0);
-			long lastExpectSafeInstanceId = source.getLastExpectSafeInstanceId();
-			source.readRecord(0, lastExpectSafeInstanceId, splitReader);
+			source.readRecord(0, Long.MAX_VALUE, splitReader);
 			if (splitReader.isError()) {
+				logger.warn(String.format("source lastExpectSafeInstanceId %s target lastExpectSafeInstanceId %s", source.getLastExpectSafeInstanceId(),target.getLastExpectSafeInstanceId()));
 				return false;
 			}
 		} catch (IOException e) {
@@ -55,7 +55,7 @@ public class VersionUpgradeTool {
 			} else {
 				try {
 					out.writeVoteRecord(instanceId, (InstanceVoteRecord) b.build(), null);
-				} catch (Throwable e) {
+				}catch (Throwable e) {
 					logger.error("upgrade error", e);
 					isError = true;
 				}
@@ -63,7 +63,7 @@ public class VersionUpgradeTool {
 		}
 
 		public boolean isError() {
-			return isError && successReader.isError;
+			return isError || successReader.isError || !sortedReadCallback.isFinished() ;
 		}
 	}
 	private static class SuccessReader implements ReadRecordCallback<SuccessfulRecord.Builder> {

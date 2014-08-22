@@ -36,7 +36,8 @@ public class TestAynscClientProtobufProtocol {
 		nsc.setProcessorNum(1);
 		nsc.setCycleRecieveBuffCellSize(1000);
 		nsc.setSoTimeOut(10);
-		nsc.setSentBuffSize( 16 * 1024);
+		nsc.setRecieveBuffSize(128 * 1024);
+		nsc.setSentBuffSize(128 * 1024);
 //		nsc.setReuseAddress(true);
 		
 		NioSocketClient client = new NioSocketClient(nsc);
@@ -111,7 +112,7 @@ class TestAynscClientProtobufProtocolHandler implements ProtocolHandler{
 //		AddressBook.Builder ab = AddressBook.newBuilder().addPerson(builder);
 		System.out.println("size" + builder.build().getSerializedSize());
 		
-		for(int i = 0 ; i < 1; i++){
+		for(int i = 0 ; i < 100; i++){
 		Thread t = new Thread(){
 			public void run(){
 				int i = 0;
@@ -122,7 +123,7 @@ class TestAynscClientProtobufProtocolHandler implements ProtocolHandler{
 						Person.Builder builder = Person.newBuilder().setId(++i).setName(soure);
 //						AddressBook.Builder ab = AddressBook.newBuilder().addPerson(builder);
 						CountDownLatch c = send(builder.build(),session);
-//						c.await();
+						c.await();
 //						break;
 					} catch (Exception e) {
 						e.printStackTrace();

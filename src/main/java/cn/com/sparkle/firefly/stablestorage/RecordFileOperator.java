@@ -6,23 +6,23 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.concurrent.Callable;
 
-import com.google.protobuf.GeneratedMessage.Builder;
-
+import cn.com.sparkle.firefly.Context;
 import cn.com.sparkle.firefly.addprocess.AddRequestPackage;
 import cn.com.sparkle.firefly.checksum.ChecksumUtil.UnsupportedChecksumAlgorithm;
-import cn.com.sparkle.firefly.config.Configuration;
 import cn.com.sparkle.firefly.deamon.InstanceExecutor;
 import cn.com.sparkle.firefly.stablestorage.event.PrepareRecordRealWriteEvent;
 import cn.com.sparkle.firefly.stablestorage.io.RecordFileOutFactory;
 import cn.com.sparkle.firefly.stablestorage.model.StoreModel.InstanceVoteRecord;
 import cn.com.sparkle.firefly.stablestorage.model.StoreModel.SuccessfulRecord;
 
+import com.google.protobuf.GeneratedMessage.Builder;
+
 public interface RecordFileOperator {
 
 	/**
 	 * just for init operator
 	 */
-	public void initOperator(File dir, long lastExpectSafeInstanceId, InstanceExecutor instanceExecutor,RecordFileOutFactory outFactory, Configuration conf);
+	public void initOperator(File dir, long lastExpectSafeInstanceId, InstanceExecutor instanceExecutor,RecordFileOutFactory outFactory, Context context);
 
 	public long loadData() throws IOException, ClassNotFoundException, UnsupportedChecksumAlgorithm;
 
@@ -68,7 +68,11 @@ public interface RecordFileOperator {
 			FileDamageException;
 
 	public long getFirstInstanceIdInUnsafe();
+	
+	public void setExecutor(InstanceExecutor executor);
 
 	public boolean isDamaged();
-
+	
+	public void close();
+	
 }

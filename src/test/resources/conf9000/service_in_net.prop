@@ -13,7 +13,7 @@ cycle_recv_cell_size=5000
 cycle_send_mem_size=8192
 cycle_send_mem_cell_size=1000
 
-worker_thread_min_num=3
+worker_thread_min_num=50
 worker_thread_max_num=100
 
 #netty config

@@ -27,9 +27,10 @@ public class TestAynscClientByteProtocol {
 //		nsc.setSoLinger(5);
 		nsc.setCycleRecieveBuffCellSize(1000);
 		nsc.setRecieveBuffSize(128 * 1024);
+		nsc.setSentBuffSize(128 * 1024);
 		NioSocketClient client = new NioSocketClient(nsc);
 		System.out.println(50);
-		IoHandler handler = new MultiThreadProtecolHandler(1000,  32*1024, 2, 300, 60, TimeUnit.SECONDS,new ByteProtocol(128), new TestAsyncByteObjetClientHandler());
+		IoHandler handler = new MultiThreadProtecolHandler(1000,  32*1024, 2, 300, 60, TimeUnit.SECONDS,new ByteProtocol(100), new TestAsyncByteObjetClientHandler());
 		for(int i = 0 ; i < 1; i++){
 //			client.connect(new InetSocketAddress("10.10.83.243",1234), handler,"aaa" + i);
 //			client.connect(new InetSocketAddress("192.168.2.131",1234),handler,"aaa" + i );
@@ -75,7 +76,7 @@ class TestAsyncByteObjetClientHandler implements ProtocolHandler{
 	}
 	@Override
 	public void onOneThreadSessionOpen(final ProtocolHandlerIoSession session) {
-		for(int i = 0 ; i < 1 ; i++){
+		for(int i = 0 ; i < 100 ; i++){
 		Thread t = new Thread(){
 			public void run(){
 				int i = 0;
@@ -91,7 +92,7 @@ class TestAsyncByteObjetClientHandler implements ProtocolHandler{
 						}
 						
 //						Thread.sleep(1000);
-//						c.await();
+						c.await();
 					} catch (SessionHavaClosedException e) {
 						e.printStackTrace();
 						break;

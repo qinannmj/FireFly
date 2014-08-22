@@ -29,11 +29,11 @@ public class TestClient {
 		//		PaxosOperater oper = client.getOperator();
 
 		final int size = 100000;
-		int threadSize = 1000;
+		int threadSize = 1;
 
 		String type = args.length > 0 ?args[0] : "raptor";
 		int cycle = args.length > 1 ? Integer.parseInt(args[1]):8;
-		String[] address = {"127.0.0.1:11001", "127.0.0.1:8001","127.0.0.1:9001",  "127.0.0.1:12001","127.0.0.1:10001" };
+		String[] address = {"127.0.0.1:10001", "127.0.0.1:8001","127.0.0.1:9001",  "127.0.0.1:12001","127.0.0.1:10001" };
 		if(args.length > 2){
 			address = new String[args.length - 2];
 			for(int i = 2 ; i < args.length ; ++i){
@@ -42,7 +42,7 @@ public class TestClient {
 		}
 		
 		final PaxosClient client = new PaxosClient(address, "target/classes/conf10000/service_out_net.prop", type,
-				ChecksumUtil.INBUILD_CRC32, 2000, 1000, 999999,1024,false);
+				ChecksumUtil.INBUILD_CRC32, 2000, 3, 999999, 10 *1024 * 1024,false);
 		
 		
 

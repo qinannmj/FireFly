@@ -24,6 +24,7 @@ import cn.com.sparkle.firefly.event.events.ConfigureEvent;
 import cn.com.sparkle.firefly.event.events.ConfigureEvent.Op;
 import cn.com.sparkle.firefly.net.client.syncwaitstrategy.SyncStrategyFactory;
 import cn.com.sparkle.firefly.paxosinstance.paxossender.InstancePaxosMessageSenderBuilderFactory;
+import cn.com.sparkle.firefly.stablestorage.util.FileUtil;
 
 public class Configuration {
 	private final static Logger logger = Logger.getLogger(Configuration.class);
@@ -120,11 +121,9 @@ public class Configuration {
 
 		parseConfiguration(confProp);
 
-		File file = new File(this.stableStorage);
+		File file = FileUtil.getDir(this.stableStorage);
 		if (file.exists() && !file.isDirectory()) {
 			throw new ConfigurationError("stable-storage is not directory!");
-		} else if (!file.exists()) {
-			file.mkdirs();
 		}
 		// format file path
 		this.stableStorage = file.getCanonicalPath();
@@ -521,10 +520,10 @@ public class Configuration {
 			if (!sfn.exists()) {
 				throw new ConfigurationError("old and new senator configuration is not existed!");
 			} else {
-				sfn.renameTo(sf);
+				FileUtil.rename(sfn, sf);
 			}
 		}
-		sfn.delete();
+		FileUtil.deleteFile(sfn);
 		
 		
 		sf = new File(filePath + "/room.prop");
@@ -533,10 +532,10 @@ public class Configuration {
 			if (!sfn.exists()) {
 				throw new ConfigurationError("old and new room configuration is not existed!");
 			} else {
-				sfn.renameTo(sf);
+				FileUtil.rename(sfn, sf);
 			}
 		}
-		sfn.delete();
+		FileUtil.deleteFile(sfn);
 		
 	}
 
@@ -565,13 +564,11 @@ public class Configuration {
 		
 		Properties p = new Properties();
 		p.setProperty("room", room);
-		File f = new File(filePath + "/room.prop.new");
-		if (!f.exists()) {
-			try {
-				f.createNewFile();
-			} catch (IOException e1) {
-				throw new ConfigurationError("room configuration write file failed.");
-			}
+		File f;
+		try {
+			f = FileUtil.getFile(filePath + "/room.prop.new");
+		} catch (IOException e2) {
+			throw new ConfigurationError("room configuration write file failed.");
 		}
 		OutputStream os = null;
 		try {
@@ -579,8 +576,8 @@ public class Configuration {
 			p.store(os, "");
 			os.close();
 			File ff = new File(filePath + "/room.prop");
-			ff.delete();
-			f.renameTo(ff);
+			FileUtil.deleteFile(ff);
+			FileUtil.rename(f, ff);
 			this.room = room;
 		} catch (IOException e) {
 			throw new ConfigurationError("room configuration write file failed.");
@@ -607,23 +604,21 @@ public class Configuration {
 //			p.setProperty("senators_" + e.getKey(), e.getValue().toString());
 //		}
 		p.setProperty("senators", sb.toString());
-
-		File f = new File(filePath + "/senators.prop.new");
-		if (!f.exists()) {
+		
+			File f;
 			try {
-				f.createNewFile();
+				f = FileUtil.getFile(filePath + "/senators.prop.new");
 			} catch (IOException e1) {
 				throw new ConfigurationError("senator configuration write file failed.");
 			}
-		}
 		OutputStream os = null;
 		try {
 			os = new FileOutputStream(f);
 			p.store(os, "");
 			os.close();
 			File ff = new File(filePath + "/senators.prop");
-			ff.delete();
-			f.renameTo(ff);
+			FileUtil.deleteFile(ff);
+			FileUtil.rename(f, ff);
 		} catch (IOException e) {
 			throw new ConfigurationError("senator configuration write file failed.");
 		} finally {

@@ -9,6 +9,8 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
 import io.netty.channel.ChannelHandler.Sharable;
+import io.netty.handler.timeout.IdleState;
+import io.netty.handler.timeout.IdleStateEvent;
 
 @Sharable
 public class NettyHandler extends ChannelInboundHandlerAdapter {
@@ -57,5 +59,16 @@ public class NettyHandler extends ChannelInboundHandlerAdapter {
 		System.out.println(ctx.channel().remoteAddress().toString());
 		logger.error("unexcepted exception", cause);
 		ctx.close();
+	}
+	@Override
+	public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
+		if(evt instanceof IdleStateEvent){
+			IdleStateEvent event = (IdleStateEvent)evt;
+			if(event.state() == IdleState.READER_IDLE){
+				ctx.close();
+			}
+		}else{
+			super.userEventTriggered(ctx, evt);
+		}
 	}
 }

@@ -40,7 +40,7 @@ public class AddRequestCallBack {
 					e.getNext().setPrev(e.getPrev());
 				}
 			}
-			processor.getRunningSize().decrementAndGet();
+			processor.finish(c);
 			processor.wakeup();
 		}
 		c.finish(response,instanceId);

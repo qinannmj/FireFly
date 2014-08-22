@@ -1,6 +1,7 @@
 package cn.com.sparkle.firefly.stablestorage;
 
 import java.util.HashMap;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -11,7 +12,8 @@ public class WriteQueue<Tag, Element, MyNode extends WriteQueue.Node<Tag, Elemen
 	private final static Logger logger = Logger.getLogger(WriteQueue.class);
 	private ReentrantLock lock = new ReentrantLock();
 	private HashMap<Tag, MyNode> lastNodeOfTag = new HashMap<Tag, MyNode>();
-	private Node<Tag, Element> root;
+	private Node<Tag, Element> highPrior;
+	private Node<Tag, Element> lowPrior;
 	private Condition condition = lock.newCondition();
 	private int size = 0;
 
@@ -41,47 +43,80 @@ public class WriteQueue<Tag, Element, MyNode extends WriteQueue.Node<Tag, Elemen
 	}
 
 	public WriteQueue() {
-		root = new Node<Tag, Element>(null, null) {
+		highPrior = new Node<Tag, Element>(null, null) {
 			@Override
 			public boolean canGet() {
 				return false;
 			}
 		};
-		root.prev = root;
-		root.next = root;
+		highPrior.prev = highPrior;
+		highPrior.next = highPrior;
+		
+		lowPrior = new Node<Tag, Element>(null, null) {
+			@Override
+			public boolean canGet() {
+				return false;
+			}
+		};
+		lowPrior.prev = lowPrior;
+		lowPrior.next = lowPrior;
 	}
 
-	public void push(MyNode n) {
+	public void push(MyNode n,boolean isHighPrior) {
 		try {
 			lock.lock();
-			n.next = root.prev.next;
-			n.prev = root.prev;
-			root.prev.next = n;
-			root.prev = n;
-			lastNodeOfTag.put(n.tag, n);
+			if(isHighPrior){
+				n.next = highPrior.prev.next;
+				n.prev = highPrior.prev;
+				highPrior.prev.next = n;
+				highPrior.prev = n;
+				lastNodeOfTag.put(n.tag, n);
+			}else{
+				n.next = lowPrior.prev.next;
+				n.prev = lowPrior.prev;
+				lowPrior.prev.next = n;
+				lowPrior.prev = n;
+				lastNodeOfTag.put(n.tag, n);
+			}
 			++size;
 			condition.signal();
 		} finally {
 			lock.unlock();
 		}
 	}
-
-	public MyNode take() throws InterruptedException {
+	@SuppressWarnings("unchecked")
+	public MyNode take(int timeout) throws InterruptedException {
 		try {
 			lock.lock();
-			while (root.next == root) {
-				condition.await();
+			while (highPrior.next == highPrior && lowPrior.next == lowPrior) {
+				if(timeout != -1){
+					condition.await(timeout,TimeUnit.MILLISECONDS);
+				}else{
+					condition.await();
+				}
+				if(timeout != -1 && highPrior.next == highPrior && lowPrior.next == lowPrior){
+					return null;
+				}
 			}
-			@SuppressWarnings("unchecked")
-			MyNode n = (MyNode) root.next;
-			root.next = n.next;
-			n.next.prev = root;
+			MyNode n;
+			if(highPrior.next != highPrior){
+				n = (MyNode) highPrior.next;
+				highPrior.next = n.next;
+				n.next.prev = highPrior;
+			}else{
+				n = (MyNode) lowPrior.next;
+				lowPrior.next = n.next;
+				n.next.prev = lowPrior;
+			}
 			lastNodeOfTag.remove(n.tag);
 			--size;
 			return n;
 		} finally {
 			lock.unlock();
 		}
+	}
+	public MyNode take() throws InterruptedException{
+		return take(-1);
 	}
 
 	public MyNode getLastNodeOfTag(Tag tag) {
@@ -123,9 +158,9 @@ public class WriteQueue<Tag, Element, MyNode extends WriteQueue.Node<Tag, Elemen
 		}
 		WriteQueue<Integer, String, MyNode> a = new WriteQueue<Integer, String, MyNode>();
 		for (int i = 0; i < 1000; i++) {
-			a.push(new MyNode(i, ""));
+			a.push(new MyNode(i, ""),true);
 		}
-		a.push(a.getLastNodeOfTag(500));
+		a.push(a.getLastNodeOfTag(500),true);
 
 		for (int i = 0; i < 1000; i++) {
 			a.take();

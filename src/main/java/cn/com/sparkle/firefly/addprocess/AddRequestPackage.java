@@ -21,19 +21,19 @@ public class AddRequestPackage {
 	private LinkedList<AddRequest> valueList = new LinkedList<AddRequest>();
 	private PaxosSession session;
 	private long valueByteSize = 0;
-	private boolean isManageCommand = false;
+	private boolean isAdmin = false;
 	private Context context;
 
 	public AddRequestPackage(AddRequest addRequest, PaxosSession session, Context context) {
 		super();
 		addRequest(addRequest);
-		isManageCommand = addRequest.getCommandType().isAdmin();
+		isAdmin = addRequest.getCommandType().isAdmin();
 		this.session = session;
 		this.context = context;
 	}
 
 	public void addRequest(AddRequest addRequest) {
-		if (isManageCommand) {
+		if (isAdmin) {
 			throw new RuntimeException("admin package is not permitted to append a request");
 		}
 		this.valueByteSize += addRequest.getValue().length;
@@ -83,8 +83,8 @@ public class AddRequestPackage {
 		return session;
 	}
 
-	public boolean isManageCommand() {
-		return isManageCommand;
+	public boolean isAdmin() {
+		return isAdmin;
 	}
 
 	public LinkedList<AddRequest> getValueList() {
@@ -92,7 +92,7 @@ public class AddRequestPackage {
 	}
 	
 	public String testAdminToPaxosAble(){
-		if(!isManageCommand() || getValueByteSize() == 0){
+		if(!isAdmin() || getValueByteSize() == 0){
 			return null;
 		}else{
 			AdminCommand adminCommand = new AdminCommand(valueList.get(0).getValue());

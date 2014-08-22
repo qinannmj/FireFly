@@ -13,7 +13,7 @@ public class DisruptorEventExecutor implements EventExecutor {
 	private Thread executeThread;
 	public DisruptorEventExecutor() {
 //		ringBuffer = RingBuffer.createMultiProducer(WaitingEvent.EVENT_FACTORY, 128, PhasedBackoffWaitStrategy.withLock(1, 1, TimeUnit.MILLISECONDS));
-		ringBuffer = RingBuffer.createMultiProducer(WaitingEvent.EVENT_FACTORY, 128, new BlockingWaitStrategy());
+		ringBuffer = RingBuffer.createMultiProducer(WaitingEvent.EVENT_FACTORY, 8192, new BlockingWaitStrategy());
 		
 		BatchEventProcessor<WaitingEvent> processor = new BatchEventProcessor<WaitingEvent>(ringBuffer, ringBuffer.newBarrier(), new DisruptorHandler());
 		ringBuffer.addGatingSequences(processor.getSequence());
@@ -56,7 +56,11 @@ public class DisruptorEventExecutor implements EventExecutor {
 		public void setArgs(Object[] args) {
 			this.args = args;
 		}
-
+		public void clear(){
+			this.event = null;
+			this.args = null;
+		}
+		
 		public final static EventFactory<WaitingEvent> EVENT_FACTORY = new EventFactory<WaitingEvent>() {
 			@Override
 			public WaitingEvent newInstance() {
@@ -69,6 +73,7 @@ public class DisruptorEventExecutor implements EventExecutor {
 		@Override
 		public void onEvent(WaitingEvent event, long sequence, boolean endOfBatch) throws Exception {
 			event.getEvent().notifyAllListener(event.getArgs());
+			event.clear();
 		}
 	}
 }

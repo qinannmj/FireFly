@@ -11,7 +11,6 @@ import java.io.RandomAccessFile;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.LinkedList;
-import java.util.concurrent.Callable;
 
 import org.apache.log4j.Logger;
 
@@ -20,6 +19,7 @@ import cn.com.sparkle.firefly.stablestorage.io.RecordFileOut;
 import cn.com.sparkle.firefly.stablestorage.io.rwsbuffered.BufferedFileOut;
 import cn.com.sparkle.firefly.stablestorage.io.rwsbuffered.FlushThreadGroup;
 import cn.com.sparkle.firefly.stablestorage.model.ExecuteRecord;
+import cn.com.sparkle.firefly.stablestorage.util.FileUtil;
 
 public class ExecuteLogOperator {
 	private final static Logger logger = Logger.getLogger(ExecuteLogOperator.class);
@@ -29,18 +29,14 @@ public class ExecuteLogOperator {
 	private RecordFileOut executeOutputStream;
 	private LinkedList<File> executeFileList = new LinkedList<File>();
 	private FlushThreadGroup flushThreadGroup;
-	
+	private long lastWaitExecuteInstanceId = -1;
 	
 	public ExecuteLogOperator(File dir) throws IOException {
 		this.dir = dir;
-		if (!dir.exists()) {
-			dir.mkdirs();
-		}
-		flushThreadGroup = new FlushThreadGroup(10 * 1024 * 1024, 3, "executelog", false);
+		flushThreadGroup = new FlushThreadGroup(1024, 3, "executelog", false);
 	}
 
 	public long init() throws IOException, UnsupportedChecksumAlgorithm {
-		long lastWaitExecuteInstanceId = -1;
 		File[] files = dir.listFiles();
 		Comparator<File> comparator = new Comparator<File>() {
 			@Override
@@ -85,8 +81,7 @@ public class ExecuteLogOperator {
 		}
 
 		if (executeFileList.size() == 0) {
-			File f = new File(dir + "/0");
-			f.createNewFile();
+			File f = FileUtil.getFile(dir + "/0");
 			executeFileList.add(f);
 		}
 		RandomAccessFile rs = new RandomAccessFile(executeFileList.getLast(), "rws");
@@ -96,18 +91,16 @@ public class ExecuteLogOperator {
 		return lastWaitExecuteInstanceId + 1;
 	}
 
-	public void writeExecuteLog(long instanceId, Callable<Object> callable) throws IOException, UnsupportedChecksumAlgorithm {
-
+	public void writeExecuteLog(long instanceId) throws IOException, UnsupportedChecksumAlgorithm {
+		if(instanceId < lastWaitExecuteInstanceId){
+			return;
+		}
 		ExecuteRecord record = new ExecuteRecord(instanceId);
-		record.writeToStream(executeOutputStream, callable);
-		// executeOutputStream.writeLong(instanceId, callable);
-
-		// ++lastWaitExecuteInstanceId;
+		record.writeToStream(executeOutputStream, null);
 
 		if (++lastLogCount >= SPLIT_EXECUTE_LOG_COUNT) {
 			lastLogCount = 0;
-			File f = new File(dir + "/" + (Long.valueOf(executeFileList.getLast().getName()) + 1));
-			f.createNewFile();
+			File f = FileUtil.getFile(dir + "/" + (Long.valueOf(executeFileList.getLast().getName()) + 1));
 			executeFileList.addLast(f);
 			executeOutputStream.close();
 			RandomAccessFile rs = new RandomAccessFile(executeFileList.getLast(), "rws");
@@ -117,7 +110,7 @@ public class ExecuteLogOperator {
 			// check mount of file
 			while (executeFileList.size() > 2) {
 				File ff = executeFileList.removeFirst();
-				ff.delete();
+				FileUtil.deleteFile(ff);
 			}
 		}
 	}

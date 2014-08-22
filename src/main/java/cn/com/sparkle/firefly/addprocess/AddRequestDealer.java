@@ -52,7 +52,7 @@ public class AddRequestDealer implements InstanceExecuteEventListener, InstanceP
 
 	public final int MIN_TCP_PACKAGE_SIZE;
 
-	public final static int MAX_EXECUTING_INSTANCE_NUM = 3;
+	public final static int MAX_EXECUTING_INSTANCE_NUM = 100;
 
 	public final static int MAX_SESSION_WAIT_QUEUE_SIZE = 3;
 
@@ -90,7 +90,7 @@ public class AddRequestDealer implements InstanceExecuteEventListener, InstanceP
 										// waitQueue
 
 	private long withoutPreparePhaseTime;
-	
+
 	private long lastSuccessTime = -1; // record the time when last instance succeed to fix a instance start time
 
 	public AddRequestDealer(Context context) {
@@ -176,7 +176,7 @@ public class AddRequestDealer implements InstanceExecuteEventListener, InstanceP
 
 	public void add(PaxosSession session, AddRequest addRequest) {
 		try {
-			
+
 			lock.lock();
 			if (!isOpend) {
 				session.closeSession();
@@ -192,12 +192,12 @@ public class AddRequestDealer implements InstanceExecuteEventListener, InstanceP
 				// wait and merge
 				AddRequestPackage lastPackage = dealState.peekLast();
 				if (lastPackage != null && lastPackage.getValueByteSize() < curTcpPackageByteSize && !addRequest.getCommandType().isAdmin()
-						&& !lastPackage.isManageCommand()) {
-					
+						&& !lastPackage.isAdmin()) {
 					lastPackage.addRequest(addRequest);
-//					logger.debug("merge ~~~~~~~~~~~~~" + lastPackage.getValueByteSize());
+					//					logger.debug(String.format("merge to a requset,size:%s", lastPackage.getValueByteSize()));
 				} else {
 					dealState.add(new AddRequestPackage(addRequest, session, context));
+					//					logger.debug(String.format("no merge to a requset,size:%s ",lastPackage == null ? null : lastPackage.getValueByteSize()));
 				}
 			} else {
 				// no wait
@@ -218,19 +218,20 @@ public class AddRequestDealer implements InstanceExecuteEventListener, InstanceP
 				executable_instances_num = MAX_EXECUTING_INSTANCE_NUM; // restore
 			}
 			int needExecute = executable_instances_num - executingInstanceNum;
-			
+
 			for (int i = 0; i < needExecute && requestQueue.size() > 0; ++i) {
 				int curByteCount = 0;
 				LinkedList<AddRequestPackage> list = new LinkedList<AddRequestPackage>();
 				// merge message from all client
 				do {
+					
 					AddRequestPackage arp = requestQueue.removeFirst();
 					String error = arp.testAdminToPaxosAble(); //test admin command if can execute
 					if (error == null) {
-						if (arp.isManageCommand()) {
+						if (arp.isAdmin()) {
 							executable_instances_num = 1;// limit executing number
 							needExecute = 0; // stop cycle
-							if (executingInstanceNum > 0 && list.size() != 0) {
+							if (executingInstanceNum > 0 || list.size() != 0) {
 								requestQueue.addFirst(arp);// restore queue
 								break;
 							}
@@ -246,7 +247,7 @@ public class AddRequestDealer implements InstanceExecuteEventListener, InstanceP
 							logger.debug("requestQueue.size()" + requestQueue.size() + " list.size:" + list.size() + " curTcpPackageByteSize"
 									+ curTcpPackageByteSize);
 						}
-						if (arp.isManageCommand() || !context.getConfiguration().isMergeClientRequest()) {
+						if (arp.isAdmin() || !context.getConfiguration().isMergeClientRequest()) {
 							break; // not to merge, this is will not merge from other node,  so for many client ,to improve rt performance
 						}
 					} else {
@@ -321,8 +322,9 @@ public class AddRequestDealer implements InstanceExecuteEventListener, InstanceP
 
 	@Override
 	public void instanceFail(InstancePaxosInstance instance, Id id, long refuseId, Value value) {
+		ReentrantLock myLock = lock;
 		try {
-			lock.lock();
+			myLock.lock();
 			if (!isOpend) {
 				// stop deal process of this instance and close tcp
 				// conntion
@@ -347,8 +349,8 @@ public class AddRequestDealer implements InstanceExecuteEventListener, InstanceP
 
 				try {
 					//study actively
-					if(value != null){
-						
+					if (value != null) {
+
 						StoreModel.Id.Builder sid = IdTranslator.toStoreModelId(id);
 						SuccessfulRecord.Builder record = SuccessfulRecord.newBuilder().setV(ValueTranslator.toStoreModelValue(value)).setHighestVoteNum(sid);
 						context.getAccountBook().writeSuccessfulRecord(instance.getInstanceId(), record, null);
@@ -398,6 +400,9 @@ public class AddRequestDealer implements InstanceExecuteEventListener, InstanceP
 						e.printStackTrace();
 					}
 				}
+				//release lock for wait next code
+				myLock.unlock();
+				myLock = null;
 				while (true) {
 					//reset sender
 					PaxosMessageSender sender = builder.buildSender(context, conf.getPaxosSender());
@@ -416,12 +421,12 @@ public class AddRequestDealer implements InstanceExecuteEventListener, InstanceP
 			}
 
 		} finally {
-			lock.unlock();
+			if (myLock != null) {
+				myLock.unlock();
+			}
 		}
 
 	}
-	
-	
 
 	@Override
 	public void instanceSuccess(InstancePaxosInstance instance, Value value) {
@@ -434,6 +439,7 @@ public class AddRequestDealer implements InstanceExecuteEventListener, InstanceP
 			--executingInstanceNum;
 
 			if (instance.getAddRequestPackages().get(0).getValueByteSize() == 0) {
+
 				if (instance.getWantAssginValue() != value) {
 					context.getcState().getSelfState().addRecoverRecordFromMasterLossCount();
 					if (context.getConfiguration().isDebugLog()) {
@@ -447,7 +453,7 @@ public class AddRequestDealer implements InstanceExecuteEventListener, InstanceP
 
 				--nullCommandCount;
 				executeNeed();
-			} else if (instance.getAddRequestPackages().get(0).isManageCommand()) {
+			} else if (instance.getAddRequestPackages().get(0).isAdmin()) {
 				// this is admin senator command,the action
 				// must be reacted in executeEvent..
 				DealState ds = instance.getAddRequestPackages().get(0).getSession().get(DEAL_STATE_KEY);
@@ -459,16 +465,25 @@ public class AddRequestDealer implements InstanceExecuteEventListener, InstanceP
 					}
 				} else {
 					for (AddRequestPackage arp : instance.getAddRequestPackages()) {
-						DealState ds = arp.getSession().get(DEAL_STATE_KEY);
-						AddRequestPackage waitArp = ds.pollFirst();
-						if (waitArp != null) {
-							requestQueue.addLast(waitArp);
-						} else {
-							ds.isDealing = false;
+						try {
+							DealState ds = arp.getSession().get(DEAL_STATE_KEY);
+							AddRequestPackage waitArp = ds.pollFirst();
+							if (waitArp != null) {
+								requestQueue.addLast(waitArp);
+							} else {
+								ds.isDealing = false;
+							}
+						} catch (NullPointerException e) {
+							logger.error("AddRequestPackage:" + arp);
+							logger.error("session:" + arp.getSession());
+							logger.error("arp.valuesize:" + arp.getValueByteSize());
+							for(AddRequest addRequset : arp.getValueList()){
+								logger.error("value:" + addRequset.getValue());
+							}
 						}
 					}
 					long realStartTime = Math.max(lastSuccessTime, instance.getStartTime());
-					if(conf.isDebugLog()){
+					if (conf.isDebugLog()) {
 						logger.debug(String.format("instance success, cost %s", TimeUtil.currentTimeMillis() - realStartTime));
 					}
 					lastSuccessTime = TimeUtil.currentTimeMillis();
@@ -539,5 +554,10 @@ public class AddRequestDealer implements InstanceExecuteEventListener, InstanceP
 
 	public PaxosMessageSender getSender() {
 		return builder.buildSender(context, conf.getPaxosSender());
+	}
+	public static void main(String[] args) {
+		AddRequest nullRequest = new AddRequest(-1, CommandType.ADMIN_WRITE, NULL_BYTES, -1);
+		AddRequestPackage nullRequestPackage = new AddRequestPackage(nullRequest, null, null);
+		System.out.println(nullRequestPackage.getValueByteSize());
 	}
 }

@@ -23,6 +23,7 @@ import javax.management.RuntimeErrorException;
 
 import org.apache.log4j.Logger;
 
+import cn.com.sparkle.firefly.Context;
 import cn.com.sparkle.firefly.addprocess.AddRequestPackage;
 import cn.com.sparkle.firefly.checksum.ChecksumUtil.UnsupportedChecksumAlgorithm;
 import cn.com.sparkle.firefly.config.Configuration;
@@ -39,6 +40,7 @@ import cn.com.sparkle.firefly.stablestorage.model.RecordType;
 import cn.com.sparkle.firefly.stablestorage.model.StoreModel.InstanceVoteRecord;
 import cn.com.sparkle.firefly.stablestorage.model.StoreModel.SuccessfulRecord;
 import cn.com.sparkle.firefly.stablestorage.model.SuccessfulRecordWrap;
+import cn.com.sparkle.firefly.stablestorage.util.FileUtil;
 import cn.com.sparkle.firefly.util.IdComparator;
 
 import com.google.protobuf.GeneratedMessage.Builder;
@@ -86,18 +88,16 @@ public class RecordFileOperatorDefault implements RecordFileOperator {
 	}
 
 	@Override
-	public void initOperator(File dir, long lastExpectSafeInstanceId, InstanceExecutor instanceExecutor, RecordFileOutFactory recordOutFactory ,Configuration conf) {
+	public void initOperator(File dir, long lastExpectSafeInstanceId, InstanceExecutor instanceExecutor, RecordFileOutFactory recordOutFactory, Context context) {
+		Configuration conf = context.getConfiguration();
 		this.debugLog = conf.isDebugLog();
 		this.dir = dir;
 		this.lastExpectSafeInstanceId = lastExpectSafeInstanceId;
 		this.maxVoteInstanceId = lastExpectSafeInstanceId - 1;
-		this.maxKnowedInstanceId =  this.maxVoteInstanceId;
+		this.maxKnowedInstanceId = this.maxVoteInstanceId;
 		this.instanceExecutor = instanceExecutor;
 		this.preferChecksum = conf.getFileChecksumType();
 		this.outFactory = recordOutFactory;
-		if (!dir.exists()) {
-			dir.mkdirs();
-		}
 	}
 
 	/**
@@ -123,8 +123,8 @@ public class RecordFileOperatorDefault implements RecordFileOperator {
 			long pos = 0;
 			long i = dirFlag;
 			// read from read log
-//			for (int i = dirFlag; i < Integer.MAX_VALUE; ++i) {
-			while(true){
+			//			for (int i = dirFlag; i < Integer.MAX_VALUE; ++i) {
+			while (true) {
 				long maxFlag = (i + 1) * DIR_FILE_NUM;
 				for (; successStartFileFlag < maxFlag; ++successStartFileFlag) {
 					pos = 0;
@@ -142,7 +142,7 @@ public class RecordFileOperatorDefault implements RecordFileOperator {
 								RecordHead head = RecordHead.readFromStream(in);
 								if (head != null) {
 									if (head.isValid()) {
-										if(head.getInstanceId() > maxKnowedInstanceId){
+										if (head.getInstanceId() > maxKnowedInstanceId) {
 											maxKnowedInstanceId = head.getInstanceId();
 										}
 										if (head.getInstanceId() < lastExpectSafeInstanceId) {
@@ -240,10 +240,8 @@ public class RecordFileOperatorDefault implements RecordFileOperator {
 			}
 
 			if (recordFileBeanList.size() == 0) {
-				File d = new File(dir + "/0");
-				d.mkdir();
-				File f = new File(dir + "/0/0");
-				f.createNewFile();
+				FileUtil.getDir(dir + "/0");
+				File f = FileUtil.getFile(dir + "/0/0");
 				recordFileBeanList.add(new RecordFileBean(f));
 			}
 			return lastExpectSafeInstanceId - 1;
@@ -297,18 +295,9 @@ public class RecordFileOperatorDefault implements RecordFileOperator {
 			//build a object
 			SuccessfulRecordWrap recordWrap = new SuccessfulRecordWrap(instanceId, successfulRecord.build(), addRequestPackages);
 
-			boolean isSuccess = writeRecordLog(record, new Callable<Object>() {
-				@Override
-				public Object call() throws Exception {
-					// notify
-					if (realEvent != null) {
-						realEvent.call();
-					}
-					return null;
-				}
-			});
+			boolean isSuccess = writeRecordLog(record, realEvent);
 			if (isSuccess) {
-				if(instanceId > maxKnowedInstanceId){
+				if (instanceId > maxKnowedInstanceId) {
 					maxKnowedInstanceId = instanceId;
 				}
 				unsafeSet.put(recordWrap.getInstanceId(), recordWrap);
@@ -364,7 +353,7 @@ public class RecordFileOperatorDefault implements RecordFileOperator {
 			if (instanceId > maxVoteInstanceId) {
 				maxVoteInstanceId = instanceId;
 			}
-			if(instanceId > maxKnowedInstanceId){
+			if (instanceId > maxKnowedInstanceId) {
 				maxKnowedInstanceId = instanceId;
 			}
 
@@ -428,8 +417,7 @@ public class RecordFileOperatorDefault implements RecordFileOperator {
 					File d = new File(dir + "/" + dirNum);
 					d.mkdir();
 				}
-				File f = new File(dir + "/" + dirNum + "/" + i);
-				f.createNewFile();
+				File f = FileUtil.getFile(dir + "/" + dirNum + "/" + i);
 				RecordFileBean recordFileBean = new RecordFileBean(f);
 				recordFileBeanList.addLast(recordFileBean);
 			}
@@ -447,7 +435,7 @@ public class RecordFileOperatorDefault implements RecordFileOperator {
 				break;
 			}
 		}
-		record.writeToStream(out, callable);
+		record.writeToStream(out, callable, true);
 		return true;
 	}
 
@@ -478,9 +466,11 @@ public class RecordFileOperatorDefault implements RecordFileOperator {
 			writeLock.unlock();
 		}
 	}
+
 	@SuppressWarnings("rawtypes")
 	@Override
-	public void readRecord(long fromInstanceId, long toInstanceId, ReadRecordCallback<Builder<? extends Builder>> readCallback) throws IOException, UnsupportedChecksumAlgorithm {
+	public void readRecord(long fromInstanceId, long toInstanceId, ReadRecordCallback<Builder<? extends Builder>> readCallback) throws IOException,
+			UnsupportedChecksumAlgorithm {
 		long startFile = getFileFlagOfInstanceId(fromInstanceId);
 		long endFile = getFileFlagOfInstanceId(toInstanceId);
 		long startDir = getDirFlagOfFileFlag(startFile);
@@ -598,10 +588,10 @@ public class RecordFileOperatorDefault implements RecordFileOperator {
 			}
 		};
 		Arrays.sort(files, comparator);
-		//		files
-		if(files.length == 0){
+		//	files
+		if (files.length == 0) {
 			return 0;
-		}else{
+		} else {
 			return Integer.parseInt(files[0].getName()) * DIR_FILE_NUM * SPLIT_SUCCESSFUL_RECORD_COUNT;
 		}
 	}
@@ -610,6 +600,30 @@ public class RecordFileOperatorDefault implements RecordFileOperator {
 	public long getKnowedMaxId() {
 		return maxKnowedInstanceId;
 	}
-	
+
+	@Override
+	public void close() {
+		for (RecordFileBean rfb : recordFileBeanList) {
+			if (rfb.out != null) {
+				try {
+					rfb.out.close();
+				} catch (IOException e) {
+					logger.error("fatal error", e);
+					System.exit(1);
+				}
+			}
+		}
+	}
+
+	@Override
+	public void setExecutor(InstanceExecutor executor) {
+		try {
+			writeLock.lock();
+			this.instanceExecutor = executor;
+		} finally {
+			writeLock.unlock();
+		}
+
+	}
 
 }

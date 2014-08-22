@@ -67,7 +67,7 @@ public class ExecuteRecord {
 	}
 
 	public void writeToStream(RecordFileOut out, Callable<Object> callable) throws IOException {
-		out.write(this.array, 0, 16, callable);
+		out.write(this.array, 0, 16, callable,true);
 	}
 
 	private long checksum(byte[] bytes, int offset, int length) throws UnsupportedChecksumAlgorithm {

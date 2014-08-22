@@ -11,7 +11,7 @@ public interface RecordFileOut {
 	 * @return the start position of this data in file
 	 * @throws IOException
 	 */
-	public long writeInt(int size, Callable<Object> callable) throws IOException;
+	public long writeInt(int size, Callable<Object> callable,boolean isSync) throws IOException;
 
 	/**
 	 * 
@@ -20,7 +20,7 @@ public interface RecordFileOut {
 	 * @return the start position of this data in file
 	 * @throws IOException
 	 */
-	public long writeLong(long v, Callable<Object> callable) throws IOException;
+	public long writeLong(long v, Callable<Object> callable,boolean isSync) throws IOException;
 	/**
 	 * 
 	 * @param buf
@@ -30,7 +30,8 @@ public interface RecordFileOut {
 	 * @return the start position of this data in file
 	 * @throws IOException
 	 */
-	public long write(byte[] buf, int off, int length, Callable<Object> callable) throws IOException;
+	public long write(byte[] buf, int off, int length, Callable<Object> callable,boolean isSync) throws IOException;
+	
 
 	public void close() throws IOException;
 }

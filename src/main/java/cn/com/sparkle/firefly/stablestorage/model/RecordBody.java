@@ -54,11 +54,14 @@ public final class RecordBody {
 		return checksum;
 	}
 
-	public void writeToStream(RecordFileOut out, Callable<Object> callable) throws IOException {
-		out.write(this.body, 0, this.body.length, null);
-		out.write(this.checksum, 0, this.checksum.length, callable);
+	public void writeToStream(RecordFileOut out, Callable<Object> callable,boolean isSync) throws IOException {
+		out.write(this.body, 0, this.body.length, null,false);
+		out.write(this.checksum, 0, this.checksum.length, callable,isSync);
 	}
-
+	
+	public int getSerializeSize(){
+		return body.length + this.checksum.length;
+	}
 	public static RecordBody readFromStream(InputStream in, RecordHead head) throws IOException {
 		byte[] body = new byte[head.getBodySize()];
 		int size = in.read(body);

@@ -27,7 +27,9 @@ public class SortedReadCallback<T extends Builder<? extends Builder>> implements
 		}
 
 	}
-
+	public boolean isFinished(){
+		return priorityQueue.isEmpty();
+	}
 	public PriorityQueue<SortBean> getPriorityQueue() {
 		return priorityQueue;
 	}

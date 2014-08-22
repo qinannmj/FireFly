@@ -6,12 +6,13 @@ import java.util.zip.CRC32;
 import java.util.zip.Checksum;
 
 /**
- * the type less than 16 for only use 4 bits
+ * 
  * @author qinan.qn
  *
  */
 public final class ChecksumUtil {
-
+	
+	//the type less than 16 for only use 4 bits
 	public final static int NO_CHECKSUM = 0;
 	public final static int INBUILD_ALDER32 = 1;
 	public final static int INBUILD_CRC32 = 2;

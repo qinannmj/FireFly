@@ -61,11 +61,11 @@ public class ClassicPaxosServer implements AccountBookEventListener, ConfigureEv
 	public ClassicPaxosServer() throws InstantiationException, IllegalAccessException {
 		this(null);
 	}
-	
-	public void init(String filePath, HandlerInterface userHandlerInterface) throws Throwable{
-		init(filePath,userHandlerInterface,null);
+
+	public void init(String filePath, HandlerInterface userHandlerInterface) throws Throwable {
+		init(filePath, userHandlerInterface, null);
 	}
-	
+
 	public void init(String filePath, HandlerInterface userHandlerInterface, List<AdminProcessor> adminList) throws Throwable {
 		this.userHandlerInterface = userHandlerInterface;
 
@@ -103,10 +103,6 @@ public class ClassicPaxosServer implements AccountBookEventListener, ConfigureEv
 		HeartBeatCheckDeamon beatCheckDeamon = new HeartBeatCheckDeamon(context);
 		beatCheckDeamon.start();
 
-		// initiate catch up deamon
-		Thread catchUpDeamon = new Thread(new CatchUpDeamon(context));
-		catchUpDeamon.setName("catchUpDeamon");
-		catchUpDeamon.start();
 		reConnectThread.startThread();
 		// connect all node
 		connectNodes(protocolManager);
@@ -117,6 +113,12 @@ public class ClassicPaxosServer implements AccountBookEventListener, ConfigureEv
 
 		// init book
 		accountBook.init(ie);
+		// initiate catch up deamon
+		Thread catchUpDeamon = new Thread(new CatchUpDeamon(context));
+		catchUpDeamon.setName("catchUpDeamon");
+		catchUpDeamon.start();
+
+		accountBook.initLoad();
 	}
 
 	@Override

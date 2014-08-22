@@ -1,18 +1,21 @@
 package cn.com.sparkle.firefly;
 
-import java.util.HashSet;
-
-import org.apache.log4j.Logger;
-import org.apache.log4j.PropertyConfigurator;
-
-import cn.com.sparkle.firefly.net.client.NetNode;
+import java.io.File;
+import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.nio.MappedByteBuffer;
+import java.nio.channels.FileChannel.MapMode;
 
 public class Test {
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
 		
-		Logger log = Logger.getLogger(Test.class);
-		log.info("fffffffff");
-		System.out.println(Logger.getRoot().getName());
-		long i = 1L <<32;
+		File f = new File("c:/test.data");
+		if(!f.exists()){
+			f.createNewFile();
+		}
+		RandomAccessFile raf = new RandomAccessFile(f, "rw");
+		raf.writeByte(8);
+		MappedByteBuffer mappedBuffer = raf.getChannel().map(MapMode.READ_ONLY, 0, 100);
+		
 	}
 }

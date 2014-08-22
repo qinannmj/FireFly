@@ -39,7 +39,7 @@ public class InstancePaxosInstance extends PaxosInstance {
 		ValueType valueType = ValueType.COMM;
 		int byteCount = 0;
 		for (AddRequestPackage arp : addRequestPackages) {
-			if (arp.isManageCommand()) {
+			if (arp.isAdmin()) {
 				valueType = ValueType.ADMIN;
 			}
 			byteCount += arp.getValueList().size() * 4 + arp.getValueByteSize();

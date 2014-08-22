@@ -10,6 +10,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.apache.log4j.Logger;
 
 import cn.com.sparkle.firefly.client.deamon.MasterHeartBeatDeamon;
+import cn.com.sparkle.firefly.client.queue.CostBlockingQueue;
 import cn.com.sparkle.firefly.deamon.ReConnectDeamon;
 import cn.com.sparkle.firefly.net.client.NetNode;
 import cn.com.sparkle.firefly.net.client.user.ConnectConfig;
@@ -24,10 +25,13 @@ import cn.com.sparkle.firefly.protocolprocessor.ProtocolManager;
 
 public class CommandAsyncProcessor implements Runnable {
 	private final static Logger logger = Logger.getLogger(CommandAsyncProcessor.class);
+	
 	private static NetClient nioSocketClient;
 	private static UserClientHandler handler;
 	private static ReConnectDeamon reConnectThread = new ReConnectDeamon();
+	
 
+	private final int runningMemMaxSize;
 	private String[] senator = {};
 
 	private volatile String[] newSenator = senator;
@@ -40,8 +44,7 @@ public class CommandAsyncProcessor implements Runnable {
 
 	private EntryNode root = new EntryNode();
 	private AtomicInteger runningSize = new AtomicInteger(0);
-
-//	private final int maxRunningMemSize;
+	
 
 	private int masterDistance;
 
@@ -54,7 +57,6 @@ public class CommandAsyncProcessor implements Runnable {
 	private MasterHeartBeatDeamon heartBeatDeamon;
 
 	private volatile boolean isWakeup = false;
-	@SuppressWarnings("unused")
 	private boolean debugLog;
 
 	public static class EntryNode {
@@ -109,13 +111,14 @@ public class CommandAsyncProcessor implements Runnable {
 
 	}
 
-	public CommandAsyncProcessor(String[] senator, int masterDistance,BlockingQueue<Command> queue, MasterHeartBeatDeamon heartBeatDeamon,
+	public CommandAsyncProcessor(String[] senator, int masterDistance,int waitingMemMaxSize,int runningMemMaxSize, MasterHeartBeatDeamon heartBeatDeamon,
 			boolean debugLog) throws Throwable {
 		this.newSenator = senator;
 		this.debugLog = debugLog;
 		this.masterDistance = masterDistance;
 		this.heartBeatDeamon = heartBeatDeamon;
-		commandQueue = queue;
+		this.runningMemMaxSize = runningMemMaxSize;
+		commandQueue = new CostBlockingQueue<Command>(waitingMemMaxSize);
 		wakeup();//notify to process first
 	}
 
@@ -202,6 +205,9 @@ public class CommandAsyncProcessor implements Runnable {
 					reConnect();
 					if (curConnectConfig != null) {
 						// redo
+						if(debugLog){
+							logger.debug("reSend requset");
+						}
 						EntryNode next = root;
 						while ((next = next.next) != null) {
 							try {
@@ -216,8 +222,11 @@ public class CommandAsyncProcessor implements Runnable {
 					}
 				}
 				if (curConnectConfig != null) {
-//					while (commandQueue.peek() != null && runningSize.get() != maxRunningSize) {
-					while (commandQueue.peek() != null) {
+					Command c = commandQueue.peek();
+					while (c != null) {
+						if(runningSize.get() + c.cost() > runningMemMaxSize ){
+							break;
+						}
 						EntryNode e = new EntryNode();
 						e.c = commandQueue.poll();
 						synchronized (root) {
@@ -228,7 +237,8 @@ public class CommandAsyncProcessor implements Runnable {
 							root.next = e;
 							e.prev = root;
 						}
-						runningSize.incrementAndGet();
+						
+						runningSize.addAndGet(e.c.cost());
 						try {
 							sendRequestToNode(curConnectConfig, e);
 						} catch (NetCloseException ee) {
@@ -237,6 +247,7 @@ public class CommandAsyncProcessor implements Runnable {
 							wakeup();
 							break;
 						}
+						c = commandQueue.peek();
 					}
 				}
 
@@ -320,9 +331,8 @@ public class CommandAsyncProcessor implements Runnable {
 	public EntryNode getRoot() {
 		return root;
 	}
-
-	public AtomicInteger getRunningSize() {
-		return runningSize;
+	
+	public void finish(Command c){
+		runningSize.addAndGet(-c.cost());
 	}
-
 }

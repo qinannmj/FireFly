@@ -75,7 +75,7 @@ public class PaxosClient {
 		MasterHeartBeatDeamon heartBeatDeamon = new MasterHeartBeatDeamon(debugLog);
 		heartBeatDeamon.setName("heartBeatDeamon");
 		for (int i = 0; i < tcpConnectNum; ++i) {
-			processor[i] = new CommandAsyncProcessor(senator, masterDistance,new CostBlockingQueue<Command>(singleTcpWaitingMaxMem), heartBeatDeamon, debugLog);
+			processor[i] = new CommandAsyncProcessor(senator, masterDistance,singleTcpWaitingMaxMem/3,singleTcpWaitingMaxMem * 2 /3, heartBeatDeamon, debugLog);
 			processor[i].runDeamon();
 		}
 

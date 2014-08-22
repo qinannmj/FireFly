@@ -7,7 +7,7 @@ public class Constants {
 	public final static long VOTE_OK = -1;
 	public final static long FILE_WRITE_SUCCESS = -1;
 	public final static int MAX_HEART_BEAT_INTERVAL = 10000;//ten minutes
-	public final static int CATCH_STOP_NUM = 500;
+	public final static int CATCH_STOP_NUM = 5000;
 	public final static long ELECTION_VOTE_ID_TOLERATION = 200; // for master can catch up fast
 	public final static int MAX_MASTER_DISTANCE = Integer.MAX_VALUE;
 	public final static int MAX_ACTIVE_HEART_BEAT_LIFE_CYCLE = 10;

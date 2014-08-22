@@ -33,7 +33,7 @@ public class StartUp {
 			}
 		});
 		ps.init(path, new HandlerInterface() {
-
+			private int executedCount = 0;
 			@Override
 			public void onClientConnect(PaxosSession session) {
 
@@ -47,8 +47,8 @@ public class StartUp {
 			@Override
 			public byte[] onLoged(byte[] bytes,int offset,int length) {
 				//				logger.info("command:" + new String(bytes));
-				
-				return "成功".getBytes();
+				executedCount++;
+				return  "成功".getBytes();
 			}
 
 			@Override
@@ -58,13 +58,17 @@ public class StartUp {
 
 			@Override
 			public void onInstanceIdExecuted(long instanceId) {
-				try {
-					writeExecuteLog(instanceId);
-				} catch (IOException e) {
-					e.printStackTrace();
-				} catch (UnsupportedChecksumAlgorithm e) {
-					e.printStackTrace();
+				if(executedCount > 50000){
+					try {
+						writeExecuteLog(instanceId);
+					} catch (IOException e) {
+						e.printStackTrace();
+					} catch (UnsupportedChecksumAlgorithm e) {
+						e.printStackTrace();
+					}
+					executedCount = 0;
 				}
+//				System.out.println(instanceId);
 			}
 
 		});

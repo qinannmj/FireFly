@@ -234,7 +234,6 @@ public class ClusterState implements ConfigureEventListener, HeartBeatEventListe
 				NetNode upLevelNode = routeManage.lookupUpLevelNode();
 				NodeState upLevelNodeState = upLevelNode == null ? null : senators.getNodeStates().get(upLevelNode.getAddress());
 				int upLevelDistance = upLevelNodeState == null ? Constants.MAX_MASTER_DISTANCE : upLevelNodeState.getMasterDistance();
-				logger.info(String.format("state from %s distance %s upLevelDistance %s masterDistance %s", nState.getAddress(),nState.getMasterDistance(),upLevelDistance,masterDistance));
 				if (masterDistance > distance || (masterDistance == distance && upLevelDistance >= distance)) {
 					setMasterDistance(distance);
 				}

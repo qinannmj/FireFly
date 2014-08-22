@@ -30,6 +30,7 @@ public class SystemServerProtocolNegotiationProcessor extends AbstractServerProt
 
 	@Override
 	public boolean isAcceptConnect(String targetAddress,String sourceAddress) {
+		logger.info(String.format("negotiation from %s to %s",sourceAddress, targetAddress ));
 		if(conf.getSelfAddress().equals(targetAddress)){
 			return true;
 		}else{
