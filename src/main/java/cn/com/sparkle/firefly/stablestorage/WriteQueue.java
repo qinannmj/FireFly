@@ -10,12 +10,15 @@ import org.apache.log4j.Logger;
 public class WriteQueue<Tag, Element, MyNode extends WriteQueue.Node<Tag, Element>> {
 	@SuppressWarnings("unused")
 	private final static Logger logger = Logger.getLogger(WriteQueue.class);
+	private final static int LOW_IDLE = 4;
 	private ReentrantLock lock = new ReentrantLock();
 	private HashMap<Tag, MyNode> lastNodeOfTag = new HashMap<Tag, MyNode>();
 	private Node<Tag, Element> highPrior;
 	private Node<Tag, Element> lowPrior;
 	private Condition condition = lock.newCondition();
 	private int size = 0;
+
+	private int lowPriorIdle = LOW_IDLE; //for 1:LOW_IDLE low write : high write
 
 	public static abstract class Node<Tag, Element> {
 		Element element;
@@ -36,9 +39,11 @@ public class WriteQueue<Tag, Element, MyNode extends WriteQueue.Node<Tag, Elemen
 		public Tag getTag() {
 			return tag;
 		}
-		public void setTag(Tag tag){
+
+		public void setTag(Tag tag) {
 			this.tag = tag;
 		}
+
 		public abstract boolean canGet();
 	}
 
@@ -51,7 +56,7 @@ public class WriteQueue<Tag, Element, MyNode extends WriteQueue.Node<Tag, Elemen
 		};
 		highPrior.prev = highPrior;
 		highPrior.next = highPrior;
-		
+
 		lowPrior = new Node<Tag, Element>(null, null) {
 			@Override
 			public boolean canGet() {
@@ -62,16 +67,16 @@ public class WriteQueue<Tag, Element, MyNode extends WriteQueue.Node<Tag, Elemen
 		lowPrior.next = lowPrior;
 	}
 
-	public void push(MyNode n,boolean isHighPrior) {
+	public void push(MyNode n, boolean isHighPrior) {
 		try {
 			lock.lock();
-			if(isHighPrior){
+			if (isHighPrior) {
 				n.next = highPrior.prev.next;
 				n.prev = highPrior.prev;
 				highPrior.prev.next = n;
 				highPrior.prev = n;
 				lastNodeOfTag.put(n.tag, n);
-			}else{
+			} else {
 				n.next = lowPrior.prev.next;
 				n.prev = lowPrior.prev;
 				lowPrior.prev.next = n;
@@ -84,39 +89,59 @@ public class WriteQueue<Tag, Element, MyNode extends WriteQueue.Node<Tag, Elemen
 			lock.unlock();
 		}
 	}
+
 	@SuppressWarnings("unchecked")
 	public MyNode take(int timeout) throws InterruptedException {
 		try {
 			lock.lock();
-			while (highPrior.next == highPrior && lowPrior.next == lowPrior) {
-				if(timeout != -1){
-					condition.await(timeout,TimeUnit.MILLISECONDS);
-				}else{
-					condition.await();
-				}
-				if(timeout != -1 && highPrior.next == highPrior && lowPrior.next == lowPrior){
+			while (highPrior.next == highPrior && (lowPrior.next == lowPrior || lowPriorIdle != 0)) {
+//			while (highPrior.next == highPrior && lowPrior.next == lowPrior) {
+				condition.await(timeout, TimeUnit.MILLISECONDS);
+				if (highPrior.next == highPrior && lowPrior.next == lowPrior) {
 					return null;
+				} 
+				else if (highPrior.next == highPrior && lowPriorIdle != 0) {
+					--lowPriorIdle;
 				}
 			}
 			MyNode n;
-			if(highPrior.next != highPrior){
-				n = (MyNode) highPrior.next;
-				highPrior.next = n.next;
-				n.next.prev = highPrior;
-			}else{
+			if(lowPrior.next != lowPrior && lowPriorIdle == 0){
 				n = (MyNode) lowPrior.next;
 				lowPrior.next = n.next;
 				n.next.prev = lowPrior;
+				if(highPrior.next != highPrior){
+					lowPriorIdle = LOW_IDLE;
+				}
+			}else{
+				n = (MyNode) highPrior.next;
+				highPrior.next = n.next;
+				n.next.prev = highPrior;
+				if(lowPriorIdle != 0){
+					--lowPriorIdle;
+				}
 			}
+//			
+//			if (highPrior.next != highPrior && ()) {
+//				n = (MyNode) highPrior.next;
+//				highPrior.next = n.next;
+//				n.next.prev = highPrior;
+//				if(lowPriorIdle == 1){
+//					lowPriorIdle = LOW_IDLE;
+//				}else{
+//					--lowPriorIdle;
+//				}
+//			} else {
+//				n = (MyNode) lowPrior.next;
+//				lowPrior.next = n.next;
+//				n.next.prev = lowPrior;
+//				
+//			}
 			lastNodeOfTag.remove(n.tag);
 			--size;
 			return n;
 		} finally {
 			lock.unlock();
 		}
-	}
-	public MyNode take() throws InterruptedException{
-		return take(-1);
 	}
 
 	public MyNode getLastNodeOfTag(Tag tag) {
@@ -135,14 +160,15 @@ public class WriteQueue<Tag, Element, MyNode extends WriteQueue.Node<Tag, Elemen
 			lock.unlock();
 		}
 	}
-	public int size(){
-		try{
+
+	public int size() {
+		try {
 			lock.lock();
 			return size;
-		}finally{
+		} finally {
 			lock.unlock();
 		}
-		
+
 	}
 
 	public static void main(String[] args) throws InterruptedException {
@@ -158,12 +184,9 @@ public class WriteQueue<Tag, Element, MyNode extends WriteQueue.Node<Tag, Elemen
 		}
 		WriteQueue<Integer, String, MyNode> a = new WriteQueue<Integer, String, MyNode>();
 		for (int i = 0; i < 1000; i++) {
-			a.push(new MyNode(i, ""),true);
+			a.push(new MyNode(i, ""), true);
 		}
-		a.push(a.getLastNodeOfTag(500),true);
+		a.push(a.getLastNodeOfTag(500), true);
 
-		for (int i = 0; i < 1000; i++) {
-			a.take();
-		}
 	}
 }

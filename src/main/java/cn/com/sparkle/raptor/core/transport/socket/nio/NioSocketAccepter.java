@@ -10,6 +10,7 @@ import java.util.Iterator;
 import cn.com.sparkle.raptor.core.collections.MaximumSizeArrayCycleQueue;
 import cn.com.sparkle.raptor.core.collections.MaximumSizeArrayCycleQueue.QueueFullException;
 import cn.com.sparkle.raptor.core.handler.IoHandler;
+import cn.com.sparkle.raptor.core.transport.socket.nio.factory.ProcessorGroup;
 
 public class NioSocketAccepter {
 
@@ -71,10 +72,10 @@ public class NioSocketAccepter {
 									sc.configureBlocking(false);
 									nscfg.configurateSocket(sc.socket());
 
-									NioSocketProcessor processor = multNioSocketProcessor.getProcessor();
-									IoSession session = new IoSession(processor, sc, handler);
+									ProcessorGroup processor = multNioSocketProcessor.getProcessor();
+									IoSession session = new DefaultIoSession(processor.getReadProcessor(),processor.getWriteProcessor(), sc, handler);
 									handler.onSessionOpened(session);
-									processor.registerRead(session);
+									processor.getReadProcessor().registerRead(session);
 								} catch (IOException e) {
 									if (sc != null) {
 										try {

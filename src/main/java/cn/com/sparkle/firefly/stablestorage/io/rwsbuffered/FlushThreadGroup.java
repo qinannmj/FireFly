@@ -41,7 +41,7 @@ public class FlushThreadGroup {
 				while (true) {
 					MyNode n;
 					try {
-						n = waitQueue.take(1000);
+						n = waitQueue.take(2000);
 						if(n != null){
 							BufferPackage bp = n.getElement();
 							long ct = TimeUtil.currentTimeMillis();

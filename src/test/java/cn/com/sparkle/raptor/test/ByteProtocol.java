@@ -1,14 +1,12 @@
 package cn.com.sparkle.raptor.test;
 
-import java.io.IOException;
 import java.util.LinkedList;
 
 import cn.com.sparkle.raptor.core.buff.BuffPool;
 import cn.com.sparkle.raptor.core.buff.IoBuffer;
 import cn.com.sparkle.raptor.core.buff.IoBufferArray;
-import cn.com.sparkle.raptor.core.buff.BuffPool.PoolEmptyException;
+import cn.com.sparkle.raptor.core.protocol.CodecHandler.ProtocolHandlerIoSession;
 import cn.com.sparkle.raptor.core.protocol.Protocol;
-import cn.com.sparkle.raptor.core.protocol.MultiThreadProtecolHandler.ProtocolHandlerIoSession;
 
 public class ByteProtocol implements Protocol {
 	private int byteSize;
@@ -42,29 +40,23 @@ public class ByteProtocol implements Protocol {
 	}
 
 	@Override
-	public IoBuffer[] encode(BuffPool buffpool, Object message) throws PoolEmptyException {
+	public IoBuffer[] encode(BuffPool buffpool, Object message) {
 		return encode(buffpool, message, null);
 	}
 
 	@Override
-	public IoBuffer[] encode(BuffPool buffpool, Object message,
-			IoBuffer lastWaitSendBuff) throws PoolEmptyException{
+	public IoBuffer[] encode(BuffPool buffpool, Object message, IoBuffer lastWaitSendBuff) {
 		IoBuffer[] buffs;
 		IoBufferArray iba;
 		if (lastWaitSendBuff != null) {
-			iba = buffpool.tryGet(byteSize
-					- lastWaitSendBuff.getByteBuffer().remaining());
+			iba = buffpool.get(byteSize - lastWaitSendBuff.getByteBuffer().remaining());
 		} else {
-			iba = buffpool.tryGet(byteSize);
-		}
-		if(iba == null){
-			throw new PoolEmptyException();
+			iba = buffpool.get(byteSize);
 		}
 		if (lastWaitSendBuff != null) {
 			buffs = new IoBuffer[1 + iba.getIoBuffArray().length];
 			buffs[0] = lastWaitSendBuff;
-			System.arraycopy(iba.getIoBuffArray(), 0, buffs, 1,
-					buffs.length - 1);
+			System.arraycopy(iba.getIoBuffArray(), 0, buffs, 1, buffs.length - 1);
 		} else {
 			buffs = iba.getIoBuffArray();
 		}
@@ -83,10 +75,10 @@ public class ByteProtocol implements Protocol {
 				IoBuffer tib = att.ll.getFirst();
 				int skip = Math.min(tbs, tib.getByteBuffer().remaining());
 				tbs -= skip;
-				tib.getByteBuffer().position(
-						tib.getByteBuffer().position() + skip);
+				tib.getByteBuffer().position(tib.getByteBuffer().position() + skip);
 				if (!tib.getByteBuffer().hasRemaining()) {
-					att.ll.removeFirst().close();;
+					att.ll.removeFirst().close();
+					;
 				}
 			}
 			att.recieveSize -= byteSize;

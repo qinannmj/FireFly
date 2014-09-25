@@ -1,5 +1,5 @@
 package cn.com.sparkle.raptor.core.protocol;
-
+/*
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
@@ -25,6 +25,7 @@ import cn.com.sparkle.raptor.core.transport.socket.nio.IoSession;
 import cn.com.sparkle.raptor.core.transport.socket.nio.NioSocketProcessor;
 import cn.com.sparkle.raptor.core.transport.socket.nio.exception.SessionHavaClosedException;
 @SuppressWarnings("rawtypes")
+
 public class MultiThreadProtecolHandler implements IoHandler {
 	private final static Logger logger = Logger.getLogger(MultiThreadProtecolHandler.class);
 
@@ -421,11 +422,7 @@ public class MultiThreadProtecolHandler implements IoHandler {
 			}
 		}
 
-		/**
-		 * @param obj
-		 * @return the size of bytes writed
-		 * @throws SessionHavaClosedException
-		 */
+		
 
 		public int writeObject(Object obj) throws SessionHavaClosedException {
 			while (true) {
@@ -518,7 +515,12 @@ public class MultiThreadProtecolHandler implements IoHandler {
 
 		@Override
 		public MaximumSizeArrayCycleQueue<ByteBuffer>.Bulk peekWaitSendBulk() {
-			return session.peekWaitSendBulk();
+			try{
+				writeLock.lock();
+				return session.peekWaitSendBulk();
+			}finally{
+				writeLock.unlock();
+			}
 		}
 
 		@Override
@@ -550,4 +552,4 @@ public class MultiThreadProtecolHandler implements IoHandler {
 		}
 	}
 
-}
+}*/

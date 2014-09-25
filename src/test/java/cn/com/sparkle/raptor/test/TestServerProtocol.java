@@ -2,24 +2,20 @@ package cn.com.sparkle.raptor.test;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.nio.ByteBuffer;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
-import cn.com.sparkle.raptor.core.buff.AllocateBytesBuff;
-import cn.com.sparkle.raptor.core.buff.IoBuffer;
-import cn.com.sparkle.raptor.core.buff.SyncBuffPool;
 import cn.com.sparkle.raptor.core.collections.MaximumSizeArrayCycleQueue.QueueFullException;
 import cn.com.sparkle.raptor.core.handler.IoHandler;
-import cn.com.sparkle.raptor.core.protocol.MultiThreadProtecolHandler;
-import cn.com.sparkle.raptor.core.protocol.MultiThreadProtecolHandler.ProtocolHandlerIoSession;
-import cn.com.sparkle.raptor.core.protocol.Protocol;
-import cn.com.sparkle.raptor.core.protocol.ProtocolHandler;
+import cn.com.sparkle.raptor.core.protocol.CodecHandler.ProtocolHandlerIoSession;
+import cn.com.sparkle.raptor.core.protocol.CodecHandler;
+import cn.com.sparkle.raptor.core.protocol.MultiThreadHandler;
 import cn.com.sparkle.raptor.core.protocol.textline.TextLineProtocol;
 import cn.com.sparkle.raptor.core.transport.socket.nio.IoSession;
 import cn.com.sparkle.raptor.core.transport.socket.nio.NioSocketConfigure;
 import cn.com.sparkle.raptor.core.transport.socket.nio.NioSocketServer;
 import cn.com.sparkle.raptor.core.transport.socket.nio.exception.SessionHavaClosedException;
+
+import com.sun.corba.se.pept.protocol.ProtocolHandler;
 
 public class TestServerProtocol {
 
@@ -37,57 +33,51 @@ public class TestServerProtocol {
 		nsc.setProcessorNum(16);
 		nsc.setTcpNoDelay(true);
 		NioSocketServer server = new NioSocketServer(nsc);
-		server.bind(new InetSocketAddress(1234),new MultiThreadProtecolHandler(100000, 1024, 20, 300, 60, TimeUnit.SECONDS,new TextLineProtocol(), new TestProtocolHandler()));
-//		server.bind(new InetSocketAddress(12345),new FilterChain(new TestHandler()));
+		IoHandler handler = new MultiThreadHandler(20, 300, 60, TimeUnit.SECONDS, new CodecHandler(100000, 1024, new TextLineProtocol(),
+				new TestProtocolHandler()));
+		server.bind(new InetSocketAddress(1234), handler);
+		//		server.bind(new InetSocketAddress(12345),new FilterChain(new TestHandler()));
 	}
-	
+
 }
-class TestProtocolHandler implements ProtocolHandler{
+
+class TestProtocolHandler implements IoHandler {
 	private int i = 0;
 
+	@Override
+	public void onSessionOpened(IoSession session) {
+		// TODO Auto-generated method stub
+
+	}
 
 	@Override
-	public void onOneThreadMessageRecieved(Object receiveObject,
-			ProtocolHandlerIoSession session) {
-//		System.out.println(recieveObject);
+	public void onSessionClose(IoSession session) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void onMessageRecieved(IoSession session, Object message) throws IOException {
+		//		System.out.println(recieveObject);
 		try {
-			session.writeObject("ÄãºÃ£¡Mr client!This is server!" + (++i));
-	} catch (SessionHavaClosedException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-	}
-	}
+			session.write("ÄãºÃ£¡Mr client!This is server!" + (++i), false);
+		} catch (SessionHavaClosedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
+	}
 
 	@Override
-	public void onOneThreadSessionOpen(ProtocolHandlerIoSession session) {
-		System.out.println("open");
-		
-	}
-
-
-	@Override
-	public void onOneThreadSessionClose(ProtocolHandlerIoSession session) {
+	public void onMessageSent(IoSession session, int sendSize) {
 		// TODO Auto-generated method stub
-		
-	}
 
+	}
 
 	@Override
-	public void onOneThreadCatchException(IoSession ioSession,
-			ProtocolHandlerIoSession attachment, Throwable e) {
+	public void catchException(IoSession session, Throwable e) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
-
-
-	@Override
-	public void onOneThreadMessageSent(ProtocolHandlerIoSession session,int sendSize) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	
-	
 }

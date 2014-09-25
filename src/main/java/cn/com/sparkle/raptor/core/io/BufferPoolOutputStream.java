@@ -5,7 +5,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import cn.com.sparkle.raptor.core.buff.BuffPool;
-import cn.com.sparkle.raptor.core.buff.BuffPool.PoolEmptyException;
 import cn.com.sparkle.raptor.core.buff.IoBuffer;
 
 /**
@@ -20,42 +19,24 @@ public class BufferPoolOutputStream extends OutputStream {
 	private int reserverPosition = -1;
 	private int reserveSize;
 
-	private IoBuffer ioBuffer;
-
-	public BufferPoolOutputStream(BuffPool pool) throws PoolEmptyException {
+	public BufferPoolOutputStream(BuffPool pool) {
 		this(pool, 0, null);
 	}
 
-	private void clearBuff() {
-		for (IoBuffer buffer : arrayList) {
-			if (buffer != ioBuffer) {
-				buffer.close();
-			}
-		}
-	}
-
-	public BufferPoolOutputStream(BuffPool pool, int reserveSize, IoBuffer ioBuffer) throws PoolEmptyException {
+	public BufferPoolOutputStream(BuffPool pool, int reserveSize, IoBuffer ioBuffer) {
 		this.reserveSize = reserveSize;
-		this.ioBuffer = ioBuffer;
 		this.pool = pool;
 		if (ioBuffer != null) {
 			cycleBuff = ioBuffer;
 		} else {
-			cycleBuff = pool.tryGet();
-			if (cycleBuff == null) {
-				throw new PoolEmptyException();
-			}
+			cycleBuff = pool.get();
 		}
 		arrayList.add(cycleBuff);
 		while (reserveSize > cycleBuff.getByteBuffer().remaining()) {
 			reserveSize -= cycleBuff.getByteBuffer().remaining();
 			reserverPosition = cycleBuff.getByteBuffer().position();
 			cycleBuff.getByteBuffer().position(cycleBuff.getByteBuffer().capacity());
-			cycleBuff = pool.tryGet();
-			if (cycleBuff == null) {
-				clearBuff();
-				throw new PoolEmptyException();
-			}
+			cycleBuff = pool.get();
 			arrayList.add(cycleBuff);
 		}
 		if (reserverPosition == -1) {
@@ -65,27 +46,19 @@ public class BufferPoolOutputStream extends OutputStream {
 	}
 
 	@Override
-	public void write(int b) throws PoolEmptyException {
+	public void write(int b) {
 		if (cycleBuff.getByteBuffer().remaining() == 0) {
-			cycleBuff = pool.tryGet();
-			if (cycleBuff == null) {
-				clearBuff();
-				throw new PoolEmptyException();
-			}
+			cycleBuff = pool.get();
 			arrayList.add(cycleBuff);
 		}
 		cycleBuff.getByteBuffer().put((byte) b);
 		++writeCount;
 	}
 
-	public void write(IoBuffer buff) throws PoolEmptyException {
+	public void write(IoBuffer buff) {
 		while (buff.getByteBuffer().hasRemaining()) {
 			if (cycleBuff.getByteBuffer().remaining() == 0) {
-				cycleBuff = pool.tryGet();
-				if (cycleBuff == null) {
-					clearBuff();
-					throw new PoolEmptyException();
-				}
+				cycleBuff = pool.get();
 				arrayList.add(cycleBuff);
 			}
 			int len = buff.getByteBuffer().remaining();
@@ -100,14 +73,10 @@ public class BufferPoolOutputStream extends OutputStream {
 	}
 
 	@Override
-	public void write(byte[] b, int off, int len) throws PoolEmptyException {
+	public void write(byte[] b, int off, int len) {
 		while (len > 0) {
 			if (cycleBuff.getByteBuffer().remaining() == 0) {
-				cycleBuff = pool.tryGet();
-				if (cycleBuff == null) {
-					clearBuff();
-					throw new PoolEmptyException();
-				}
+				cycleBuff = pool.get();
 				arrayList.add(cycleBuff);
 			}
 			int canWrite = Math.min(cycleBuff.getByteBuffer().remaining(), len);

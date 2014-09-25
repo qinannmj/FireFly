@@ -3,6 +3,9 @@ package cn.com.sparkle.raptor.core.transport.socket.nio;
 import java.net.Socket;
 import java.net.SocketException;
 
+import cn.com.sparkle.raptor.core.transport.socket.nio.factory.ProcessorFactory;
+import cn.com.sparkle.raptor.core.transport.socket.nio.factory.ReadWriteProcessorFactory;
+
 public class NioSocketConfigure {
 	private int recieveBuffSize = 8 * 1024;
 	private int sentBuffSize = 8 * 1024;
@@ -24,6 +27,7 @@ public class NioSocketConfigure {
 	private int cycleRecieveBuffCellSize = 20000;
 	private int soTimeOut = 500;
 	private int backLog = 500;
+	private ProcessorFactory processorFactory = new ReadWriteProcessorFactory();
 
 	public int getCycleRecieveBuffCellSize() {
 		return cycleRecieveBuffCellSize;
@@ -215,6 +219,15 @@ public class NioSocketConfigure {
 
 	public void setTrafficClass(int trafficClass) {
 		this.trafficClass = Integer.valueOf(trafficClass);
+	}
+
+	
+	public ProcessorFactory getProcessorFactory() {
+		return processorFactory;
+	}
+
+	public void setProcessorFactory(ProcessorFactory processorFactory) {
+		this.processorFactory = processorFactory;
 	}
 
 	public void configurateSocket(Socket socket) throws SocketException {

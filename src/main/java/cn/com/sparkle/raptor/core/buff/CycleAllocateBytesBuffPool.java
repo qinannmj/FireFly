@@ -2,13 +2,18 @@ package cn.com.sparkle.raptor.core.buff;
 
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.apache.log4j.Logger;
+
 import cn.com.sparkle.raptor.core.collections.MaximumSizeArrayCycleQueue;
 import cn.com.sparkle.raptor.core.collections.MaximumSizeArrayCycleQueue.QueueFullException;
 
 public class CycleAllocateBytesBuffPool implements BuffPool {
+	private Logger logger = Logger.getLogger(CycleAllocateBuff.class);
+
 	protected MaximumSizeArrayCycleQueue<CycleBuff> queue;
 	private int cellCapacity;
 	private int totalCellSize;
+	private int heapAllocateCount = 0;
 
 	private ReentrantLock lock = new ReentrantLock();
 
@@ -27,55 +32,50 @@ public class CycleAllocateBytesBuffPool implements BuffPool {
 
 	}
 
-	public void close(CycleBuff buff) {
+	public boolean close(CycleBuff buff) {
 		try {
 			lock.lock();
 			if (buff.getPool() != this) {
-				return;
+				return false;
 			}
 			buff.getByteBuffer().clear();
 			queue.push(buff);
+			return true;
 		} catch (QueueFullException e) {
-			e.printStackTrace();
+			return false;
 		} finally {
 			lock.unlock();
 		}
 	}
 
-	public CycleBuff tryGet() {
-		CycleBuff buff = queue.peek();
+	public IoBuffer get() {
+		IoBuffer buff = queue.peek();
 		if (buff != null) {
 			queue.poll();
+			heapAllocateCount = 0;
+		} else {
+			buff = new AllocateBytesBuff(cellCapacity, false);
+			if (++heapAllocateCount == 100) {
+				logger.warn("allocate a heap bytes,maybe you need to incread the size of pool!");
+			}
 		}
 		return buff;
 	}
 
 	@Override
-	public IoBufferArray tryGet(int byteSize) {
+	public IoBufferArray get(int byteSize) {
 		int size = byteSize / cellCapacity + (byteSize % cellCapacity == 0 ? 0 : 1);
-		if (totalCellSize < size) {
-			throw new RuntimeException("this size of need is more than the capacity of pool!you need increase totalCellSize");
-		}
-		if (queue.size() < size) {
-			return null;
-		}
 
-		CycleBuff[] buff = new CycleBuff[size];
+		IoBuffer[] buff = new IoBuffer[size];
 		for (int i = 0; i < size; i++) {
-			while (true) {
-				buff[i] = queue.peek();
-				if (buff[i] != null) {
-					queue.poll();
-					break;
-				} else {
-					for (i -= 1; i >= 0; --i) {
-						try {
-							queue.push(buff[i]);
-						} catch (QueueFullException e) {
-							throw new RuntimeException("fatal error", e);
-						}
-					}
-					return null;
+			buff[i] = queue.peek();
+			if (buff[i] != null) {
+				queue.poll();
+				heapAllocateCount = 0;
+			} else {
+				buff[i] = new AllocateBytesBuff(cellCapacity, false);
+				if (++heapAllocateCount == 100) {
+					logger.warn("allocate a heap bytes,maybe you need to incread the size of pool!");
 				}
 			}
 		}

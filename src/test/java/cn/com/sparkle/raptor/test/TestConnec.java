@@ -56,11 +56,11 @@ class TestClientHandler1 implements IoHandler {
 	long ct = System.currentTimeMillis();
 	int cc = 0;
 	@Override
-	public void onMessageRecieved(IoSession session, IoBuffer message) {
+	public void onMessageRecieved(IoSession session, Object message) {
 	}
 
 	@Override
-	public void onMessageSent(IoSession session, IoBuffer message) {
+	public void onMessageSent(IoSession session, int size) {
 		// TODO Auto-generated method stub
 	}
 	@Override

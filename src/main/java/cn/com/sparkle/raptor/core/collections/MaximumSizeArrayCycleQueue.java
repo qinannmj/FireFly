@@ -138,20 +138,24 @@ public class MaximumSizeArrayCycleQueue<T> implements Queue<T> {
 	}
 
 	public static void main(String[] args) throws QueueFullException, InterruptedException {
-
 		MaximumSizeArrayCycleQueue<Integer> cq = new MaximumSizeArrayCycleQueue<Integer>(Integer.class, 7);
-		for (int i = 0; i < 7; i++) {
+		for(int i =0 ; i < 1000; ++i){
 			cq.push(i);
-			MaximumSizeArrayCycleQueue<Integer>.Bulk b = cq.getBulk();
-			System.out.println(b.getQueue()[b.getOffset()] + " " + b.getOffset() + " " + b.getLength());
+			System.out.println(i);
 		}
-		cq.poll();
-		for (int i = 0; i < 7; i++) {
-			cq.poll();
-			cq.push(i);
-			MaximumSizeArrayCycleQueue<Integer>.Bulk b = cq.getBulk();
-			System.out.println(b.getQueue()[b.getOffset()] + " " + b.getOffset() + " " + b.getLength());
-		}
+//		MaximumSizeArrayCycleQueue<Integer> cq = new MaximumSizeArrayCycleQueue<Integer>(Integer.class, 7);
+//		for (int i = 0; i < 7; i++) {
+//			cq.push(i);
+//			MaximumSizeArrayCycleQueue<Integer>.Bulk b = cq.getBulk();
+//			System.out.println(b.getQueue()[b.getOffset()] + " " + b.getOffset() + " " + b.getLength());
+//		}
+//		cq.poll();
+//		for (int i = 0; i < 7; i++) {
+//			cq.poll();
+//			cq.push(i);
+//			MaximumSizeArrayCycleQueue<Integer>.Bulk b = cq.getBulk();
+//			System.out.println(b.getQueue()[b.getOffset()] + " " + b.getOffset() + " " + b.getLength());
+//		}
 		//		cq.push(1);
 		//		cq.push(2);
 		//		cq.push(3);

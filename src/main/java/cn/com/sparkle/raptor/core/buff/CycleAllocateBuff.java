@@ -31,5 +31,4 @@ public class CycleAllocateBuff extends AllocateBytesBuff implements CycleBuff {
 	public void incRef() {
 		++refCnt;
 	}
-
 }

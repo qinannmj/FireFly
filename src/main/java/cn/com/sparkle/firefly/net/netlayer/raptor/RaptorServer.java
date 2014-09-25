@@ -10,7 +10,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import cn.com.sparkle.firefly.net.netlayer.NetHandler;
 import cn.com.sparkle.firefly.net.netlayer.NetServer;
 import cn.com.sparkle.raptor.core.handler.IoHandler;
-import cn.com.sparkle.raptor.core.protocol.MultiThreadProtecolHandler;
+import cn.com.sparkle.raptor.core.protocol.CodecHandler;
+import cn.com.sparkle.raptor.core.protocol.MultiThreadHandler;
 import cn.com.sparkle.raptor.core.transport.socket.nio.NioSocketConfigure;
 import cn.com.sparkle.raptor.core.transport.socket.nio.NioSocketServer;
 
@@ -20,7 +21,7 @@ public class RaptorServer implements NetServer {
 	private IoHandler handler;
 
 	@Override
-	public void init(String confPath, int heartBeatInterval, NetHandler netHandler,String threadName) throws IOException {
+	public void init(String confPath, int heartBeatInterval, NetHandler netHandler, String threadName) throws IOException {
 		Conf conf = new Conf(confPath);
 		NioSocketConfigure nsc = new NioSocketConfigure();
 		nsc.setProcessorNum(conf.getIothreadnum());
@@ -33,8 +34,9 @@ public class RaptorServer implements NetServer {
 		server = new NioSocketServer(nsc, threadName);
 
 		String workthreadName = threadName + INSTANCE_NUM.incrementAndGet();
-		handler = new MultiThreadProtecolHandler(conf.getCycleSendCell(), conf.getCycleSendBuffSize(), conf.getWorkthreadMinNum(), conf.getWorkthreadMaxNum(), 60,
-				TimeUnit.SECONDS, new BufProtocol(), new RaptorHandler(netHandler), workthreadName);
+		handler = new MultiThreadHandler(conf.getWorkthreadMinNum(), conf.getWorkthreadMaxNum(), 60, TimeUnit.SECONDS, new CodecHandler(
+				conf.getCycleSendCell(), conf.getCycleSendBuffSize(), new BufProtocol(), new RaptorHandler(netHandler)), workthreadName);
+
 	}
 
 	@Override

@@ -4,10 +4,9 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 
 import cn.com.sparkle.raptor.core.buff.BuffPool;
-import cn.com.sparkle.raptor.core.buff.BuffPool.PoolEmptyException;
 import cn.com.sparkle.raptor.core.buff.IoBuffer;
 import cn.com.sparkle.raptor.core.buff.IoBufferArray;
-import cn.com.sparkle.raptor.core.protocol.MultiThreadProtecolHandler.ProtocolHandlerIoSession;
+import cn.com.sparkle.raptor.core.protocol.CodecHandler.ProtocolHandlerIoSession;
 import cn.com.sparkle.raptor.core.protocol.Protocol;
 
 public class TextLineProtocol implements Protocol {
@@ -84,13 +83,10 @@ public class TextLineProtocol implements Protocol {
 
 		IoBufferArray ioBuffArray;
 		if (lastWaitSendBuff != null) {
-			newBuffArray = buffpool.tryGet(s.length() * 2 + 2 - lastWaitSendBuff.getByteBuffer().remaining());
+			newBuffArray = buffpool.get(s.length() * 2 + 2 - lastWaitSendBuff.getByteBuffer().remaining());
 
 		} else {
-			newBuffArray = buffpool.tryGet(s.length() * 2 + 2);
-		}
-		if (newBuffArray == null) {
-			throw new PoolEmptyException();
+			newBuffArray = buffpool.get(s.length() * 2 + 2);
 		}
 
 		if (lastWaitSendBuff != null) {

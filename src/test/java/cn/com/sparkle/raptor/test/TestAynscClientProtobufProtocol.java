@@ -1,10 +1,9 @@
 package cn.com.sparkle.raptor.test;
 
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.LinkedList;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
@@ -12,19 +11,18 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.apache.log4j.Logger;
 
 import cn.com.sparkle.raptor.core.handler.IoHandler;
-import cn.com.sparkle.raptor.core.protocol.MultiThreadProtecolHandler;
-import cn.com.sparkle.raptor.core.protocol.MultiThreadProtecolHandler.ProtocolHandlerIoSession;
-import cn.com.sparkle.raptor.core.protocol.ProtocolHandler;
-import cn.com.sparkle.raptor.core.protocol.javaobject.ObjectProtocol;
+import cn.com.sparkle.raptor.core.protocol.CodecHandler;
+import cn.com.sparkle.raptor.core.protocol.CodecHandler.ProtocolHandlerIoSession;
+import cn.com.sparkle.raptor.core.protocol.MultiThreadHandler;
 import cn.com.sparkle.raptor.core.protocol.protobuf.ProtoBufProtocol;
 import cn.com.sparkle.raptor.core.transport.socket.nio.IoSession;
 import cn.com.sparkle.raptor.core.transport.socket.nio.NioSocketClient;
 import cn.com.sparkle.raptor.core.transport.socket.nio.NioSocketConfigure;
 import cn.com.sparkle.raptor.core.transport.socket.nio.exception.SessionHavaClosedException;
-import cn.com.sparkle.raptor.test.model.javaserialize.TestMessage;
 import cn.com.sparkle.raptor.test.model.protocolbuffer.PersonMessage;
-import cn.com.sparkle.raptor.test.model.protocolbuffer.PersonMessage.AddressBook;
 import cn.com.sparkle.raptor.test.model.protocolbuffer.PersonMessage.Person;
+
+import com.sun.corba.se.pept.protocol.ProtocolHandler;
 
 public class TestAynscClientProtobufProtocol {
 	public final static Logger logger = Logger.getLogger(TestAynscClientProtobufProtocol.class);
@@ -46,7 +44,7 @@ public class TestAynscClientProtobufProtocol {
 //		protocol.registerMessage(1, PersonMessage.Person.getDefaultInstance());
 		
 		TestAynscClientProtobufProtocolHandler ih = new TestAynscClientProtobufProtocolHandler();
-		IoHandler handler = new MultiThreadProtecolHandler(1000, 64 * 1024, 20, 300, 60, TimeUnit.SECONDS,protocol, ih);
+		IoHandler handler = new MultiThreadHandler( 20, 300, 60, TimeUnit.SECONDS,new CodecHandler(1000, 4 * 1024, protocol, ih)  );
 		for(int i = 0 ; i < 1 ; i++){
 //		while(true){
 			WaitFinishConnect wfc = new WaitFinishConnect();
@@ -71,9 +69,9 @@ public class TestAynscClientProtobufProtocol {
 }
 class WaitFinishConnect{
 	CountDownLatch count = new CountDownLatch(1);
-	ProtocolHandlerIoSession session;
+	IoSession session;
 }
-class TestAynscClientProtobufProtocolHandler implements ProtocolHandler{
+class TestAynscClientProtobufProtocolHandler implements IoHandler{
 	private static AtomicInteger flag = new AtomicInteger(0);
 	public String origin = "ÄãºÃ£¡Mr server !This is client  cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc             !write package";
 	public String soure = "";
@@ -86,7 +84,7 @@ class TestAynscClientProtobufProtocolHandler implements ProtocolHandler{
 	
 	private LinkedList<CountDownLatch> l = new LinkedList<CountDownLatch>();
 	private ReentrantLock llock = new ReentrantLock();
-	public CountDownLatch send(Object o,ProtocolHandlerIoSession session) throws SessionHavaClosedException{
+	public CountDownLatch send(Object o,IoSession session) throws SessionHavaClosedException{
 		CountDownLatch c;
 		try{
 			llock.lock();
@@ -96,16 +94,12 @@ class TestAynscClientProtobufProtocolHandler implements ProtocolHandler{
 		}finally{
 			llock.unlock();
 		}
-		int size = session.writeObject(o);
-		if(size == 0){
-			throw new RuntimeException();
-		}
-//		System.out.println("sendSize" + size);
+		session.write(o, false);
 		return c;
 	}
 	@Override
-	public void onOneThreadSessionOpen(final ProtocolHandlerIoSession session) {
-		WaitFinishConnect wfc = (WaitFinishConnect)session.customAttachment;
+	public void onSessionOpened(final IoSession session) {
+		WaitFinishConnect wfc = (WaitFinishConnect)session.attachment();
 		wfc.session = session;
 		wfc.count.countDown();
 		Person.Builder builder = Person.newBuilder().setId(0).setName(soure);
@@ -123,7 +117,7 @@ class TestAynscClientProtobufProtocolHandler implements ProtocolHandler{
 						Person.Builder builder = Person.newBuilder().setId(++i).setName(soure);
 //						AddressBook.Builder ab = AddressBook.newBuilder().addPerson(builder);
 						CountDownLatch c = send(builder.build(),session);
-						c.await();
+//						c.await();
 //						break;
 					} catch (Exception e) {
 						e.printStackTrace();
@@ -138,8 +132,8 @@ class TestAynscClientProtobufProtocolHandler implements ProtocolHandler{
 	}
 
 	@Override
-	public void onOneThreadSessionClose(ProtocolHandlerIoSession session) {
-		System.out.println("close" + session.customAttachment);
+	public void onSessionClose(IoSession session) {
+		System.out.println("close" + session.attachment());
 	}
 
 	private int cc = 0 ;
@@ -148,8 +142,7 @@ class TestAynscClientProtobufProtocolHandler implements ProtocolHandler{
 	private long start = System.currentTimeMillis();
 	private long tc = 0;
 	@Override
-	public void onOneThreadMessageRecieved(Object receiveObject,
-			ProtocolHandlerIoSession session) {
+	public void onMessageRecieved(IoSession session, Object message) throws IOException {
 //		System.out.println(o);
 //		try {
 //			IoBuffer[] buffa = protocol.encode(buffPool, "ÄãºÃ£¡Mr server ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc                                                                                                                                                                                                                                                    !This is client" + attachment.customAttachment + "!write package" + (++i));
@@ -157,7 +150,7 @@ class TestAynscClientProtobufProtocolHandler implements ProtocolHandler{
 //	} catch (SessionHavaClosedException e) {
 //		e.printStackTrace();
 //	}
-		Person p = (Person)receiveObject;
+		Person p = (Person)message;
 //		System.out.println(p.getId());
 		try{
 			llock.lock();
@@ -184,13 +177,11 @@ class TestAynscClientProtobufProtocolHandler implements ProtocolHandler{
 //		session.closeSession();
 	}
 	@Override
-	public void onOneThreadCatchException(IoSession ioSession,
-			ProtocolHandlerIoSession attachment, Throwable e) {
+	public void catchException(IoSession session, Throwable e) {
 		TestAynscClientProtobufProtocol.logger.error("", e);
 	}
 	@Override
-	public void onOneThreadMessageSent(ProtocolHandlerIoSession session,int sendSize) {
-		
+	public void onMessageSent(IoSession session, int sendSize) {
 	}
 
 	

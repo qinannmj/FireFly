@@ -4,4 +4,5 @@ public interface CycleBuff extends IoBuffer {
 	public BuffPool getPool();
 
 	public void incRef();
+	
 }

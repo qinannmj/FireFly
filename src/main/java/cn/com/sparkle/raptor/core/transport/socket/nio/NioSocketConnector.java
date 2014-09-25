@@ -13,6 +13,7 @@ import cn.com.sparkle.raptor.core.collections.MaximumSizeArrayCycleQueue;
 import cn.com.sparkle.raptor.core.delaycheck.DelayChecked;
 import cn.com.sparkle.raptor.core.delaycheck.DelayCheckedTimer;
 import cn.com.sparkle.raptor.core.handler.IoHandler;
+import cn.com.sparkle.raptor.core.transport.socket.nio.factory.ProcessorGroup;
 
 public class NioSocketConnector {
 	private Selector selector;
@@ -88,8 +89,8 @@ public class NioSocketConnector {
 				QueueBean qb;
 				// long s = System.currentTimeMillis();
 				while ((qb = waitConnectQueue.peek()) != null) {
-					NioSocketProcessor processor = multNioSocketProcessor.getProcessor();
-					IoSession session = new IoSession(processor, qb.sc, qb.handler);
+					ProcessorGroup processor = multNioSocketProcessor.getProcessor();
+					IoSession session = new DefaultIoSession(processor.getReadProcessor(),processor.getWriteProcessor(), qb.sc, qb.handler);
 					qb.session = session;
 					session.attach(qb.attachment);
 					try {
@@ -114,7 +115,7 @@ public class NioSocketConnector {
 							QueueBean queueBean = (QueueBean) key.attachment();
 							try {
 								if (sc.finishConnect()) {
-									queueBean.session.getProcessor().registerRead(queueBean.session);
+									queueBean.session.getReadProcessor().registerRead(queueBean.session);
 									queueBean.session.getHandler().onSessionOpened(queueBean.session);
 									queueBean.future.setResult(true);
 									queueBean.future.run();

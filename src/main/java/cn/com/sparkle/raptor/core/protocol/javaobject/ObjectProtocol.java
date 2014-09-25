@@ -12,8 +12,8 @@ import cn.com.sparkle.raptor.core.buff.BuffPool;
 import cn.com.sparkle.raptor.core.buff.IoBuffer;
 import cn.com.sparkle.raptor.core.io.BufferPoolOutputStream;
 import cn.com.sparkle.raptor.core.io.IoBufferArrayInputStream;
+import cn.com.sparkle.raptor.core.protocol.CodecHandler.ProtocolHandlerIoSession;
 import cn.com.sparkle.raptor.core.protocol.DecodeException;
-import cn.com.sparkle.raptor.core.protocol.MultiThreadProtecolHandler.ProtocolHandlerIoSession;
 import cn.com.sparkle.raptor.core.protocol.Protocol;
 
 public class ObjectProtocol implements Protocol {

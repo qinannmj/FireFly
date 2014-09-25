@@ -1,17 +1,14 @@
 package cn.com.sparkle.raptor.test;
 
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
-import cn.com.sparkle.raptor.core.buff.IoBuffer;
-import cn.com.sparkle.raptor.core.buff.SyncBuffPool;
 import cn.com.sparkle.raptor.core.handler.IoHandler;
-import cn.com.sparkle.raptor.core.protocol.MultiThreadProtecolHandler;
-import cn.com.sparkle.raptor.core.protocol.MultiThreadProtecolHandler.ProtocolHandlerIoSession;
-import cn.com.sparkle.raptor.core.protocol.Protocol;
-import cn.com.sparkle.raptor.core.protocol.ProtocolHandler;
+import cn.com.sparkle.raptor.core.protocol.CodecHandler;
+import cn.com.sparkle.raptor.core.protocol.MultiThreadHandler;
 import cn.com.sparkle.raptor.core.protocol.javaobject.ObjectProtocol;
 import cn.com.sparkle.raptor.core.transport.socket.nio.IoSession;
 import cn.com.sparkle.raptor.core.transport.socket.nio.NioSocketClient;
@@ -26,85 +23,87 @@ public class TestClientObjectProtocol {
 		nsc.setTcpNoDelay(true);
 		nsc.setCycleRecieveBuffCellSize(10000);
 		nsc.setSentBuffSize(1024);
-		IoHandler handler = new MultiThreadProtecolHandler(1000, 512, 20, 300, 60, TimeUnit.SECONDS,new ObjectProtocol(), new TestProtocolObjetClientHandler());
-		for(int i = 0 ; i < 1 ; i++){
-//			client.connect(new InetSocketAddress("10.10.83.243",1234), handler,"aaa" + i);
-			
-//			client.connect(new InetSocketAddress("192.168.3.100",1234),handler,"aaa" + i );
-			client.connect(new InetSocketAddress("127.0.0.1",1234),handler,"aaa" + i );
-//			client.connect(new InetSocketAddress("10.232.128.11",1234),handler,"aaa" + i );
+		IoHandler handler = new MultiThreadHandler(20, 300, 60, TimeUnit.SECONDS, new CodecHandler(1000, 512, new ObjectProtocol(),
+				new TestProtocolObjetClientHandler()));
+		for (int i = 0; i < 1; i++) {
+			//			client.connect(new InetSocketAddress("10.10.83.243",1234), handler,"aaa" + i);
+
+			//			client.connect(new InetSocketAddress("192.168.3.100",1234),handler,"aaa" + i );
+			client.connect(new InetSocketAddress("127.0.0.1", 1234), handler, "aaa" + i);
+			//			client.connect(new InetSocketAddress("10.232.128.11",1234),handler,"aaa" + i );
 		}
 	}
 
 }
-class TestProtocolObjetClientHandler implements ProtocolHandler{
+
+class TestProtocolObjetClientHandler implements IoHandler {
 	private static AtomicInteger flag = new AtomicInteger(0);
 	private int i = 0;
 	private String test = "ÄãºÃ£¡Mr server !This is client  cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc             !write package";
+
 	public TestProtocolObjetClientHandler() {
-		for(int i = 0 ; i < 1 ; i++){
+		for (int i = 0; i < 1; i++) {
 			test += test;
 		}
-//		test ="ccc";
-	}
-	@Override
-	public void onOneThreadSessionOpen(ProtocolHandlerIoSession session) {
-		try {
-			System.out.println("init attachment:" + session.customAttachment);
-			session.customAttachment = Integer.valueOf(flag.addAndGet(1));
-			session.writeObject("Hello,Mr server!");
-		} catch (SessionHavaClosedException e) {
-//			//only stop send data,because the onOneThreadSessionClose will be invoked subsequently. 
-			return;
-		}
+		//		test ="ccc";
 	}
 
-
-	private int cc = 0 ;
+	private int cc = 0;
 	private long ct = System.currentTimeMillis();
 	private ReentrantLock lock = new ReentrantLock();
+
 	@Override
-	public void onOneThreadMessageRecieved(Object receiveObject,
-			ProtocolHandlerIoSession session) {
-//		System.out.println(o);
+	public void onSessionOpened(IoSession session) {
 		try {
-			session.writeObject(test);
-	} catch (SessionHavaClosedException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
+			System.out.println("init attachment:" + session.attachment());
+			session.attach(Integer.valueOf(flag.addAndGet(1)));
+			session.write("Hello,Mr server!", false);
+		} catch (SessionHavaClosedException e) {
+			//			//only stop send data,because the onOneThreadSessionClose will be invoked subsequently. 
+			return;
+		}
+
 	}
-		try{
+
+	@Override
+	public void onSessionClose(IoSession session) {
+		System.out.println("close" + session.attachment());
+
+	}
+
+	@Override
+	public void onMessageRecieved(IoSession session, Object message) throws IOException {
+		try {
+			session.write(test, false);
+		} catch (SessionHavaClosedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		try {
 			lock.lock();
 			++cc;
-			if(cc%10000 == 0){
+			if (cc % 10000 == 0) {
 				long tt = System.currentTimeMillis() - ct;
-				System.out.println((cc*1000/tt) + "/s");
+				System.out.println((cc * 1000 / tt) + "/s");
 				ct = System.currentTimeMillis();
 				cc = 1;
 			}
-		}finally{
+		} finally {
 			lock.unlock();
 		}
-		
+
 	}
 
 	@Override
-	public void onOneThreadSessionClose(ProtocolHandlerIoSession session) {
-		System.out.println("close" + session.customAttachment);
+	public void onMessageSent(IoSession session, int sendSize) {
+		// TODO Auto-generated method stub
+
 	}
 
 	@Override
-	public void onOneThreadCatchException(IoSession ioSession,
-			ProtocolHandlerIoSession attachment, Throwable e) {
+	public void catchException(IoSession session, Throwable e) {
 		e.printStackTrace();
-		
+
 	}
 
-
-	@Override
-	public void onOneThreadMessageSent(ProtocolHandlerIoSession session,int sendSize) {
-		
-	}
-	
-	
 }

@@ -25,58 +25,60 @@ public class TestServer {
 	public static void main(String[] args) throws IOException, QueueFullException {
 		// TODO Auto-generated method stub
 		NioSocketConfigure nsc = new NioSocketConfigure();
-		
+
 		//nsc.setSentBuffSize(1024);
 		//nsc.setRevieveBuffSize(1024 * 2048);
-//		nsc.setReuseAddress(true);
+		//		nsc.setReuseAddress(true);
 		nsc.setTcpNoDelay(true);
 		nsc.setProcessorNum(2);
-		
+
 		NioSocketServer server = new NioSocketServer(nsc);
-		server.bind(new InetSocketAddress(1234),new TestHandler());
-//		server.bind(new InetSocketAddress(12345),new FilterChain(new TestHandler()));
+		server.bind(new InetSocketAddress(1234), new TestHandler());
+		//		server.bind(new InetSocketAddress(12345),new FilterChain(new TestHandler()));
 	}
-	
+
 }
 
-class TestHandler implements IoHandler{
+class TestHandler implements IoHandler {
 	public static AtomicInteger i = new AtomicInteger(0);
 	byte[] b = new byte[128];
+
 	@Override
-	public void onMessageRecieved(IoSession session, IoBuffer message) {
-	
+	public void onMessageRecieved(IoSession session, Object message) {
+
 	}
 
 	@Override
-	public void onMessageSent(IoSession session, IoBuffer message) {
+	public void onMessageSent(IoSession session, int messagesize) {
 		// TODO Auto-generated method stub
-//		System.out.println("message sent");
+		//		System.out.println("message sent");
 	}
 
 	@Override
 	public void onSessionClose(IoSession session) {
 		// TODO Auto-generated method stub
 		int temp = i.addAndGet(-1);
-//		System.out.println("session closed!!!");
+		//		System.out.println("session closed!!!");
 	}
 
-	
-	private static long time ;
+	private static long time;
+
 	@Override
 	public void onSessionOpened(IoSession session) {
 		// TODO Auto-generated method stub
 		session.closeSession();
-		if(i.get()==0) time = System.currentTimeMillis();
+		if (i.get() == 0)
+			time = System.currentTimeMillis();
 		int temp = i.addAndGet(1);
-//		System.out.println("session opend!!!" + temp);
-		if(temp%1000 ==0){
+		//		System.out.println("session opend!!!" + temp);
+		if (temp % 1000 == 0) {
 			System.out.println("connected " + i + "  cost:" + (System.currentTimeMillis() - time));
 		}
 	}
 
 	@Override
-	public void catchException(IoSession session,Throwable e) {
-//		 TODO Auto-generated method stub
+	public void catchException(IoSession session, Throwable e) {
+		//		 TODO Auto-generated method stub
 		e.printStackTrace();
 	}
 }

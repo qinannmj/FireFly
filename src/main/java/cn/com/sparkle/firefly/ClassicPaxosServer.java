@@ -117,18 +117,19 @@ public class ClassicPaxosServer implements AccountBookEventListener, ConfigureEv
 		Thread catchUpDeamon = new Thread(new CatchUpDeamon(context));
 		catchUpDeamon.setName("catchUpDeamon");
 		catchUpDeamon.start();
-
+		
+		ConfigNode configNode = new ConfigNode(configuration.getIp(), String.valueOf(configuration.getPort()));
+		context.getcState().getSelfState().init(context);
+		tryBind(configNode, handler);
+		
 		accountBook.initLoad();
 	}
 
 	@Override
 	public void accountInit() {
 		try {
-			Configuration conf = context.getConfiguration();
-			ConfigNode configNode = new ConfigNode(conf.getIp(), String.valueOf(conf.getPort()));
-			context.getcState().getSelfState().init(context);
 			//after account book have finished initial, start to bind server and user port
-			tryBind(configNode, handler);
+			
 			tryBindUserServer(userHandlerInterface);
 			// initiate master check deamon
 			Thread checkSenatorDeamon = new Thread(new CheckMasterSenatorStateDeamon(context));

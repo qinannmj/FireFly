@@ -52,7 +52,7 @@ public class AddRequestDealer implements InstanceExecuteEventListener, InstanceP
 
 	public final int MIN_TCP_PACKAGE_SIZE;
 
-	public final static int MAX_EXECUTING_INSTANCE_NUM = 100;
+	public final static int MAX_EXECUTING_INSTANCE_NUM = 10;
 
 	public final static int MAX_SESSION_WAIT_QUEUE_SIZE = 3;
 

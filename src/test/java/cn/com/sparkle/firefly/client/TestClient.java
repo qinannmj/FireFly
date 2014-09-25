@@ -29,7 +29,7 @@ public class TestClient {
 		//		PaxosOperater oper = client.getOperator();
 
 		final int size = 100000;
-		int threadSize = 1;
+		int threadSize = 100;
 
 		String type = args.length > 0 ?args[0] : "raptor";
 		int cycle = args.length > 1 ? Integer.parseInt(args[1]):8;
@@ -42,7 +42,7 @@ public class TestClient {
 		}
 		
 		final PaxosClient client = new PaxosClient(address, "target/classes/conf10000/service_out_net.prop", type,
-				ChecksumUtil.INBUILD_CRC32, 2000, 3, 999999, 10 *1024 * 1024,false);
+				ChecksumUtil.INBUILD_CRC32, 2000, 100, 999999, 1024 * 1024,false);
 		
 		
 

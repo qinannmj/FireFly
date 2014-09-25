@@ -4,13 +4,13 @@ import cn.com.sparkle.firefly.net.netlayer.NetCloseException;
 import cn.com.sparkle.firefly.net.netlayer.PaxosSession;
 import cn.com.sparkle.firefly.net.netlayer.buf.Buf;
 import cn.com.sparkle.firefly.net.netlayer.buf.ReferenceBuf;
-import cn.com.sparkle.raptor.core.protocol.MultiThreadProtecolHandler.ProtocolHandlerIoSession;
+import cn.com.sparkle.raptor.core.transport.socket.nio.IoSession;
 import cn.com.sparkle.raptor.core.transport.socket.nio.exception.SessionHavaClosedException;
 
 public class RaptorPaxosSession extends PaxosSession {
-	ProtocolHandlerIoSession session;
+	IoSession session;
 
-	public RaptorPaxosSession(ProtocolHandlerIoSession session) {
+	public RaptorPaxosSession(IoSession session) {
 		this.session = session;
 	}
 
@@ -22,7 +22,7 @@ public class RaptorPaxosSession extends PaxosSession {
 	@Override
 	public void write(Buf[] buf) throws NetCloseException {
 		try {
-			session.writeObject(buf);
+			session.write(buf, false);
 		} catch (SessionHavaClosedException e) {
 			throw new NetCloseException(e);
 		}

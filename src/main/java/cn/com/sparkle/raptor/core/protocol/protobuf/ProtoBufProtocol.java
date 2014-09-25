@@ -6,16 +6,16 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
-import com.google.protobuf.GeneratedMessage;
-import com.google.protobuf.Message.Builder;
-
 import cn.com.sparkle.raptor.core.buff.BuffPool;
 import cn.com.sparkle.raptor.core.buff.IoBuffer;
 import cn.com.sparkle.raptor.core.io.BufferPoolOutputStream;
 import cn.com.sparkle.raptor.core.io.IoBufferArrayInputStream;
+import cn.com.sparkle.raptor.core.protocol.CodecHandler.ProtocolHandlerIoSession;
 import cn.com.sparkle.raptor.core.protocol.DecodeException;
-import cn.com.sparkle.raptor.core.protocol.MultiThreadProtecolHandler.ProtocolHandlerIoSession;
 import cn.com.sparkle.raptor.core.protocol.Protocol;
+
+import com.google.protobuf.GeneratedMessage;
+import com.google.protobuf.Message.Builder;
 
 public class ProtoBufProtocol implements Protocol {
 	private Logger logger = Logger.getLogger(ProtoBufProtocol.class);

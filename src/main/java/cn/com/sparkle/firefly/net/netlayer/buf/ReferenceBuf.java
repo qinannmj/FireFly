@@ -26,4 +26,5 @@ public class ReferenceBuf implements Buf {
 	@Override
 	public void close() {
 	}
+
 }

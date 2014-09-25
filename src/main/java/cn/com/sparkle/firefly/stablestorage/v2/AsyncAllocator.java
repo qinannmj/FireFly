@@ -6,6 +6,7 @@ import java.util.Random;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
 
@@ -23,9 +24,10 @@ public class AsyncAllocator implements Runnable {
 	private final ArrayBlockingQueue<File> idleList;
 	private final File dir;
 	private final long fileBlockNum;
-	private final byte[] zeroBytes = new byte[8 * 1024 * 1024];
+	private final byte[] zeroBytes = new byte[1 * 1024 * 1024];
 	private final Random random = new Random();
 	private final Thread thread;
+	private volatile Throwable isAllocateError = null;
 
 	public AsyncAllocator(RecordFileOutFactory factory, Configuration conf, File dir) {
 		if (conf.getConfigValue("async-file-allocator-idle-size") == null) {
@@ -35,7 +37,7 @@ public class AsyncAllocator implements Runnable {
 			throw new RuntimeException("must set async-file-allocator-fileblock-num in conf.prop!");
 		}
 		fileBlockNum = Long.parseLong(conf.getConfigValue("async-file-allocator-fileblock-num"));
-		fileCapacity = fileBlockNum * zeroBytes.length;
+		fileCapacity = fileBlockNum * zeroBytes.length * 8;
 		int idleSize = Integer.parseInt(conf.getConfigValue("async-file-allocator-idle-size"));
 
 		idleList = new ArrayBlockingQueue<File>(idleSize < 2 ? 1 : idleSize - 1);
@@ -47,11 +49,16 @@ public class AsyncAllocator implements Runnable {
 	}
 
 	public File getIdle(String newPath) throws InterruptedException {
-
-		File f = idleList.take();
-		File newfile = new File(newPath);
-		FileUtil.rename(f, newfile);
-		return newfile;
+		while(true){
+			File f = idleList.poll(5, TimeUnit.SECONDS);
+			if(f != null){
+				File newfile = new File(newPath);
+				FileUtil.rename(f, newfile);
+				return newfile;
+			}else if(isAllocateError != null){
+				logger.error("async allocator error", isAllocateError);
+			}
+		}
 	}
 
 	public void run() {
@@ -68,6 +75,7 @@ public class AsyncAllocator implements Runnable {
 					}
 					idleList.put(f);
 				}
+//				if(true) return;
 				while (true) {
 					File f;
 					while (true) {
@@ -86,7 +94,7 @@ public class AsyncAllocator implements Runnable {
 				logger.info("shutdown file allocator!");
 			} catch (Throwable e) {
 				logger.error("unexcepted error", e);
-				System.exit(1);
+				this.isAllocateError = e;
 			}
 		}
 
