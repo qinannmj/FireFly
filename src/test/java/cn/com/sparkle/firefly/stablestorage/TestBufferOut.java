@@ -17,7 +17,7 @@ public class TestBufferOut {
 				FlushThreadGroup flushThreadGroup = new FlushThreadGroup(1024 * 1024 * 10,20, "", true);
 //		FlushThreadGroup flushThreadGroup = new FlushThreadGroup(20, "", false);
 		final AtomicInteger ai = new AtomicInteger();
-		final BufferedFileOut out = new BufferedFileOut(new RandomAccessFile("d://jbpaxos//a.test1", "rws"), flushThreadGroup);
+		final BufferedFileOut out = new BufferedFileOut("d://jbpaxos//a.test1",new RandomAccessFile("d://jbpaxos//a.test1", "rws"), flushThreadGroup);
 			Thread t = new Thread() {
 				public void run() {
 					byte[] buf = new byte[4 * 1024];

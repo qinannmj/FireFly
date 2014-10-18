@@ -43,13 +43,11 @@ public class RaptorHandler implements IoHandler {
 
 	@Override
 	public void onMessageSent(IoSession session, int sendSize) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void catchException(IoSession session, Throwable e) {
-		if (!(session.attachment() instanceof IoSession)) {
+		if (!(session.attachment() instanceof RaptorPaxosSession)) {
 			netHandler.onRefuse(session.attachment());
 		}else{
 			logger.error(session.getLocalAddress() + "  " + session.getRemoteAddress() , e);

@@ -7,7 +7,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.Callable;
 
 import javax.management.RuntimeErrorException;
@@ -45,6 +44,17 @@ import com.google.protobuf.GeneratedMessage.Builder;
 public class DataChunk {
 	private final static Logger logger = Logger.getLogger(DataChunk.class);
 
+	private boolean isInited = false;
+	private boolean closing = false;
+
+	public boolean isClosing() {
+		return closing;
+	}
+
+	public void setClosing(boolean closing) {
+		this.closing = closing;
+	}
+
 	private RecordFileOutFactory factory;
 	private long instanceId;
 	private File file;
@@ -54,10 +64,17 @@ public class DataChunk {
 	private long used;
 	private RecordFileOut writeStream = null;
 
-	
+	public boolean isInited() {
+		return isInited;
+	}
+
+	public void setInited(boolean isInited) {
+		this.isInited = isInited;
+	}
+
 	private Context context;
 
-	public DataChunk(RecordFileOutFactory factory, File f,Context context) {
+	public DataChunk(RecordFileOutFactory factory, File f, Context context) {
 		this.factory = factory;
 		this.file = f;
 		this.instanceId = Long.parseLong(f.getName());
@@ -70,13 +87,15 @@ public class DataChunk {
 	@SuppressWarnings("rawtypes")
 	public ReadResult initRead(long startInstanceId, ReadRecordCallback<Builder<? extends Builder>> readCallback) throws IOException,
 			UnsupportedChecksumAlgorithm {
-		if(context.getConfiguration().isDebugLog()){
-			logger.debug(String.format("initRead from:%s file:%s", startInstanceId,file.getAbsoluteFile()));
+		if (context.getConfiguration().isDebugLog()) {
+			logger.debug(String.format("initRead from:%s file:%s", startInstanceId, file.getAbsoluteFile()));
 		}
 		ReadResult r = readRecord(startInstanceId, Long.MAX_VALUE, readCallback);
 		used = r.pos;
-		this.maxVoteInstanceId = r.maxVoteInstanceId;
-		this.successfullInstanceId = r.successInstanceId;
+		if (this.maxVoteInstanceId < r.maxVoteInstanceId) {
+			this.maxVoteInstanceId = r.maxVoteInstanceId;
+		}
+		this.successfullInstanceId = r.maxSuccessInstanceId;
 		return r;
 	}
 
@@ -90,7 +109,7 @@ public class DataChunk {
 		if (maxVoteInstanceId >= instanceId || capacity >= (used + recordLen)) {
 			record.writeToStream(writeStream, call, true);
 			used += recordLen;
-			if(instanceId > maxVoteInstanceId){
+			if (instanceId > maxVoteInstanceId) {
 				this.maxVoteInstanceId = instanceId;
 			}
 		} else {
@@ -99,23 +118,22 @@ public class DataChunk {
 	}
 
 	public void writeSuccess(long instanceId, Record record) throws IOException, ChunkFullException {
-		checkBufferout();
-		while (true) {
-			if (successfullInstanceId >= instanceId) {
-				//the success has written and give up write,
-				return;
-			} else if (successfullInstanceId + 1 == instanceId) {
-				int recordLen = record.getSerializeSize();
-				if (maxVoteInstanceId >= instanceId || capacity >= (used + recordLen)) {
-					record.writeToStream(writeStream, null, false);
-					++successfullInstanceId;
-					used += recordLen;
-				} else {
-					throw new ChunkFullException();
-				}
+		
+		if (successfullInstanceId >= instanceId) {
+			//the success has written and give up write,
+			return;
+		} else if (successfullInstanceId + 1 == instanceId) {
+			checkBufferout();
+			int recordLen = record.getSerializeSize();
+			if (maxVoteInstanceId >= instanceId || capacity >= (used + recordLen)) {
+				record.writeToStream(writeStream, null, false);
+				++successfullInstanceId;
+				used += recordLen;
 			} else {
-				throw new RuntimeException(String.format("excepted successful instanceId %s , give instanceId %s", successfullInstanceId + 1,instanceId));
+				throw new ChunkFullException();
 			}
+		} else {
+			throw new RuntimeException(String.format("excepted successful instanceId %s , give instanceId %s", successfullInstanceId + 1, instanceId));
 		}
 	}
 
@@ -143,19 +161,20 @@ public class DataChunk {
 					RecordHead head = RecordHead.readFromStream(in);
 					if (head != null) {
 						if (head.isValid()) {
-							
+							if (head.getInstanceId() > maxVoteInstanceId) {
+								maxVoteInstanceId = head.getInstanceId();
+							}
 							if (head.getInstanceId() < fromInstanceId || head.getInstanceId() > toInstanceId) {
 								in.skipBytes(head.getBodySize() + head.getBodyChecksumLength());
 								pos += head.getSerializeSize() + head.getBodySize() + head.getBodyChecksumLength();
 								if (head.getType() == RecordType.SUCCESS && head.getInstanceId() > successInstanceId) {
 									successInstanceId = head.getInstanceId();
-								} else if (head.getType() == RecordType.VOTE && head.getInstanceId() > maxVoteInstanceId) {
-									maxVoteInstanceId = head.getInstanceId();
 								}
 								continue;
 							}
 							RecordBody body = RecordBody.readFromStream(in, head);
 							if (body.isValid()) {
+
 								if (head.getType() == RecordType.SUCCESS) {
 									SuccessfulRecord.Builder record = SuccessfulRecord.newBuilder().mergeFrom(body.getBody());
 									InstanceVoteRecord voteRecord = voteRecordMap.remove(head.getInstanceId());
@@ -175,9 +194,6 @@ public class DataChunk {
 									InstanceVoteRecord.Builder voteRecord = InstanceVoteRecord.newBuilder().mergeFrom(body.getBody());
 									voteRecordMap.put(head.getInstanceId(), voteRecord.build());
 									readCallback.read(head.getInstanceId(), voteRecord);
-									if (head.getInstanceId() > maxVoteInstanceId) {
-										maxVoteInstanceId = head.getInstanceId();
-									}
 								}
 								pos += head.getSerializeSize() + head.getBodySize() + head.getBodyChecksumLength();
 
@@ -218,28 +234,35 @@ public class DataChunk {
 		return maxVoteInstanceId;
 	}
 
+	public void setMaxVoteInstanceId(long maxVoteInstanceId) {
+		this.maxVoteInstanceId = maxVoteInstanceId;
+	}
+
 	private void checkBufferout() throws IOException {
+		if (!isInited) {
+			throw new RuntimeException("uninited data chunk");
+		}
 		if (writeStream == null) {
 			writeStream = factory.makeRecordFileOut(file, used);
 		}
 	}
 
 	public final static class ReadResult {
-		private Map<Long, InstanceVoteRecord> voteMap;
 		private long pos;
 		private long maxVoteInstanceId;
-		private long successInstanceId;
+		private long maxSuccessInstanceId;
+		private HashMap<Long, InstanceVoteRecord> voteRecordMap;
 
-		public ReadResult(Map<Long, InstanceVoteRecord> voteMap, long pos, long maxVoteInstanceId, long successInstanceId) {
-			super();
-			this.voteMap = voteMap;
-			this.pos = pos;
-			this.maxVoteInstanceId = maxVoteInstanceId;
-			this.successInstanceId = successInstanceId;
+		public HashMap<Long, InstanceVoteRecord> getVoteRecordMap() {
+			return voteRecordMap;
 		}
 
-		public Map<Long, InstanceVoteRecord> getVoteMap() {
-			return voteMap;
+		public ReadResult(HashMap<Long, InstanceVoteRecord> voteRecordMap, long pos, long maxVoteInstanceId, long maxSuccessInstanceId) {
+			super();
+			this.pos = pos;
+			this.maxVoteInstanceId = maxVoteInstanceId;
+			this.maxSuccessInstanceId = maxSuccessInstanceId;
+			this.voteRecordMap = voteRecordMap;
 		}
 
 		public long getPos() {
@@ -250,8 +273,8 @@ public class DataChunk {
 			return maxVoteInstanceId;
 		}
 
-		public long getSuccessInstanceId() {
-			return successInstanceId;
+		public long getMaxSuccessInstanceId() {
+			return maxSuccessInstanceId;
 		}
 
 	}

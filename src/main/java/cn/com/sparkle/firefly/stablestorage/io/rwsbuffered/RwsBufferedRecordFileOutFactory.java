@@ -40,9 +40,19 @@ public class RwsBufferedRecordFileOutFactory implements RecordFileOutFactory {
 
 	@Override
 	public RecordFileOut makeRecordFileOut(File f, long pos) throws IOException {
+		return makeRwsRecordFileOut(f, pos);
+	}
+	
+	public RecordFileOut makeRwsRecordFileOut(File f,long pos) throws IOException{
 		RandomAccessFile raff = new RandomAccessFile(f, "rws");
 		raff.seek(pos);
-		return new BufferedFileOut(raff,flushThreadGroup);
+		return new BufferedFileOut(f.getName(),raff,flushThreadGroup);
 	}
+	
+	public RecordFileOut makeRwRecordFileOut(File f,long pos) throws IOException{
+		RandomAccessFile raff = new RandomAccessFile(f, "rw");
+		raff.seek(pos);
+		return new BufferedFileOut(f.getName(),raff,flushThreadGroup);
+	} 
 
 }

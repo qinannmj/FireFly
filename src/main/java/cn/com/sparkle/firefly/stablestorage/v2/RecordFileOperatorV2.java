@@ -9,11 +9,13 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.PriorityQueue;
 import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.log4j.Logger;
 
 import cn.com.sparkle.firefly.Context;
+import cn.com.sparkle.firefly.addprocess.AddRequestDealer;
 import cn.com.sparkle.firefly.addprocess.AddRequestPackage;
 import cn.com.sparkle.firefly.checksum.ChecksumUtil.UnsupportedChecksumAlgorithm;
 import cn.com.sparkle.firefly.deamon.InstanceExecutor;
@@ -52,7 +54,6 @@ public class RecordFileOperatorV2 implements RecordFileOperator {
 	private volatile long maxKnowedInstanceId = -1; //just for look up
 
 	private ReentrantLock writeLock = new ReentrantLock();
-	//	private Condition catchUpWait = writeLock.newCondition();
 
 	private PriorityQueue<InstanceSaveContext> unsafeRecordQueue = new PriorityQueue<InstanceSaveContext>(1000);
 
@@ -92,28 +93,38 @@ public class RecordFileOperatorV2 implements RecordFileOperator {
 				while (true) {
 					try {
 						writeLock.lock();
-						if (lastExpectSafeInstanceId >= dataChunk.getInstanceId()) {
+						if(unsafeRecordQueue.size() <= AddRequestDealer.MAX_EXECUTING_INSTANCE_NUM){
+							
 							ReadResult r = dataChunk.initRead(lastExpectSafeInstanceId, new ReadSuccessRecordCallback() {
 								@Override
 								public void readSuccess(long instanceId,
 										cn.com.sparkle.firefly.stablestorage.model.StoreModel.SuccessfulRecord.Builder successfulRecordBuilder) {
-									SuccessfulRecordWrap recordWrap = new SuccessfulRecordWrap(instanceId, successfulRecordBuilder.build(), null);
-									instanceExecutor.execute(recordWrap);
+									if(lastExpectSafeInstanceId == instanceId){
+										++lastExpectSafeInstanceId;
+										SuccessfulRecordWrap recordWrap = new SuccessfulRecordWrap(instanceId, successfulRecordBuilder.build(), null);
+										instanceExecutor.execute(recordWrap);
+									}else{
+										unsafeRecordQueue.add(new InstanceSaveContext(instanceId, successfulRecordBuilder, null));
+									}
 								}
 							});
-							lastExpectSafeInstanceId = r.getSuccessInstanceId() + 1;
-							maxKnowedInstanceId = r.getMaxVoteInstanceId() > r.getSuccessInstanceId() ? r.getMaxVoteInstanceId() : r.getSuccessInstanceId();
+							maxKnowedInstanceId = r.getMaxVoteInstanceId() > r.getMaxSuccessInstanceId() ? r.getMaxVoteInstanceId() : r.getMaxSuccessInstanceId();
 							maxVoteInstanceId = maxKnowedInstanceId;
-							votedInstanceRecordMap.putAll(r.getVoteMap());
+							votedInstanceRecordMap.putAll(r.getVoteRecordMap());
+							dataChunk.setInited(true);
+							//write noredo hint
+							if(dataChunk.getMaxVoteInstanceId() == dataChunk.getSuccessfullInstanceId()){
+								checkHintNoRedo();
+							}
+							logger.debug(String.format("init load from [%s] votedInstanceRecordMap.size[%s] unsafeRecordQueue.size[%s],",dataChunk.getFile().getName(),votedInstanceRecordMap.size(),unsafeRecordQueue.size()));
 							break;
 						}
-						//						else {
-						//							//hold and wait catch up
-						//							catchUpWait.await();
-						//						}
+						
 					} finally {
 						writeLock.unlock();
 					}
+					//damage will lead to reach next code
+					TimeUnit.MILLISECONDS.sleep(10);
 				}
 
 			} catch (Throwable e) {
@@ -132,57 +143,63 @@ public class RecordFileOperatorV2 implements RecordFileOperator {
 			if (realEvent != null) {
 				throw new RuntimeException("unsupported callback!");
 			}
-			if (instanceId < lastExpectSafeInstanceId) {
-				return true;//has succeeded 
-			}
 
 			while (true) { //for detect chunk full
 				DataChunk dataChunk = null;
 				try {
-
 					dataChunk = fileIndexer.findDataChunk(instanceId);
 					if (dataChunk == null && fileIndexer.getEnd() == 0) {
 						throw new ChunkFullException();
 					}
-
+					if(!dataChunk.isInited()){
+						return false;
+					}
 					if (instanceId > lastExpectSafeInstanceId) {
-						logger.info(String.format("waiting lastExpectSafeInstanceId %s instanceId %s", lastExpectSafeInstanceId, instanceId));
+//						logger.info(String.format("waiting lastExpectSafeInstanceId %s instanceId %s", lastExpectSafeInstanceId, instanceId));
 						//								catchUpWait.await();
 						unsafeRecordQueue.add(new InstanceSaveContext(instanceId, successfulRecord, addRequestPackages));
 						break;
-					}
+					}else if(instanceId == lastExpectSafeInstanceId){
+						InstanceVoteRecord voteRecord = votedInstanceRecordMap.remove(instanceId);
+						//check successfulRecord.hasV
+						boolean isVotedBySelf = voteRecord != null
+								&& IdComparator.getInstance().compare(successfulRecord.getHighestVoteNum(), voteRecord.getHighestVotedNum()) == 0;
+						//build a object to save
+						RecordBody body = new RecordBody(successfulRecord.build().toByteArray(), context.getConfiguration().getFileChecksumType());
+						RecordHead head = new RecordHead(body.getBody().length, instanceId, RecordType.SUCCESS, context.getConfiguration().getFileChecksumType());
+						Record record = new Record(head, body);
 
-					InstanceVoteRecord voteRecord = votedInstanceRecordMap.remove(instanceId);
-					//check successfulRecord.hasV
-					boolean isVotedBySelf = voteRecord != null
-							&& IdComparator.getInstance().compare(successfulRecord.getHighestVoteNum(), voteRecord.getHighestVotedNum()) == 0;
-					//build a object to save
-					RecordBody body = new RecordBody(successfulRecord.build().toByteArray(), context.getConfiguration().getFileChecksumType());
-					RecordHead head = new RecordHead(body.getBody().length, instanceId, RecordType.SUCCESS, context.getConfiguration().getFileChecksumType());
-					Record record = new Record(head, body);
-
-					//build a execute record
-					if (!successfulRecord.hasV()) {
-						if (isVotedBySelf) {
-							//is in order to reduce io of network,because for the node having 
-							//voted in last vote round it has record real value ,the master only
-							//notify the id to this node,we need to assemble the value to record.
-							successfulRecord.setV(voteRecord.getHighestValue());
-						} else {
-							logger.warn("This node has not voted this instance!");
-							return false;
+						//build a execute record
+						if (!successfulRecord.hasV()) {
+							if (isVotedBySelf) {
+								//is in order to reduce io of network,because for the node having 
+								//voted in last vote round it has record real value ,the master only
+								//notify the id to this node,we need to assemble the value to record.
+								successfulRecord.setV(voteRecord.getHighestValue());
+							} else {
+								logger.warn("This node has not voted this instance!");
+								return false;
+							}
 						}
-					}
-					//build a object
-					SuccessfulRecordWrap recordWrap = new SuccessfulRecordWrap(instanceId, successfulRecord.build(), addRequestPackages);
+						//build a object
+						SuccessfulRecordWrap recordWrap = new SuccessfulRecordWrap(instanceId, successfulRecord.build(), addRequestPackages);
 
-					dataChunk.writeSuccess(instanceId, record);
-					++lastExpectSafeInstanceId;
-					logger.debug(String.format("%s writed", instanceId));
-					if (instanceId > maxKnowedInstanceId) {
-						maxKnowedInstanceId = instanceId;
+						dataChunk.writeSuccess(instanceId, record);
+						++lastExpectSafeInstanceId;
+//						logger.debug(String.format("%s writed", instanceId));
+						if (instanceId > maxKnowedInstanceId) {
+							maxKnowedInstanceId = instanceId;
+						}
+						instanceExecutor.execute(recordWrap);
 					}
-					instanceExecutor.execute(recordWrap);
+					
+					while(unsafeRecordQueue.size() != 0 && unsafeRecordQueue.peek().getInstanceId() < lastExpectSafeInstanceId){
+						//poll repeated record
+						unsafeRecordQueue.poll();
+					}
+					if(dataChunk.isClosing() && dataChunk.getMaxVoteInstanceId() == dataChunk.getSuccessfullInstanceId()){
+						dataChunk.close();
+					}
 					if(unsafeRecordQueue.size() != 0 && unsafeRecordQueue.peek().getInstanceId() == lastExpectSafeInstanceId){
 						//restore the context of instance be stored in queue
 						InstanceSaveContext saveContext = unsafeRecordQueue.poll();
@@ -190,6 +207,7 @@ public class RecordFileOperatorV2 implements RecordFileOperator {
 						successfulRecord = saveContext.getSuccessfulRecord();
 						addRequestPackages = saveContext.getAddRequestPackages();
 					}else{
+						
 						break;
 					}
 				} catch (ChunkFullException e) {
@@ -200,6 +218,7 @@ public class RecordFileOperatorV2 implements RecordFileOperator {
 					}
 					try {
 						DataChunk chunk = new DataChunk(factory, allocator.getIdle(dir.getAbsolutePath() + "/" + instanceId), context);
+						chunk.setInited(true);
 						if (context.getConfiguration().isDebugLog()) {
 							logger.debug(String.format("allocate a file %s", chunk.getFile().getAbsoluteFile()));
 						}
@@ -261,12 +280,15 @@ public class RecordFileOperatorV2 implements RecordFileOperator {
 						if (dataChunk.getMaxVoteInstanceId() == dataChunk.getSuccessfullInstanceId()) {
 							dataChunk.close(); // this chunk is full.
 							checkHintNoRedo();
+						}else{
+							dataChunk.setClosing(true);
 						}
 					}
 					//fetch a new file from async allocator
 					try {
 						DataChunk chunk = new DataChunk(factory, allocator.getIdle(dir.getAbsolutePath() + "/"
 								+ (dataChunk != null ? Math.max(dataChunk.getMaxVoteInstanceId(), dataChunk.getSuccessfullInstanceId()) + 1 : 0)), context);
+						chunk.setInited(true);
 						if (context.getConfiguration().isDebugLog()) {
 							logger.debug(String.format("allocate a file %s", chunk.getFile().getAbsoluteFile()));
 						}
@@ -323,7 +345,7 @@ public class RecordFileOperatorV2 implements RecordFileOperator {
 			DataChunk chunk = fileIndexer.findDataChunk(tempInstanceId);
 			if (chunk != null) {
 				ReadResult r = chunk.readRecord(tempInstanceId, toInstanceId, readCallback);
-				tempInstanceId = r.getSuccessInstanceId() + 1;
+				tempInstanceId = r.getMaxSuccessInstanceId() + 1;
 				if (chunk == endChunk) {
 					break;
 				}

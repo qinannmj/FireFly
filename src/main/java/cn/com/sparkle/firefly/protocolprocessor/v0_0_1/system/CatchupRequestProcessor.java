@@ -82,6 +82,7 @@ public class CatchupRequestProcessor extends AbstractProtocolV0_0_1Processor{
 							SuccessfulRecordWrap successfulRecordWrap = new SuccessfulRecordWrap(instanceId, successRecord.build(), null);
 							CatchUpRecord catchUpRecord = CatchUpRecord.newBuilder().setInstanceId(successfulRecordWrap.getInstanceId())
 									.setValue(successfulRecordWrap.getRecord()).build();
+							
 							int recordSize = catchUpRecord.getSerializedSize();
 							if (packageSize + recordSize >= MAX_CATCH_SIZE && b.getSuccessfulRecordsCount() != 0) {
 								MessagePackage.Builder response = MessagePackage.newBuilder().setCatchUpResponse(b.build());

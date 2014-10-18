@@ -32,6 +32,7 @@ public interface RecordFileOut {
 	 */
 	public long write(byte[] buf, int off, int length, Callable<Object> callable,boolean isSync) throws IOException;
 	
-
+	public void skip(int n);
+	
 	public void close() throws IOException;
 }

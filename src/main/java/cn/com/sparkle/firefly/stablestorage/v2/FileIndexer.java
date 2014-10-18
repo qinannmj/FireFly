@@ -13,8 +13,15 @@ public class FileIndexer {
 	public FileIndexer(RecordFileOutFactory factory, File[] files,Context context) {
 		index = new DataChunk[files.length == 0 ? 1 : files.length * 2];
 		int index_idx = 0;
+		DataChunk prevChunk = null;
 		for (File f : files) {
-			index[index_idx++] = new DataChunk(factory, f,context);
+			DataChunk chunk = new DataChunk(factory, f,context); 
+			index[index_idx++] = chunk;
+			if(prevChunk != null){
+				prevChunk.setClosing(true);
+				prevChunk.setMaxVoteInstanceId(chunk.getMaxVoteInstanceId());
+			}
+			prevChunk = chunk;
 		}
 		end = files.length;
 	}

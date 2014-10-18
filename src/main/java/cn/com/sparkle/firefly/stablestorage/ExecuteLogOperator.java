@@ -86,7 +86,7 @@ public class ExecuteLogOperator {
 		}
 		RandomAccessFile rs = new RandomAccessFile(executeFileList.getLast(), "rws");
 		rs.seek(pos);
-		executeOutputStream = new BufferedFileOut(rs,flushThreadGroup);
+		executeOutputStream = new BufferedFileOut(executeFileList.getLast().getName(),rs,flushThreadGroup);
 		
 		return lastWaitExecuteInstanceId + 1;
 	}
@@ -104,7 +104,7 @@ public class ExecuteLogOperator {
 			executeFileList.addLast(f);
 			executeOutputStream.close();
 			RandomAccessFile rs = new RandomAccessFile(executeFileList.getLast(), "rws");
-			executeOutputStream = new BufferedFileOut(rs,flushThreadGroup);
+			executeOutputStream = new BufferedFileOut(executeFileList.getLast().getName(),rs,flushThreadGroup);
 			
 			
 			// check mount of file

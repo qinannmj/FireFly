@@ -1,7 +1,8 @@
 package cn.com.sparkle.firefly.stablestorage.io.rwsbuffered;
 
+import java.io.RandomAccessFile;
 import java.util.Iterator;
-import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -27,7 +28,7 @@ public class FlushThreadGroup {
 	public FlushThreadGroup(int buffSize, int idleBufferPoolSize, String groupName,final boolean debug) {
 		this.debug = debug;
 		for (int i = 0; i < idleBufferPoolSize; ++i) {
-			idleBufferPool.add(new MyNode(null, new BufferPackage(buffSize)));
+			idleBufferPool.add(new MyNode(null, new WriteBufferPackage(buffSize)));
 		}
 		// initial finish event deal thread
 		finishRealEventThread = new FinishRealEventThread();
@@ -43,18 +44,29 @@ public class FlushThreadGroup {
 					try {
 						n = waitQueue.take(2000);
 						if(n != null){
-							BufferPackage bp = n.getElement();
 							long ct = TimeUtil.currentTimeMillis();
-							n.getTag().getRaf().write(bp.buff, 0, bp.used);
-							if(debug){
-								logger.debug(String.format("flush to disk cost:%s size:%s from:%s",TimeUtil.currentTimeMillis() - ct,bp.used,n.getTag().getRaf().getFD().toString()));
+							BufferPackage bp = n.getElement();
+							BufferedFileOut out = n.getTag();
+							long pos = n.getTag().getRaf().getFilePointer();
+							if(bp.getBuffer() == null){
+								//skip
+								RandomAccessFile raf = n.getTag().getRaf();
+								raf.seek(raf.getFilePointer() + bp.size());
+								if(debug){
+									logger.debug(String.format("skip to disk cost:%s size:%s pos:%s from:%s bufferinstance:%s",TimeUtil.currentTimeMillis() - ct,bp.size(),pos,n.getTag().getRaf().getFD().toString(),bp));
+								}
+							}else{
+								//write
+								n.getTag().getRaf().write(bp.getBuffer(), 0, bp.size());
+								if(debug){
+									logger.debug(String.format("flush to disk cost:%s size:%s pos:%s from:%s bufferinstance:%s",TimeUtil.currentTimeMillis() - ct,bp.size(),pos,n.getTag().getRaf().getFD().toString(),bp));
+								}
+								List<Callable<Object>> calllist = bp.getCallableList();
+								bp.clear();
+								idleBufferPool.add(n);
+								finishRealEventThread.addFinishEvent(calllist);
 							}
-							LinkedList<Callable<Object>> calllist = bp.callAbleList;
-							bp.callAbleList = new LinkedList<Callable<Object>>();
-							n.getTag().finish(n);
-							n.getElement().used = 0;
-							idleBufferPool.add(n);
-							finishRealEventThread.addFinishEvent(calllist);
+							out.finish();
 						}else{
 							//flush bufferout
 							Iterator<BufferedFileOut> iter = allOpenedOut.iterator();
@@ -107,20 +119,8 @@ public class FlushThreadGroup {
 
 		@Override
 		public boolean canGet() {
-			return this.getElement().used != this.getElement().buff.length;
+			return !this.getElement().isFull();
 		}
 	}
 
-	public final static class BufferPackage {
-		byte[] buff;
-		LinkedList<Callable<Object>> callAbleList = new LinkedList<Callable<Object>>();
-		int used = 0;
-
-		public BufferPackage(int size) {
-			this.buff = new byte[size];
-		}
-		public boolean isFull(){
-			return used == buff.length;
-		}
-	}
 }

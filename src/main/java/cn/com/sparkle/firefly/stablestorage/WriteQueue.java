@@ -7,10 +7,12 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.log4j.Logger;
 
+import cn.com.sparkle.raptor.core.util.TimeUtil;
+
 public class WriteQueue<Tag, Element, MyNode extends WriteQueue.Node<Tag, Element>> {
 	@SuppressWarnings("unused")
 	private final static Logger logger = Logger.getLogger(WriteQueue.class);
-	private final static int LOW_IDLE = 4;
+	private final static int LOW_IDLE = 1000;
 	private ReentrantLock lock = new ReentrantLock();
 	private HashMap<Tag, MyNode> lastNodeOfTag = new HashMap<Tag, MyNode>();
 	private Node<Tag, Element> highPrior;
@@ -66,18 +68,21 @@ public class WriteQueue<Tag, Element, MyNode extends WriteQueue.Node<Tag, Elemen
 		lowPrior.prev = lowPrior;
 		lowPrior.next = lowPrior;
 	}
-
+	private int highWrite = 0;
 	public void push(MyNode n, boolean isHighPrior) {
 		try {
+			
 			lock.lock();
+			
 			if (isHighPrior) {
-				n.next = highPrior.prev.next;
+				n.next = highPrior;
 				n.prev = highPrior.prev;
 				highPrior.prev.next = n;
 				highPrior.prev = n;
 				lastNodeOfTag.put(n.tag, n);
+//				logger.info(String.format("write %s", highPrior.next != highPrior));
 			} else {
-				n.next = lowPrior.prev.next;
+				n.next = lowPrior;
 				n.prev = lowPrior.prev;
 				lowPrior.prev.next = n;
 				lowPrior.prev = n;
@@ -92,16 +97,22 @@ public class WriteQueue<Tag, Element, MyNode extends WriteQueue.Node<Tag, Elemen
 
 	@SuppressWarnings("unchecked")
 	public MyNode take(int timeout) throws InterruptedException {
+		if(timeout < 1){
+			timeout = 2;
+		}
 		try {
 			lock.lock();
+			long sleepTime = TimeUtil.currentTimeMillis();
 			while (highPrior.next == highPrior && (lowPrior.next == lowPrior || lowPriorIdle != 0)) {
-//			while (highPrior.next == highPrior && lowPrior.next == lowPrior) {
 				condition.await(timeout, TimeUnit.MILLISECONDS);
 				if (highPrior.next == highPrior && lowPrior.next == lowPrior) {
 					return null;
-				} 
-				else if (highPrior.next == highPrior && lowPriorIdle != 0) {
-					--lowPriorIdle;
+				}else if (highPrior.next == highPrior && lowPriorIdle != 0) {
+					sleepTime = TimeUtil.currentTimeMillis() - sleepTime;
+					int time =(int)( sleepTime);
+					lowPriorIdle = time > lowPriorIdle ? 0 : lowPriorIdle - 1;
+//					--lowPriorIdle;
+//					logger.info(String.format("lowPriorIdle:%s ", lowPriorIdle));
 				}
 			}
 			MyNode n;
@@ -112,13 +123,18 @@ public class WriteQueue<Tag, Element, MyNode extends WriteQueue.Node<Tag, Elemen
 				if(highPrior.next != highPrior){
 					lowPriorIdle = LOW_IDLE;
 				}
+//				logger.info(String.format("write low,high exist %s highsize %s", highPrior.next != highPrior,highWrite));
 			}else{
 				n = (MyNode) highPrior.next;
 				highPrior.next = n.next;
 				n.next.prev = highPrior;
 				if(lowPriorIdle != 0){
 					--lowPriorIdle;
+//					logger.info(String.format("lowPriorIdle:%s ,write high", lowPriorIdle));
+				}else{
+					lowPriorIdle = LOW_IDLE;
 				}
+				++highWrite;
 			}
 //			
 //			if (highPrior.next != highPrior && ()) {

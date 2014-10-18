@@ -7,6 +7,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.log4j.Logger;
+import org.apache.log4j.PropertyConfigurator;
 
 import cn.com.sparkle.firefly.checksum.ChecksumUtil;
 import cn.com.sparkle.firefly.client.MasterMayBeLostException;
@@ -19,6 +20,7 @@ public class TestClient {
 	private final static Logger logger = Logger.getLogger(TestClient.class);
 
 	public static void main(String[] args) throws Throwable {
+		PropertyConfigurator.configure("target/classes/client/log4j.properties");
 		final AtomicLong totalCost= new AtomicLong();
 		final AtomicInteger[] rtArray = new AtomicInteger[11];
 		for(int i = 0 ;i < rtArray.length ; ++i){
@@ -29,10 +31,10 @@ public class TestClient {
 		//		PaxosOperater oper = client.getOperator();
 
 		final int size = 100000;
-		int threadSize = 100;
+		int threadSize = 50;
 
 		String type = args.length > 0 ?args[0] : "raptor";
-		int cycle = args.length > 1 ? Integer.parseInt(args[1]):8;
+		int cycle = args.length > 1 ? Integer.parseInt(args[1]):1;
 		String[] address = {"127.0.0.1:10001", "127.0.0.1:8001","127.0.0.1:9001",  "127.0.0.1:12001","127.0.0.1:10001" };
 		if(args.length > 2){
 			address = new String[args.length - 2];
@@ -42,7 +44,7 @@ public class TestClient {
 		}
 		
 		final PaxosClient client = new PaxosClient(address, "target/classes/conf10000/service_out_net.prop", type,
-				ChecksumUtil.INBUILD_CRC32, 2000, 100, 999999, 1024 * 1024,false);
+				ChecksumUtil.INBUILD_CRC32, 2000, 1, 999999,10 * 1024 * 1024,true);
 		
 		
 

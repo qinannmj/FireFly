@@ -14,17 +14,18 @@ import cn.com.sparkle.firefly.config.Configuration;
 import cn.com.sparkle.firefly.stablestorage.io.PriorChangeable;
 import cn.com.sparkle.firefly.stablestorage.io.RecordFileOut;
 import cn.com.sparkle.firefly.stablestorage.io.RecordFileOutFactory;
+import cn.com.sparkle.firefly.stablestorage.io.rwsbuffered.RwsBufferedRecordFileOutFactory;
 import cn.com.sparkle.firefly.stablestorage.util.FileUtil;
 
 public class AsyncAllocator implements Runnable {
 	private final static Logger logger = Logger.getLogger(AsyncAllocator.class);
 
 	private final long fileCapacity;
-	private final RecordFileOutFactory factory;
+	private final RwsBufferedRecordFileOutFactory factory;
 	private final ArrayBlockingQueue<File> idleList;
 	private final File dir;
 	private final long fileBlockNum;
-	private final byte[] zeroBytes = new byte[1 * 1024 * 1024];
+	private final byte[] zeroBytes = new byte[1024 * 1024];
 	private final Random random = new Random();
 	private final Thread thread;
 	private volatile Throwable isAllocateError = null;
@@ -37,25 +38,27 @@ public class AsyncAllocator implements Runnable {
 			throw new RuntimeException("must set async-file-allocator-fileblock-num in conf.prop!");
 		}
 		fileBlockNum = Long.parseLong(conf.getConfigValue("async-file-allocator-fileblock-num"));
-		fileCapacity = fileBlockNum * zeroBytes.length * 8;
+		fileCapacity = fileBlockNum * 1024 * 1024 * 8;
 		int idleSize = Integer.parseInt(conf.getConfigValue("async-file-allocator-idle-size"));
 
 		idleList = new ArrayBlockingQueue<File>(idleSize < 2 ? 1 : idleSize - 1);
 		this.dir = dir;
-		this.factory = factory;
+		//		this.factory = new RwsBufferedRecordFileOutFactory();
+		//		this.factory.init(conf);
+		this.factory = (RwsBufferedRecordFileOutFactory) factory;
 		thread = new Thread(this);
 		thread.setName("async-file-allocator");
 		thread.start();
 	}
 
 	public File getIdle(String newPath) throws InterruptedException {
-		while(true){
+		while (true) {
 			File f = idleList.poll(5, TimeUnit.SECONDS);
-			if(f != null){
+			if (f != null) {
 				File newfile = new File(newPath);
 				FileUtil.rename(f, newfile);
 				return newfile;
-			}else if(isAllocateError != null){
+			} else if (isAllocateError != null) {
 				logger.error("async allocator error", isAllocateError);
 			}
 		}
@@ -64,7 +67,7 @@ public class AsyncAllocator implements Runnable {
 	public void run() {
 		synchronized (this) {
 			try {
-				if(thread.isInterrupted()){
+				if (thread.isInterrupted()) {
 					return;
 				}
 				File workspace = FileUtil.getDir(dir.getAbsoluteFile() + "/allocator");
@@ -75,7 +78,6 @@ public class AsyncAllocator implements Runnable {
 					}
 					idleList.put(f);
 				}
-//				if(true) return;
 				while (true) {
 					File f;
 					while (true) {
@@ -87,7 +89,7 @@ public class AsyncAllocator implements Runnable {
 					}
 					f.createNewFile();
 					ensureCapacity(f);
-					
+
 					idleList.put(f);
 				}
 			} catch (InterruptedException e) {
@@ -112,7 +114,7 @@ public class AsyncAllocator implements Runnable {
 		int wBlkNum = (int) Math.ceil(((double) (fileCapacity - curLen)) / zeroBytes.length);
 		RecordFileOut out = null;
 		try {
-			out = factory.makeRecordFileOut(f, f.length());
+			out = factory.makeRwsRecordFileOut(f, f.length());
 			if (out instanceof PriorChangeable) {
 				((PriorChangeable) out).setIsHighPrior(false);
 			}
@@ -126,13 +128,17 @@ public class AsyncAllocator implements Runnable {
 						return null;
 					}
 				}, true);
+				//					out.skip(BLOCK_SIZE - zeroBytes.length);
+
 				finish.await();
 			}
+
 		} finally {
 			if (out != null) {
 				out.close();
 			}
 		}
+
 	}
 
 }

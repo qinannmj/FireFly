@@ -139,8 +139,9 @@ public final class RecordHead {
 		}
 	}
 
-	public void writeToStream(RecordFileOut out, Callable<Object> callable,boolean isSync) throws IOException {
-		out.write(this.head, 0, 12, null,false);
+	public long writeToStream(RecordFileOut out, Callable<Object> callable,boolean isSync) throws IOException {
+		long start = out.write(this.head, 0, 12, null,false);
 		out.write(this.checksum, 0, this.checksum.length, callable,isSync);
+		return start;
 	}
 }

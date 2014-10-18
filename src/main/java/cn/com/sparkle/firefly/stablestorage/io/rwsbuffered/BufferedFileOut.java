@@ -11,12 +11,12 @@ import org.apache.log4j.Logger;
 
 import cn.com.sparkle.firefly.stablestorage.io.PriorChangeable;
 import cn.com.sparkle.firefly.stablestorage.io.RecordFileOut;
-import cn.com.sparkle.firefly.stablestorage.io.rwsbuffered.FlushThreadGroup.BufferPackage;
 import cn.com.sparkle.firefly.stablestorage.io.rwsbuffered.FlushThreadGroup.MyNode;
 
-public class BufferedFileOut implements RecordFileOut ,PriorChangeable{
+public class BufferedFileOut implements RecordFileOut, PriorChangeable {
 	private final static Logger logger = Logger.getLogger(BufferedFileOut.class);
 
+	private final String filename;
 	private RandomAccessFile raf;
 	private byte[] intbyte = new byte[4];
 	private byte[] longbyte = new byte[8];
@@ -36,10 +36,11 @@ public class BufferedFileOut implements RecordFileOut ,PriorChangeable{
 
 	private boolean canChIsHigh = true;
 
-	public BufferedFileOut(RandomAccessFile randomAccessFile, FlushThreadGroup flushThreadGroup) throws IOException {
+	public BufferedFileOut(String filename, RandomAccessFile randomAccessFile, FlushThreadGroup flushThreadGroup) throws IOException {
 		this.raf = randomAccessFile;
 		this.curPos = randomAccessFile.getFilePointer();
 		this.flushThreadGroup = flushThreadGroup;
+		this.filename = filename;
 		flushThreadGroup.open(this);
 	}
 
@@ -109,16 +110,14 @@ public class BufferedFileOut implements RecordFileOut ,PriorChangeable{
 					}
 				}
 				BufferPackage bp = noNeedFluseRightNow.getElement();
-				int canWrite = length > bp.buff.length - bp.used ? bp.buff.length - bp.used : length;
-				System.arraycopy(buf, off, bp.buff, bp.used, canWrite);
+				int canWrite = bp.write(buf, off, length);
 				off += canWrite;
 				length -= canWrite;
-				bp.used += canWrite;
 				curPos += canWrite;
 
 				if (length == 0) {
 					if (callable != null) {
-						bp.callAbleList.add(callable);
+						bp.getCallableList().add(callable);
 					}
 					isFlushRightNow = isFlushRightNow | isSync;
 				}
@@ -144,16 +143,32 @@ public class BufferedFileOut implements RecordFileOut ,PriorChangeable{
 		}
 	}
 
+	@Override
+	public void skip(int n) {
+		try {
+			writeLock.lock();
+			flush();
+			waitedWriteBuffSize.incrementAndGet();
+			flushThreadGroup.getWaitQueue().push(new MyNode(this, new SkipBufferPackage(n)), isHigh);
+			curPos += n;
+		} finally {
+			writeLock.unlock();
+		}
+	}
+
 	public RandomAccessFile getRaf() {
 		return raf;
 	}
 
-	public void finish(MyNode n) {
+	public void finish() {
 		try {
 			finishLock.lock();
-
-			if (waitedWriteBuffSize.decrementAndGet() == 0) {
+			int old = waitedWriteBuffSize.decrementAndGet();
+			if (old == 0) {
 				finishCondition.signal();
+			}
+			if (flushThreadGroup.isDebug()) {
+				logger.debug(String.format("finish a node flush, waiting size %s instance %s", waitedWriteBuffSize.get(), this));
 			}
 		} finally {
 			finishLock.unlock();
@@ -177,20 +192,21 @@ public class BufferedFileOut implements RecordFileOut ,PriorChangeable{
 	public void close() throws IOException {
 		try {
 			writeLock.lock();
+			flush();
+
 			if (waitedWriteBuffSize.get() == 0) {
-				raf.setLength(raf.getFilePointer());
-				logger.debug("close");
+				long fileLength = raf.getFilePointer();
+				raf.setLength(fileLength);
+				raf.getChannel().force(true);
 				raf.close();
+				if (flushThreadGroup.isDebug()) {
+					logger.debug(String.format("close file[filename:%s lenght:%s wait %s] instance %s", filename, fileLength, waitedWriteBuffSize.get(), this));
+				}
 				return;
 			}
-
 			try {
 
 				finishLock.lock();
-				if (noNeedFluseRightNow != null) {
-					canChIsHigh = false;
-					flushThreadGroup.getWaitQueue().push(noNeedFluseRightNow, isHigh);
-				}
 				while (waitedWriteBuffSize.get() != 0) {
 					try {
 						finishCondition.await();
@@ -199,12 +215,17 @@ public class BufferedFileOut implements RecordFileOut ,PriorChangeable{
 						throw new RuntimeException(e);
 					}
 				}
-				raf.setLength(raf.getFilePointer());
-				
+				long fileLength = raf.getFilePointer();
+				raf.setLength(fileLength);
+				raf.getChannel().force(true);
 				raf.close();
+				if (flushThreadGroup.isDebug()) {
+					logger.debug(String.format("close file[filename:%s lenght:%s wait1 %s] instance %s", filename, fileLength, waitedWriteBuffSize.get(), this));
+				}
 			} finally {
 				finishLock.unlock();
 			}
+
 			isClose = true;
 		} finally {
 			writeLock.unlock();
@@ -217,9 +238,9 @@ public class BufferedFileOut implements RecordFileOut ,PriorChangeable{
 
 	@Override
 	public void setIsHighPrior(boolean isHigh) {
-		if(canChIsHigh){
+		if (canChIsHigh) {
 			this.isHigh = isHigh;
-		}else{
+		} else {
 			throw new RuntimeException("This BufferedOut has write some data!Can't change prior");
 		}
 	}
