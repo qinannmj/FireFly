@@ -7,14 +7,13 @@ import org.apache.log4j.Logger;
 
 import cn.com.sparkle.firefly.Constants;
 import cn.com.sparkle.firefly.client.deamon.MasterHeartBeatDeamon;
-import cn.com.sparkle.firefly.client.queue.CostBlockingQueue;
 import cn.com.sparkle.firefly.protocolprocessor.ProtocolManager;
 
 public class PaxosClient {
 	private final static Logger logger = Logger.getLogger(PaxosClient.class);
-	
+
 	public static interface CommandCallBack {
-		public void response(byte[] result,long instanceId);
+		public void response(byte[] result, long instanceId);
 	}
 
 	//	private String[] senators;
@@ -39,32 +38,35 @@ public class PaxosClient {
 	 * @throws Throwable
 	 */
 	public PaxosClient(String[] senator, String netLayerConfPath, String netLayerType, int preferChecksumType, int heartBeatInterval, int tcpConnectNum,
-			int masterDistance,int singleTcpWaitingMaxMem) throws Throwable {
+			int masterDistance, int singleTcpWaitingMaxMem) throws Throwable {
 		this(senator, netLayerConfPath, netLayerType, preferChecksumType, heartBeatInterval, tcpConnectNum, masterDistance, ProtocolManager
-				.createClientProtocolManager(),singleTcpWaitingMaxMem, false);
+				.createClientProtocolManager(), singleTcpWaitingMaxMem, false);
 	}
 
 	public PaxosClient(String[] senator, String netLayerConfPath, String netLayerType, int preferChecksumType, int heartBeatInterval, int tcpConnectNum,
 			int masterDistance, ProtocolManager protocolManager) throws Throwable {
 		this(senator, netLayerConfPath, netLayerType, preferChecksumType, heartBeatInterval, tcpConnectNum, masterDistance, protocolManager, false);
 	}
+
 	public PaxosClient(String[] senator, String netLayerConfPath, String netLayerType, int preferChecksumType, int heartBeatInterval, int tcpConnectNum,
 			int masterDistance, boolean debugLog) throws Throwable {
 		this(senator, netLayerConfPath, netLayerType, preferChecksumType, heartBeatInterval, tcpConnectNum, masterDistance, ProtocolManager
 				.createClientProtocolManager(), debugLog);
 	}
+
 	public PaxosClient(String[] senator, String netLayerConfPath, String netLayerType, int preferChecksumType, int heartBeatInterval, int tcpConnectNum,
-			int masterDistance,int singleTcpWaitingMaxMem, boolean debugLog) throws Throwable {
+			int masterDistance, int singleTcpWaitingMaxMem, boolean debugLog) throws Throwable {
 		this(senator, netLayerConfPath, netLayerType, preferChecksumType, heartBeatInterval, tcpConnectNum, masterDistance, ProtocolManager
-				.createClientProtocolManager(),singleTcpWaitingMaxMem, debugLog);
+				.createClientProtocolManager(), singleTcpWaitingMaxMem, debugLog);
 	}
 
 	public PaxosClient(String[] senator, String netLayerConfPath, String netLayerType, int preferChecksumType, int heartBeatInterval, int tcpConnectNum,
 			int masterDistance, ProtocolManager protocolManager, boolean debugLog) throws Throwable {
 		this(senator, netLayerConfPath, netLayerType, preferChecksumType, heartBeatInterval, tcpConnectNum, masterDistance, protocolManager, 524288, debugLog);
 	}
+
 	public PaxosClient(String[] senator, String netLayerConfPath, String netLayerType, int preferChecksumType, int heartBeatInterval, int tcpConnectNum,
-			int masterDistance, ProtocolManager protocolManager,int singleTcpWaitingMaxMem, boolean debugLog) throws Throwable {
+			int masterDistance, ProtocolManager protocolManager, int singleTcpWaitingMaxMem, boolean debugLog) throws Throwable {
 		masterDistance = Math.min(Constants.MAX_MASTER_DISTANCE, masterDistance);
 		this.debugLog = debugLog;
 		if (tcpConnectNum < 1) {
@@ -75,7 +77,8 @@ public class PaxosClient {
 		MasterHeartBeatDeamon heartBeatDeamon = new MasterHeartBeatDeamon(debugLog);
 		heartBeatDeamon.setName("heartBeatDeamon");
 		for (int i = 0; i < tcpConnectNum; ++i) {
-			processor[i] = new CommandAsyncProcessor(senator, masterDistance,singleTcpWaitingMaxMem/3,singleTcpWaitingMaxMem * 2 /3, heartBeatDeamon, debugLog);
+			processor[i] = new CommandAsyncProcessor(senator, masterDistance, singleTcpWaitingMaxMem / 3, singleTcpWaitingMaxMem * 2 / 3, heartBeatDeamon,
+					debugLog);
 			processor[i].runDeamon();
 		}
 
@@ -98,12 +101,12 @@ public class PaxosClient {
 				}
 			}
 		}
-		return new DefaultPaxosOperator(processor[nextFlag % processor.length],this.responseInstanceId);
+		return new DefaultPaxosOperator(processor[nextFlag % processor.length], this.responseInstanceId);
 	}
 
 	public void changeSenator(String[] senator) throws Throwable {
 		StringBuffer sb = new StringBuffer();
-		for(String s : senator){
+		for (String s : senator) {
 			sb.append(s).append(" ");
 		}
 		logger.info("senators change to " + sb.toString());
@@ -111,7 +114,8 @@ public class PaxosClient {
 			p.changeSenator(senator);
 		}
 	}
-	public long getResponseInstanceId(){
+
+	public long getResponseInstanceId() {
 		return this.responseInstanceId.get();
 	}
 }

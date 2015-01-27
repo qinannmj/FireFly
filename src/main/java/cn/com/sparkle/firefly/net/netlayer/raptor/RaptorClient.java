@@ -41,7 +41,11 @@ public class RaptorClient implements NetClient {
 		nsc.setSentBuffSize(conf.getSendBuffSize());
 		nsc.setBackLog(conf.getBacklog());
 		client = new NioSocketClient(nsc, threadName);
-		handler = new MultiThreadHandler(conf.getWorkthreadMinNum(),conf.getWorkthreadMaxNum(),60,TimeUnit.SECONDS,new CodecHandler(conf.getCycleSendCell(), conf.getCycleSendBuffSize(), new BufProtocol(), new RaptorHandler(netHandler)),threadName);
+		if(conf.getWorkthreadMaxNum() == 0){
+			handler = new CodecHandler(conf.getCycleSendCell(), conf.getCycleSendBuffSize(), new BufProtocol(), new RaptorHandler(netHandler));
+		}else{
+			handler = new MultiThreadHandler(conf.getWorkthreadMinNum(),conf.getWorkthreadMaxNum(),60,TimeUnit.SECONDS,new CodecHandler(conf.getCycleSendCell(), conf.getCycleSendBuffSize(), new BufProtocol(), new RaptorHandler(netHandler)),threadName);
+		}
 		this.netHandler = netHandler;
 	}
 

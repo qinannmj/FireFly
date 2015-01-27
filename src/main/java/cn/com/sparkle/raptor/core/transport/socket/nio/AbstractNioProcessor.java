@@ -26,7 +26,7 @@ public abstract class AbstractNioProcessor implements NioProcessor {
 			while (true) {
 				int i;
 				try {
-					i = selector.select(1);
+					i = selector.select(500);
 				} catch (Throwable e) {
 					throw new RuntimeException(e);
 				}

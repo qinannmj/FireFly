@@ -1,5 +1,5 @@
 #normal config
-io_thread_num=1
+io_thread_num=4
 timeout=500
 recv_mem_size=32768
 send_mem_size=32768
@@ -8,13 +8,13 @@ backlog=1000
 #raptor config
 
 cycle_recv_mem_size=8192
-cycle_recv_cell_size=5000
+cycle_recv_cell_size=512
 
 cycle_send_mem_size=8192
-cycle_send_mem_cell_size=1000
+cycle_send_mem_cell_size=512
 
-worker_thread_min_num=50
-worker_thread_max_num=100
+worker_thread_min_num=10
+worker_thread_max_num=10
 
 #netty config
-worker_thread_num = 100
+worker_thread_num = 10

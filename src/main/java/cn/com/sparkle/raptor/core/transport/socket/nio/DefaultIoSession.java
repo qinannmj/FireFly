@@ -329,7 +329,6 @@ public class DefaultIoSession implements IoSession {
 		try {
 			address = channel.socket().getLocalSocketAddress();
 		} catch (Throwable e) {
-			logger.error(e);
 		}
 		return address == null ? "" : address.toString();
 	}

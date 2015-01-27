@@ -18,7 +18,7 @@ is-merge-client-request=true
 
 net-checksum-type=3
 file-checksum-type=3
-session-success-sync-max-mem=31457280
+session-success-sync-max-mem=4194304
 session-success-sync-max-mem-strategy=closeConnectionAfterWaitTimeStrategy
 session-success-sync-max-mem-waittime=4000
 paxos-sender=fullCircleSender

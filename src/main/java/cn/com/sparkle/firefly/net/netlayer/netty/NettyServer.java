@@ -20,19 +20,22 @@ public class NettyServer implements NetServer {
 	private ServerBootstrap bootstrap = new ServerBootstrap();
 
 	@Override
-	public void init(String confPath, final int heartBeatInterval, final NetHandler handler,String threadName) throws FileNotFoundException, IOException {
+	public void init(String confPath, final int heartBeatInterval, final NetHandler handler, String threadName) throws FileNotFoundException, IOException {
 		final Conf conf = new Conf(confPath);
 		NioEventLoopGroup group = new NioEventLoopGroup(conf.getIothreadnum());
 		bootstrap.group(group).channel(NioServerSocketChannel.class).option(ChannelOption.TCP_NODELAY, true).option(ChannelOption.SO_REUSEADDR, true)
 				.option(ChannelOption.SO_SNDBUF, conf.getSendBuf()).option(ChannelOption.SO_RCVBUF, conf.getRecvBuf())
-				.option(ChannelOption.SO_BACKLOG, conf.getBacklog())
-				.childHandler(new ChannelInitializer<SocketChannel>() {
+				.option(ChannelOption.SO_BACKLOG, conf.getBacklog()).childHandler(new ChannelInitializer<SocketChannel>() {
 					@Override
 					public void initChannel(SocketChannel ch) throws Exception {
-						ch.pipeline()
-								.addLast(new IdleStateHandler((int) (2 * heartBeatInterval / 1000), 0, 0))
-								.addLast(new DefaultEventExecutorGroup(conf.getWorkthreadNum()), new BufDecoder(), new BufArrayEncoder(),
-										new NettyHandler(handler));
+						ch.pipeline().addLast(new IdleStateHandler((int) (2 * heartBeatInterval / 1000), 0, 0));
+
+						if (conf.getWorkthreadNum() == 0) {
+							ch.pipeline().addLast(new BufDecoder(), new BufArrayEncoder(), new NettyHandler(handler));
+						} else {
+							ch.pipeline().addLast(new DefaultEventExecutorGroup(conf.getWorkthreadNum()), new BufDecoder(), new BufArrayEncoder(),
+									new NettyHandler(handler));
+						}
 					}
 				});
 	}

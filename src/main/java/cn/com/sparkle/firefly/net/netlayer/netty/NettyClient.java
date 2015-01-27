@@ -75,7 +75,7 @@ public class NettyClient implements NetClient {
 	}
 
 	@Override
-	public void init(String path, final int heartBeatInterval, final NetHandler netHandler,String threadName) throws Throwable {
+	public void init(String path, final int heartBeatInterval, final NetHandler netHandler, String threadName) throws Throwable {
 		final Conf conf = new Conf(path);
 		this.netHandler = netHandler;
 		NioEventLoopGroup group = new NioEventLoopGroup(conf.getIothreadnum());
@@ -84,10 +84,13 @@ public class NettyClient implements NetClient {
 				.handler(new ChannelInitializer<SocketChannel>() {
 					@Override
 					public void initChannel(SocketChannel ch) throws Exception {
-						ch.pipeline()
-								.addLast(new IdleStateHandler((int) (2 * heartBeatInterval / 1000), 0, 0))
-								.addLast(new DefaultEventExecutorGroup(conf.getWorkthreadNum()), new BufDecoder(), new BufArrayEncoder(),
-										new NettyHandler(netHandler));
+						ch.pipeline().addLast(new IdleStateHandler((int) (2 * heartBeatInterval / 1000), 0, 0));
+						if (conf.getWorkthreadNum() == 0) {
+							ch.pipeline().addLast(new BufDecoder(), new BufArrayEncoder(), new NettyHandler(netHandler));
+						} else {
+							ch.pipeline().addLast(new DefaultEventExecutorGroup(conf.getWorkthreadNum()), new BufDecoder(), new BufArrayEncoder(),
+									new NettyHandler(netHandler));
+						}
 					}
 				});
 	}
