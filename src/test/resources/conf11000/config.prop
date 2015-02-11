@@ -1,6 +1,6 @@
 stable-storage=d:/jbpaxos
 #fileOutFacotry-class=cn.com.sparkle.firefly.stablestorage.io.rwsbuffered.RwsBufferedRecordFileOutFactory
-fileOutFacotry-class=cn.com.sparkle.firefly.stablestorage.io.rwsbuffered.RwsBufferedRecordFileOutFactory
+fileOutFacotry-class=cn.com.sparkle.firefly.stablestorage.io.rwbuffered.RwBufferedRecordFileOutFactory
 rwsbuffered-file-io-buffsize=5242880
 rwsbuffered-file-io-queue-deep=5
 

@@ -7,7 +7,7 @@ backlog=1000
 
 #raptor config
 cycle_recv_mem_size=8192
-cycle_recv_cell_size=10
+cycle_recv_cell_size=1000
 
 cycle_send_mem_size=8192
 cycle_send_mem_cell_size=1000

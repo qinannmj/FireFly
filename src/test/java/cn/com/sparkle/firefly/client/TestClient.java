@@ -34,7 +34,7 @@ public class TestClient {
 		int threadSize = 1;
 
 		String type = args.length > 0 ?args[0] : "raptor";
-		int cycle = args.length > 1 ? Integer.parseInt(args[1]):1;
+		int cycle = args.length > 1 ? Integer.parseInt(args[1]):512;
 		String[] address = {"127.0.0.1:10001", "127.0.0.1:8001","127.0.0.1:9001",  "127.0.0.1:12001","127.0.0.1:10001" };
 		if(args.length > 2){
 			address = new String[args.length - 2];
@@ -43,7 +43,7 @@ public class TestClient {
 			}
 		}
 		
-		final PaxosClient client = new PaxosClient(address, "target/classes/conf9000/service_out_net.prop", type,
+		final PaxosClient client = new PaxosClient(address, "target/classes/service_out_net.prop", type,
 				ChecksumUtil.INBUILD_CRC32, 2000, 1, 999999,10 * 1024 * 1024,true);
 		
 		
@@ -88,7 +88,7 @@ public class TestClient {
 							//							ct = System.currentTimeMillis();
 							//							Thread.sleep(100);
 //							Thread.sleep(100);
-//							f.get();
+							f.get();
 						}
 						oper.waitAllFinish(6000000);
 					} catch (InterruptedException e) {

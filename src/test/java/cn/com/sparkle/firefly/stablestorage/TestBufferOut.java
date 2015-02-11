@@ -14,20 +14,18 @@ public class TestBufferOut {
 	private static int count = 0;
 
 	public static void main(String[] args) throws FileNotFoundException, IOException {
-				FlushThreadGroup flushThreadGroup = new FlushThreadGroup(1024 * 1024 * 10,20, "", true);
+				FlushThreadGroup flushThreadGroup = new FlushThreadGroup(1024 * 1024 * 10,20, "", false);
 //		FlushThreadGroup flushThreadGroup = new FlushThreadGroup(20, "", false);
 		final AtomicInteger ai = new AtomicInteger();
 		final BufferedFileOut out = new BufferedFileOut("d://jbpaxos//a.test1",new RandomAccessFile("d://jbpaxos//a.test1", "rws"), flushThreadGroup);
-			Thread t = new Thread() {
+		Thread t = new Thread() {
 				public void run() {
-					byte[] buf = new byte[4 * 1024];
+					byte[] buf = new byte[128];
 //									byte[] buf = new byte[1024 * 1024 * 8];
 
 					for(int i = 0 ; i < 100000 ; ++i){
 						final CountDownLatch c = new CountDownLatch(1);
 						try {
-							out.write(buf, 0, 46, null,false);
-							Thread.sleep(1000);
 							out.write(buf, 0, buf.length, new Callable<Object>() {
 								@Override
 								public Object call() throws Exception {
@@ -36,7 +34,6 @@ public class TestBufferOut {
 									return null;
 								}
 							},true);
-							out.write(buf, 0, 4, null,false);
 							c.await();
 						} catch (Exception e) {
 							// TODO Auto-generated catch block
@@ -56,7 +53,7 @@ public class TestBufferOut {
 							e.printStackTrace();
 						}
 						int c = ai.getAndSet(0);
-						System.out.println(c / 3 + " " + c);
+						System.out.println(c / 3 );
 					}
 				}
 			};
