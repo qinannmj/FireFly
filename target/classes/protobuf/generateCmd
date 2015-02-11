@@ -1,7 +1,0 @@
-
-//message
-protoc.exe -I=D:\workspaces\workspace-free\FireFly\src\main\resources\protobuf\ --java_out=D:\workspaces\workspace-free\FireFly\src\main\java D:\workspaces\workspace-free\FireFly\src\main\resources\protobuf\messages.proto
-
-
-//store
-protoc.exe -I=D:\workspaces\workspace-free\FireFly\src\main\resources\protobuf\ --java_out=D:\workspaces\workspace-free\FireFly\src\main\java D:\workspaces\workspace-free\FireFly\src\main\resources\protobuf\store.proto
