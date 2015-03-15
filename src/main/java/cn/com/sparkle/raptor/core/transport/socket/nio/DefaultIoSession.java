@@ -56,11 +56,6 @@ public class DefaultIoSession implements IoSession {
 
 	}
 
-	//	@Override
-	//	public MaximumSizeArrayCycleQueue<ByteBuffer> getDebugQueue() {
-	//		return waitSendQueue;
-	//	}
-
 	@Override
 	public IoHandler getHandler() {
 		return handler;
@@ -88,9 +83,7 @@ public class DefaultIoSession implements IoSession {
 
 	@Override
 	public void suspendRead() {
-		//		logger.debug(this.getRemoteAddress() + " suspendRead");
 		if (!isSuspendRead) {
-			//			logger.debug(this.getRemoteAddress() + " suspendRead");
 			isSuspendRead = true;
 			readProcessor.unRegisterRead(this);
 		}
@@ -98,9 +91,7 @@ public class DefaultIoSession implements IoSession {
 
 	@Override
 	public void continueRead() {
-		//		logger.debug(this.getRemoteAddress() + " continueRead");
 		if (isSuspendRead) {
-			//			logger.debug(this.getRemoteAddress() + " continueRead");
 			isSuspendRead = false;
 			readProcessor.registerRead(this);
 		}
@@ -115,7 +106,7 @@ public class DefaultIoSession implements IoSession {
 	public synchronized boolean tryWrite(IoBuffer message, boolean flush) throws SessionHavaClosedException {
 		// this progress of lock is necessary,because the method tryWrite will
 		// be invoked in many different threads
-		flush = false;
+//		flush = false;
 		if (isClose) {
 			throw new SessionHavaClosedException("IoSession have closed!");
 		}
@@ -123,12 +114,15 @@ public class DefaultIoSession implements IoSession {
 			return false;
 		}
 
-		ByteBuffer buffer = message.getByteBuffer().asReadOnlyBuffer();
-		buffer.limit(buffer.position()).position(0);
+//		ByteBuffer buffer = message.getByteBuffer().asReadOnlyBuffer();
+//		buffer.limit(buffer.position()).position(0);
 		if (flush && waitSendQueueList.size() == 0) {
 			//try send right now
 			try {
+				ByteBuffer buffer = message.getByteBuffer();
+				buffer.limit(buffer.position()).position(0);
 				channel.write(buffer);
+				message.getByteBuffer().mark().position(buffer.limit()).limit(buffer.capacity());
 			} catch (IOException e) {
 				this.closeSession();
 				throw new SessionHavaClosedException("IoSession have closed!");
@@ -182,7 +176,6 @@ public class DefaultIoSession implements IoSession {
 			} else {
 				if (buffLock.compareAndSet(lockingBuffer, buffer)) {//try lock
 					if(waitSendQueueList.last() == buffer){ //double check
-//						logger.debug("lock a buff" + buffer + " " + buffer.getByteBuffer());
 						return buffer;
 					}else{
 						
@@ -211,8 +204,6 @@ public class DefaultIoSession implements IoSession {
 		ByteBuffer bb = buffer.getByteBuffer();
 		bb.mark().position(bb.limit()).limit(bb.capacity());
 		buffLock.compareAndSet(buffer, null);
-		logger.debug("unlock " + buffer);
-		
 	}
 	@Override
 	public IoBuffer lockPeekBuffer() {
@@ -230,14 +221,10 @@ public class DefaultIoSession implements IoSession {
 							//first peek
 							buffer.getByteBuffer().position(0);
 						}
-//						logger.debug("peek buffer" + buffer.getByteBuffer() + " " + buffer );
-					}else{
-//						logger.debug("peek null");
 					}
 					return buffer;
 				}
 			} else if (lockingBuffer == buffer) {
-//				logger.debug("locked buff " + buffer );
 				return null;
 			} else {
 				if (buffer != null) {
@@ -248,9 +235,6 @@ public class DefaultIoSession implements IoSession {
 						buffer.getByteBuffer().limit(buffer.getByteBuffer().position());
 						buffer.getByteBuffer().position(0);
 					}
-//					logger.debug("peek buffer" + buffer.getByteBuffer() + " " + lockingBuffer + " " + buffer);
-				}else{
-//					logger.debug("peek null");
 				}
 				return buffer;
 			}

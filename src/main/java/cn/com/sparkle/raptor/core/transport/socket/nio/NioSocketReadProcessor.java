@@ -18,7 +18,7 @@ import cn.com.sparkle.raptor.core.delaycheck.DelayChecked;
 import cn.com.sparkle.raptor.core.delaycheck.DelayCheckedTimer;
 import cn.com.sparkle.raptor.core.util.TimeUtil;
 
-public class NioSocketReadProcessor extends AbstractNioProcessor implements NioReadProcessor{
+public class NioSocketReadProcessor extends AbstractNioProcessor implements NioReadProcessor {
 	private Logger logger = Logger.getLogger(NioSocketReadProcessor.class);
 
 	private ReentrantLock readLock = new ReentrantLock();
@@ -80,7 +80,9 @@ public class NioSocketReadProcessor extends AbstractNioProcessor implements NioR
 						checkRegisterRead.needRun();
 						break;
 					} catch (Exception e) {
-						logger.debug(e);
+						if (logger.isDebugEnabled()) {
+							logger.debug(e);
+						}
 						try {
 							Thread.sleep(10);
 						} catch (InterruptedException e1) {
@@ -118,7 +120,6 @@ public class NioSocketReadProcessor extends AbstractNioProcessor implements NioR
 		}
 	}
 
-
 	public void registerClose(IoSession session) {
 		try {
 			closeLock.lock();
@@ -128,7 +129,9 @@ public class NioSocketReadProcessor extends AbstractNioProcessor implements NioR
 					selector.wakeup();
 					break;
 				} catch (Exception e) {
-					logger.debug(e);
+					if (logger.isDebugEnabled()) {
+						logger.debug(e);
+					}
 					try {
 						Thread.sleep(1);
 					} catch (InterruptedException e1) {
@@ -196,7 +199,6 @@ public class NioSocketReadProcessor extends AbstractNioProcessor implements NioR
 		}
 	}
 
-
 	private void proceedTimeoutQueue() {
 		long now = TimeUtil.currentTimeMillis();
 		Entity<IoSession> entity;
@@ -205,7 +207,9 @@ public class NioSocketReadProcessor extends AbstractNioProcessor implements NioR
 				break;
 			}
 			entity.getElement().closeSession();
-			logger.debug("close timeout connection!" + (now - entity.getElement().getLastActiveTime()));
+			if (logger.isDebugEnabled()) {
+				logger.debug("close timeout connection!" + (now - entity.getElement().getLastActiveTime()));
+			}
 			activeSessionLinedLinkedList.remove(entity);
 		}
 	}
@@ -216,24 +220,24 @@ public class NioSocketReadProcessor extends AbstractNioProcessor implements NioR
 		try {
 			SocketChannel sc = (SocketChannel) key.channel();
 			session = (IoSession) key.attachment();
-//			int totalRead = 0;
+			//			int totalRead = 0;
 			for (int k = 0; k < 255; ++k) {
 				if (buff == null) {
 					buff = memPool.get();
 				}
 				readSize = sc.read(buff.getByteBuffer());
-//				logger.debug("read " + readSize);
+				//				logger.debug("read " + readSize);
 				if (readSize <= 0) {
 					break;
 				}
-//				totalRead += readSize;
+				//				totalRead += readSize;
 				if (!buff.getByteBuffer().hasRemaining()) {
 					buff.getByteBuffer().limit(buff.getByteBuffer().position()).position(0);
 					session.getHandler().onMessageRecieved(session, buff);
 					buff = null;
 				}
 			}
-//			System.out.println("totalRead:"+totalRead);
+			//			System.out.println("totalRead:"+totalRead);
 			if (buff != null && buff.getByteBuffer().position() != 0) {
 				buff.getByteBuffer().limit(buff.getByteBuffer().position()).position(0);
 				session.getHandler().onMessageRecieved(session, buff);
@@ -272,6 +276,6 @@ public class NioSocketReadProcessor extends AbstractNioProcessor implements NioR
 		proceedRegister();
 		proceedRegisterRead();
 		proceedTimeoutQueue();
-		
+
 	}
 }

@@ -38,8 +38,10 @@ public class TestAynscClientByteProtocol {
 		
 		int tcpSize = 1;
 		for(int i = 0 ; i < tcpSize; i++){
-//			IoHandler handler = new MultiThreadHandler(3, 300, 60, TimeUnit.SECONDS,new CodecHandler(1000, 32 * 1024, new BytesProtocol(), new TestAsyncByteObjetClientHandler()));
-			IoHandler handler = new CodecHandler(10000 / tcpSize, 64 * 1024, new BytesProtocol(), new TestAsyncByteObjetClientHandler());
+			IoHandler handler1 = new CodecHandler(10000 / tcpSize, 64 * 1024, new BytesProtocol(), new TestAsyncByteObjetClientHandler());
+			
+			IoHandler handler = new MultiThreadHandler(3, 300, 60, TimeUnit.SECONDS,handler1);
+//			
 			
 			
 			
@@ -61,7 +63,7 @@ class TestAsyncByteObjetClientHandler implements IoHandler{
 //	private static AtomicInteger flag = new AtomicInteger(0);
 //	private int i = 0;
 	
-	private byte[] sample = new byte[1];
+	private byte[] sample = new byte[128];
 	
 	private final static int MAX = 100000;
 	
@@ -108,7 +110,7 @@ class TestAsyncByteObjetClientHandler implements IoHandler{
 						}
 						
 //						Thread.sleep(1000);
-//						c.await();
+						c.await();
 					} catch (SessionHavaClosedException e) {
 						e.printStackTrace();
 						break;
@@ -157,23 +159,23 @@ class TestAsyncByteObjetClientHandler implements IoHandler{
 				l.notify();
 			}
 		}
-//		try{
-//			lock.lock();
-//			++cc;
-//			++tc;
-//			if(cc%20000 == 0){
-//				long tt = System.currentTimeMillis() - ct;
-//				try{
-//					System.out.println((cc*1000/tt) + "/s   " + (tc * 1000/(System.currentTimeMillis() - start) ) + "/s");
-//					ct = System.currentTimeMillis();
-//					cc = 1;
-//				}catch(Throwable e){
-//					System.out.println(tt);
-//				}
-//			}
-//		}finally{
-//			lock.unlock();
-//		}
+		try{
+			lock.lock();
+			++cc;
+			++tc;
+			if(cc%20000 == 0){
+				long tt = System.currentTimeMillis() - ct;
+				try{
+					System.out.println((cc*1000/tt) + "/s   " + (tc * 1000/(System.currentTimeMillis() - start) ) + "/s");
+					ct = System.currentTimeMillis();
+					cc = 1;
+				}catch(Throwable e){
+					System.out.println(tt);
+				}
+			}
+		}finally{
+			lock.unlock();
+		}
 		
 	}
 	@Override

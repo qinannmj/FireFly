@@ -129,7 +129,9 @@ public class ProtoBufProtocol implements Protocol {
 				}
 				return b.build();
 			} catch (Exception e) {
-				logger.debug("bean.recieveSize" + bean.recieveSize + " bean.curPackageSize:" + bean.curPackageSize);
+				if (logger.isDebugEnabled()) {
+					logger.debug("bean.recieveSize" + bean.recieveSize + " bean.curPackageSize:" + bean.curPackageSize);
+				}
 				throw new DecodeException(e);
 			}
 		}

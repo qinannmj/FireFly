@@ -1,5 +1,5 @@
 #normal config
-io_thread_num=1
+io_thread_num=2
 timeout=500
 recv_mem_size=131072
 send_mem_size=131072

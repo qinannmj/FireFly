@@ -155,8 +155,10 @@ public class CatchUpDeamon implements Runnable {
 									}
 								}
 							}
-							if (newMaxInstanceId - selfInstanceId <= Constants.CATCH_STOP_NUM
+							if (newMaxInstanceId == selfInstanceId
 									&& (newValidCount >= quorum || (nodeState != null && nodeState.isUpToDate()))) {
+//							if (newMaxInstanceId - selfInstanceId <= Constants.ELECTION_VOTE_ID_TOLERATION
+//									&& (newValidCount >= quorum || (nodeState != null && nodeState.isUpToDate()))) {
 								// this condition can promise this node not
 								// fall behind other nodes too many
 								curCatchUpState = CatchUpEvent.RECOVERY_FROM_CATCH_UP;

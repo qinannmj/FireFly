@@ -164,10 +164,7 @@ public class NioSocketWriteProcessor extends AbstractNioProcessor implements Nio
 				long sendSize = 0;
 				for (int j = 0; j < nscfg.getTrySendNum(); j++) {
 					try {
-						//					sendSize = sc.write(buffW.getQueue(), buffW.getOffset(), buffW.getLength());
-//						logger.debug(buff + String.format("pos:%s limit:%s", buff.getByteBuffer().position(),buff.getByteBuffer().limit()));
 						sendSize = sc.write(buff.getByteBuffer());
-//						logger.debug("write" + sendSize);
 					} catch (IllegalArgumentException e) {
 						throw e;
 					} catch (BufferOverflowException e) {
@@ -177,7 +174,6 @@ public class NioSocketWriteProcessor extends AbstractNioProcessor implements Nio
 						break;
 				}
 				if (!buff.getByteBuffer().hasRemaining()) {
-//					logger.debug("poll buffer" + buff.getByteBuffer());
 					int size = buff.getByteBuffer().limit();
 					session.pollWaitSendBuff();
 					buff.close();

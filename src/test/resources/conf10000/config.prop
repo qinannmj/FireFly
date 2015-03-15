@@ -1,7 +1,7 @@
 stable-storage=d:/jbpaxos
 
-#fileOutFacotry-class=cn.com.sparkle.firefly.stablestorage.io.rwsbuffered.RwsBufferedRecordFileOutFactory
-fileOutFacotry-class=cn.com.sparkle.firefly.stablestorage.io.rwbuffered.RwBufferedRecordFileOutFactory
+fileOutFacotry-class=cn.com.sparkle.firefly.stablestorage.io.rwsbuffered.RwsBufferedRecordFileOutFactory
+#fileOutFacotry-class=cn.com.sparkle.firefly.stablestorage.io.rwbuffered.RwBufferedRecordFileOutFactory
 rwsbuffered-file-io-buffsize=5242880
 rwsbuffered-file-io-queue-deep=5
 async-file-allocator-idle-size=20
@@ -17,7 +17,7 @@ transport-singletcp-max-waiting-mem-size=5242880
 net-layer=raptor
 disk-mem-lost=0
 catchup-delay=5000
-debug-log=true
+debug-log=false
 elect-self-master=true
 vote-value-split-size=65535
 min-instance-merge-package-size=5242880
@@ -27,7 +27,7 @@ is-merge-client-request=true
 
 
 
-net-checksum-type=3
+net-checksum-type=0
 file-checksum-type=3
 session-success-sync-max-mem=5242880
 session-success-sync-max-mem-strategy=closeConnectionAfterWaitTimeStrategy

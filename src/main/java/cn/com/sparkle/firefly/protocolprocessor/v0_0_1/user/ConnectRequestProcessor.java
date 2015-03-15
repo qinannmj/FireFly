@@ -39,25 +39,32 @@ public class ConnectRequestProcessor extends AbstractProtocolV0_0_1Processor imp
 		if (t.hasConnectRequest()) {
 			ConnectRequest request = t.getConnectRequest();
 			if (request.getMasterDistance() > masterDistance) {
+				boolean isAcceptable = true;
 				try {
 					rwlock.readLock().lock();
-					ConcurrentHashMap<PaxosSession, PaxosSession> set = wantConnectMasterSessionMap.get(request.getMasterDistance());
-					if (set == null) {
-						try {
-							lock.lock();
-							set = new ConcurrentHashMap<PaxosSession, PaxosSession>();
-							wantConnectMasterSessionMap.put(request.getMasterDistance(), set);
-						} finally {
-							lock.unlock();
+					if (request.getMasterDistance() > masterDistance) {
+						ConcurrentHashMap<PaxosSession, PaxosSession> set = wantConnectMasterSessionMap.get(request.getMasterDistance());
+						if (set == null) {
+							try {
+								lock.lock();
+								set = new ConcurrentHashMap<PaxosSession, PaxosSession>();
+								wantConnectMasterSessionMap.put(request.getMasterDistance(), set);
+							} finally {
+								lock.unlock();
+							}
 						}
+						set.put(session, session);
+					} else {
+						isAcceptable = false;
 					}
-					set.put(session, session);
+				} finally {
+					rwlock.readLock().unlock();
+				}
+				if (isAcceptable) {
 					session.put(distanceKey, request.getMasterDistance());
 					ConnectResponse.Builder b = ConnectResponse.newBuilder().setIsSuccessful(true);
 					MessagePackage.Builder response = MessagePackage.newBuilder().setId(t.getId()).setIsLast(true).setConnectResponse(b);
 					sendResponse(session, response.build().toByteArray());
-				} finally {
-					rwlock.readLock().unlock();
 				}
 			} else {
 				logger.info("this server is not master,close connnection!");

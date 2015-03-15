@@ -18,8 +18,7 @@ import cn.com.sparkle.raptor.core.protocol.Protocol;
 
 public abstract class VariLenFrameProtocol implements Protocol {
 	private Logger logger = Logger.getLogger(VariLenFrameProtocol.class);
-	
-	
+
 	public VariLenFrameProtocol() {
 	}
 
@@ -92,7 +91,7 @@ public abstract class VariLenFrameProtocol implements Protocol {
 				dataSize >>>= 7;
 			}
 		}
-		flushMsg(bufferPoolOutputStream,message);
+		flushMsg(bufferPoolOutputStream, message);
 		List<IoBuffer> list = bufferPoolOutputStream.getBuffArray();
 		if (lastWaitSendBuff != null) {
 			list.remove(0);
@@ -115,7 +114,7 @@ public abstract class VariLenFrameProtocol implements Protocol {
 			//				throw new DecodeException("The message is not registered to protocol! id:" + index);
 			//			}
 			try {
-				Object o = readMsg(new IoBufferArrayInputStream(bean.buff.toArray(new IoBuffer[bean.buff.size()]), bean.curPackageSize),bean.curPackageSize);
+				Object o = readMsg(new IoBufferArrayInputStream(bean.buff.toArray(new IoBuffer[bean.buff.size()]), bean.curPackageSize), bean.curPackageSize);
 				bean.recieveSize -= bean.curPackageSize;
 				bean.curPackageSize = 0;
 				bean.checkPos = 0;
@@ -125,13 +124,18 @@ public abstract class VariLenFrameProtocol implements Protocol {
 				}
 				return o;
 			} catch (Exception e) {
-				logger.debug("bean.recieveSize" + bean.recieveSize + " bean.curPackageSize:" + bean.curPackageSize);
+				if (logger.isDebugEnabled()) {
+					logger.debug("bean.recieveSize" + bean.recieveSize + " bean.curPackageSize:" + bean.curPackageSize);
+				}
 				throw new DecodeException(e);
 			}
 		}
 		return null;
 	}
+
 	public abstract int dataSize(Object msg);
-	public abstract void flushMsg(OutputStream out,Object msg) throws IOException;
-	public abstract Object readMsg(InputStream in,int msgSize) throws IOException;
+
+	public abstract void flushMsg(OutputStream out, Object msg) throws IOException;
+
+	public abstract Object readMsg(InputStream in, int msgSize) throws IOException;
 }

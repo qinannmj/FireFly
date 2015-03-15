@@ -18,9 +18,8 @@ public class Record {
 	}
 
 	public void writeToStream(RecordFileOut out, Callable<Object> callable,boolean isSync) throws IOException {
-		long pos = head.writeToStream(out, null,false);
+		head.writeToStream(out, null,false);
 		body.writeToStream(out, callable,isSync);
-		logger.debug(String.format("write pos %s endpos %s", pos , pos + getSerializeSize()));
 	}
 
 	public RecordHead getHead() {

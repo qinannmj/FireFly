@@ -148,7 +148,9 @@ public class ObjectProtocol implements Protocol {
 				}
 				return o;
 			} catch (Exception e) {
-				logger.debug("bean.recieveSize" + bean.recieveSize + " bean.curPackageSize:" + bean.curPackageSize);
+				if (logger.isDebugEnabled()) {
+					logger.debug("bean.recieveSize" + bean.recieveSize + " bean.curPackageSize:" + bean.curPackageSize);
+				}
 				throw new DecodeException(e);
 			} finally {
 				try {
