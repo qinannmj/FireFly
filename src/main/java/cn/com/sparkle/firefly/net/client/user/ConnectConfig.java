@@ -16,9 +16,9 @@ public class ConnectConfig {
 	private volatile NetNode node;
 	private int masterDistance;
 	private ConnectEvent connectEvent;
-	private SystemFuture<Boolean> future = new SystemFuture<Boolean>();
+	private volatile SystemFuture<Boolean> future = new SystemFuture<Boolean>();
 
-	private SystemFuture<Boolean> handFuture = new SystemFuture<Boolean>();
+	private volatile SystemFuture<Boolean> handFuture = new SystemFuture<Boolean>();
 
 	public static interface ConnectEvent {
 		public void connect(String address, NetNode node);
@@ -32,6 +32,11 @@ public class ConnectConfig {
 		this.isAutoReConnect = isAutoReConnect;
 		this.masterDistance = masterDistance;
 		this.connectEvent = connectEvent;
+	}
+	
+	public void reset(){
+		future = new SystemFuture<Boolean>();
+		handFuture = new SystemFuture<Boolean>();
 	}
 
 	public int getMasterDistance() {
@@ -58,7 +63,7 @@ public class ConnectConfig {
 		this.isAutoReConnect = isAutoReConnect;
 	}
 
-	public void connected(NetNode node) {
+	public synchronized void connected(NetNode node) {
 		this.node = node;
 		connectEvent.connect(address, node);
 		future.set(true);
@@ -75,8 +80,11 @@ public class ConnectConfig {
 		future.set(false);
 		handFuture.set(false);
 	}
-	public NetNode getNode(){
-		return node;
+	public synchronized NetNode getNode(){
+		SystemFuture<Boolean> localHandFuture = handFuture;
+		if(localHandFuture.isDone() && localHandFuture.value()){
+			return node;
+		}else return null;
 	}
 	
 	public void handed() {

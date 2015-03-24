@@ -105,6 +105,7 @@ public class UserClientHandler implements NetHandler {
 	private void reConnect(ConnectConfig connectConfig) {
 		// After sleep 5 seconds,retry to connect.
 		if (connectConfig.isAutoReConnect()) {
+			connectConfig.reset();
 			reConnectThread.add(connectConfig, method, 5000);
 		}
 	}

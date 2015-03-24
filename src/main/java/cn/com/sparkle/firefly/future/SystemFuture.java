@@ -10,6 +10,7 @@ import org.apache.log4j.Logger;
 
 public class SystemFuture<T> extends FutureTask<T> {
 	private final static Logger logger = Logger.getLogger(SystemFuture.class);
+	private volatile T v;
 	@SuppressWarnings("rawtypes")
 	private static Callable nullCallable = new Callable() {
 		@Override
@@ -26,6 +27,7 @@ public class SystemFuture<T> extends FutureTask<T> {
 	@Override
 	public void set(T v) {
 		if (!isDone()) {
+			this.v = v;
 			super.set(v);
 		}
 	}
@@ -52,5 +54,9 @@ public class SystemFuture<T> extends FutureTask<T> {
 			System.exit(1);
 		}
 		return null;
+	}
+	
+	public T value(){
+		return v;
 	}
 }
