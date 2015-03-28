@@ -56,7 +56,6 @@ public class FileIndexer {
 
 	public DataChunk findDataChunk(long instanceId) {
 		//binary search
-
 		int i = findDataChunkIdx(instanceId);
 		return i == -1 ? null : index[i];
 	}

@@ -147,19 +147,22 @@ public class RecordFileOperatorV2 implements RecordFileOperator {
 			while (true) { //for detect chunk full
 				DataChunk dataChunk = null;
 				try {
-					dataChunk = fileIndexer.findDataChunk(instanceId);
-					if (dataChunk == null && fileIndexer.getEnd() == 0) {
-						throw new ChunkFullException();
-					}
-					if(!dataChunk.isInited()){
-						return false;
-					}
+					
 					if (instanceId > lastExpectSafeInstanceId) {
 //						logger.info(String.format("waiting lastExpectSafeInstanceId %s instanceId %s", lastExpectSafeInstanceId, instanceId));
 						//								catchUpWait.await();
 						unsafeRecordQueue.add(new InstanceSaveContext(instanceId, successfulRecord, addRequestPackages));
 						break;
 					}else if(instanceId == lastExpectSafeInstanceId){
+						
+						dataChunk = fileIndexer.findDataChunk(instanceId);
+						if (dataChunk == null && fileIndexer.getEnd() == 0) {
+							throw new ChunkFullException();
+						}
+						if(!dataChunk.isInited()){
+							return false;
+						}
+						
 						InstanceVoteRecord voteRecord = votedInstanceRecordMap.remove(instanceId);
 						//check successfulRecord.hasV
 						boolean isVotedBySelf = voteRecord != null
@@ -191,15 +194,17 @@ public class RecordFileOperatorV2 implements RecordFileOperator {
 							maxKnowedInstanceId = instanceId;
 						}
 						instanceExecutor.execute(recordWrap);
+						
+						if(dataChunk.isClosing() && dataChunk.getMaxVoteInstanceId() == dataChunk.getSuccessfullInstanceId()){
+							dataChunk.close();
+						}
 					}
 					
 					while(unsafeRecordQueue.size() != 0 && unsafeRecordQueue.peek().getInstanceId() < lastExpectSafeInstanceId){
 						//poll repeated record
 						unsafeRecordQueue.poll();
 					}
-					if(dataChunk.isClosing() && dataChunk.getMaxVoteInstanceId() == dataChunk.getSuccessfullInstanceId()){
-						dataChunk.close();
-					}
+					
 					if(unsafeRecordQueue.size() != 0 && unsafeRecordQueue.peek().getInstanceId() == lastExpectSafeInstanceId){
 						//restore the context of instance be stored in queue
 						InstanceSaveContext saveContext = unsafeRecordQueue.poll();
