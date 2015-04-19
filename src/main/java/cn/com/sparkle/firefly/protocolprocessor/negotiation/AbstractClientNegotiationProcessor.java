@@ -11,6 +11,7 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
+import cn.com.sparkle.firefly.Constants;
 import cn.com.sparkle.firefly.Version;
 import cn.com.sparkle.firefly.checksum.ChecksumUtil;
 import cn.com.sparkle.firefly.checksum.ChecksumUtil.UnsupportedChecksumAlgorithm;
@@ -101,7 +102,15 @@ public abstract class AbstractClientNegotiationProcessor extends AbstractChainPr
 
 				session.put(PaxosSessionKeys.NET_NODE_KEY, netNode);
 			} else {
-				logger.error("uncompatible protocol to remoting server that appversion is " + appVersion);
+				if(errorCode.equals(Constants.ERROR_NEGOTIATE_UNCOMPATIBLE)){
+					logger.error("uncompatible protocol to remoting server that appversion is " + appVersion);
+				}else if(errorCode.equals(Constants.ERROR_NEGOTIATE_ARBITRATOR)){
+					logger.error("The arbitrator can't provide service!");
+				}else if(errorCode.equals(Constants.ERROR_NEGOTIATE_UNACCEPT_IP)){
+					logger.error("Yours ip can't be accepted by server!");
+				}else{
+					logger.error("unknowed errorcode:" + errorCode);
+				}
 				session.closeSession();
 			}
 

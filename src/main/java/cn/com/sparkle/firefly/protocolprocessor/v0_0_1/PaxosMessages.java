@@ -6318,6 +6318,16 @@ public final class PaxosMessages {
      * </pre>
      */
     int getLifecycle();
+
+    // optional bool isArbitrator = 4;
+    /**
+     * <code>optional bool isArbitrator = 4;</code>
+     */
+    boolean hasIsArbitrator();
+    /**
+     * <code>optional bool isArbitrator = 4;</code>
+     */
+    boolean getIsArbitrator();
   }
   /**
    * Protobuf type {@code protocolbuffer.ActiveHeartBeatRequest}
@@ -6391,6 +6401,11 @@ public final class PaxosMessages {
             case 24: {
               bitField0_ |= 0x00000004;
               lifecycle_ = input.readInt32();
+              break;
+            }
+            case 32: {
+              bitField0_ |= 0x00000008;
+              isArbitrator_ = input.readBool();
               break;
             }
           }
@@ -6522,10 +6537,27 @@ public final class PaxosMessages {
       return lifecycle_;
     }
 
+    // optional bool isArbitrator = 4;
+    public static final int ISARBITRATOR_FIELD_NUMBER = 4;
+    private boolean isArbitrator_;
+    /**
+     * <code>optional bool isArbitrator = 4;</code>
+     */
+    public boolean hasIsArbitrator() {
+      return ((bitField0_ & 0x00000008) == 0x00000008);
+    }
+    /**
+     * <code>optional bool isArbitrator = 4;</code>
+     */
+    public boolean getIsArbitrator() {
+      return isArbitrator_;
+    }
+
     private void initFields() {
       address_ = "";
       heartBeatResponse_ = cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.SenatorHeartBeatResponse.getDefaultInstance();
       lifecycle_ = 0;
+      isArbitrator_ = false;
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -6564,6 +6596,9 @@ public final class PaxosMessages {
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
         output.writeInt32(3, lifecycle_);
       }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        output.writeBool(4, isArbitrator_);
+      }
       getUnknownFields().writeTo(output);
     }
 
@@ -6584,6 +6619,10 @@ public final class PaxosMessages {
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
         size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(3, lifecycle_);
+      }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(4, isArbitrator_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -6712,6 +6751,8 @@ public final class PaxosMessages {
         bitField0_ = (bitField0_ & ~0x00000002);
         lifecycle_ = 0;
         bitField0_ = (bitField0_ & ~0x00000004);
+        isArbitrator_ = false;
+        bitField0_ = (bitField0_ & ~0x00000008);
         return this;
       }
 
@@ -6756,6 +6797,10 @@ public final class PaxosMessages {
           to_bitField0_ |= 0x00000004;
         }
         result.lifecycle_ = lifecycle_;
+        if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
+          to_bitField0_ |= 0x00000008;
+        }
+        result.isArbitrator_ = isArbitrator_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -6782,6 +6827,9 @@ public final class PaxosMessages {
         }
         if (other.hasLifecycle()) {
           setLifecycle(other.getLifecycle());
+        }
+        if (other.hasIsArbitrator()) {
+          setIsArbitrator(other.getIsArbitrator());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
@@ -7062,6 +7110,39 @@ public final class PaxosMessages {
       public Builder clearLifecycle() {
         bitField0_ = (bitField0_ & ~0x00000004);
         lifecycle_ = 0;
+        onChanged();
+        return this;
+      }
+
+      // optional bool isArbitrator = 4;
+      private boolean isArbitrator_ ;
+      /**
+       * <code>optional bool isArbitrator = 4;</code>
+       */
+      public boolean hasIsArbitrator() {
+        return ((bitField0_ & 0x00000008) == 0x00000008);
+      }
+      /**
+       * <code>optional bool isArbitrator = 4;</code>
+       */
+      public boolean getIsArbitrator() {
+        return isArbitrator_;
+      }
+      /**
+       * <code>optional bool isArbitrator = 4;</code>
+       */
+      public Builder setIsArbitrator(boolean value) {
+        bitField0_ |= 0x00000008;
+        isArbitrator_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional bool isArbitrator = 4;</code>
+       */
+      public Builder clearIsArbitrator() {
+        bitField0_ = (bitField0_ & ~0x00000008);
+        isArbitrator_ = false;
         onChanged();
         return this;
       }
@@ -9965,6 +10046,16 @@ public final class PaxosMessages {
      * <code>required int32 size = 2;</code>
      */
     int getSize();
+
+    // optional bool isArbitrator = 3;
+    /**
+     * <code>optional bool isArbitrator = 3;</code>
+     */
+    boolean hasIsArbitrator();
+    /**
+     * <code>optional bool isArbitrator = 3;</code>
+     */
+    boolean getIsArbitrator();
   }
   /**
    * Protobuf type {@code protocolbuffer.CatchUpRequest}
@@ -10025,6 +10116,11 @@ public final class PaxosMessages {
             case 16: {
               bitField0_ |= 0x00000002;
               size_ = input.readInt32();
+              break;
+            }
+            case 24: {
+              bitField0_ |= 0x00000004;
+              isArbitrator_ = input.readBool();
               break;
             }
           }
@@ -10099,9 +10195,26 @@ public final class PaxosMessages {
       return size_;
     }
 
+    // optional bool isArbitrator = 3;
+    public static final int ISARBITRATOR_FIELD_NUMBER = 3;
+    private boolean isArbitrator_;
+    /**
+     * <code>optional bool isArbitrator = 3;</code>
+     */
+    public boolean hasIsArbitrator() {
+      return ((bitField0_ & 0x00000004) == 0x00000004);
+    }
+    /**
+     * <code>optional bool isArbitrator = 3;</code>
+     */
+    public boolean getIsArbitrator() {
+      return isArbitrator_;
+    }
+
     private void initFields() {
       startInstanceId_ = 0L;
       size_ = 0;
+      isArbitrator_ = false;
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -10129,6 +10242,9 @@ public final class PaxosMessages {
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
         output.writeInt32(2, size_);
       }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        output.writeBool(3, isArbitrator_);
+      }
       getUnknownFields().writeTo(output);
     }
 
@@ -10145,6 +10261,10 @@ public final class PaxosMessages {
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
         size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(2, size_);
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(3, isArbitrator_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -10266,6 +10386,8 @@ public final class PaxosMessages {
         bitField0_ = (bitField0_ & ~0x00000001);
         size_ = 0;
         bitField0_ = (bitField0_ & ~0x00000002);
+        isArbitrator_ = false;
+        bitField0_ = (bitField0_ & ~0x00000004);
         return this;
       }
 
@@ -10302,6 +10424,10 @@ public final class PaxosMessages {
           to_bitField0_ |= 0x00000002;
         }
         result.size_ = size_;
+        if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
+          to_bitField0_ |= 0x00000004;
+        }
+        result.isArbitrator_ = isArbitrator_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -10323,6 +10449,9 @@ public final class PaxosMessages {
         }
         if (other.hasSize()) {
           setSize(other.getSize());
+        }
+        if (other.hasIsArbitrator()) {
+          setIsArbitrator(other.getIsArbitrator());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
@@ -10421,6 +10550,39 @@ public final class PaxosMessages {
       public Builder clearSize() {
         bitField0_ = (bitField0_ & ~0x00000002);
         size_ = 0;
+        onChanged();
+        return this;
+      }
+
+      // optional bool isArbitrator = 3;
+      private boolean isArbitrator_ ;
+      /**
+       * <code>optional bool isArbitrator = 3;</code>
+       */
+      public boolean hasIsArbitrator() {
+        return ((bitField0_ & 0x00000004) == 0x00000004);
+      }
+      /**
+       * <code>optional bool isArbitrator = 3;</code>
+       */
+      public boolean getIsArbitrator() {
+        return isArbitrator_;
+      }
+      /**
+       * <code>optional bool isArbitrator = 3;</code>
+       */
+      public Builder setIsArbitrator(boolean value) {
+        bitField0_ |= 0x00000004;
+        isArbitrator_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional bool isArbitrator = 3;</code>
+       */
+      public Builder clearIsArbitrator() {
+        bitField0_ = (bitField0_ & ~0x00000004);
+        isArbitrator_ = false;
         onChanged();
         return this;
       }
@@ -23356,64 +23518,65 @@ public final class PaxosMessages {
       "e\030\035 \001(\0132\037.protocolbuffer.ConnectResponse" +
       "\022.\n\nvalueTrunk\030\036 \001(\0132\032.protocolbuffer.Va" +
       "lueTrunk\"\032\n\nValueTrunk\022\014\n\004part\030\001 \002(\014\"\022\n\020" +
-      "HeartBeatRequest\"\201\001\n\026ActiveHeartBeatRequ" +
+      "HeartBeatRequest\"\227\001\n\026ActiveHeartBeatRequ" +
       "est\022\017\n\007address\030\001 \002(\t\022C\n\021heartBeatRespons" +
       "e\030\002 \002(\0132(.protocolbuffer.SenatorHeartBea" +
-      "tResponse\022\021\n\tlifecycle\030\003 \002(\005\"\206\002\n\030Senator" +
-      "HeartBeatResponse\022 \n\030lastCanExecuteInsta" +
-      "nceId\030\001 \002(\003\022\031\n\021isMasterConnected\030\002 \002(\010\022\027",
-      "\n\017electionAddress\030\003 \002(\t\022\022\n\nelectionId\030\004 " +
-      "\002(\003\022\027\n\017electionVersion\030\005 \002(\003\022\020\n\010isInited" +
-      "\030\006 \002(\010\022\022\n\nisUpToDate\030\007 \002(\010\022\026\n\016masterDist" +
-      "ance\030\010 \002(\005\022\014\n\004room\030\t \002(\t\022\033\n\023connectedVal" +
-      "idNodes\030\n \003(\t\"\037\n\035LookUpLatestInstanceIdR" +
-      "equest\"\030\n\026GetNewsSenatorsRequest\"`\n\027GetN" +
-      "ewsSenatorsResponse\022\017\n\007version\030\001 \002(\003\022\020\n\010" +
-      "senators\030\002 \003(\t\022\"\n\006master\030\003 \002(\0132\022.protoco" +
-      "lbuffer.Id\"7\n\016CatchUpRequest\022\027\n\017startIns" +
-      "tanceId\030\001 \002(\003\022\014\n\004size\030\002 \002(\005\"K\n\017CatchUpRe",
-      "sponse\0228\n\021successfulRecords\030\001 \003(\0132\035.prot" +
-      "ocolbuffer.CatchUpRecord\"T\n\rCatchUpRecor" +
-      "d\022\022\n\ninstanceId\030\001 \002(\003\022/\n\005value\030\002 \002(\0132 .p" +
-      "rotocolbuffer.SuccessfulRecord\"[\n\026Instan" +
-      "cePrepareRequest\022\022\n\ninstanceId\030\001 \002(\003\022\036\n\002" +
-      "id\030\002 \002(\0132\022.protocolbuffer.Id\022\r\n\005chain\030\003 " +
-      "\003(\t\"X\n\022PrepareResponseBad\022\025\n\rlastPrepare" +
+      "tResponse\022\021\n\tlifecycle\030\003 \002(\005\022\024\n\014isArbitr" +
+      "ator\030\004 \001(\010\"\206\002\n\030SenatorHeartBeatResponse\022" +
+      " \n\030lastCanExecuteInstanceId\030\001 \002(\003\022\031\n\021isM",
+      "asterConnected\030\002 \002(\010\022\027\n\017electionAddress\030" +
+      "\003 \002(\t\022\022\n\nelectionId\030\004 \002(\003\022\027\n\017electionVer" +
+      "sion\030\005 \002(\003\022\020\n\010isInited\030\006 \002(\010\022\022\n\nisUpToDa" +
+      "te\030\007 \002(\010\022\026\n\016masterDistance\030\010 \002(\005\022\014\n\004room" +
+      "\030\t \002(\t\022\033\n\023connectedValidNodes\030\n \003(\t\"\037\n\035L" +
+      "ookUpLatestInstanceIdRequest\"\030\n\026GetNewsS" +
+      "enatorsRequest\"`\n\027GetNewsSenatorsRespons" +
+      "e\022\017\n\007version\030\001 \002(\003\022\020\n\010senators\030\002 \003(\t\022\"\n\006" +
+      "master\030\003 \002(\0132\022.protocolbuffer.Id\"M\n\016Catc" +
+      "hUpRequest\022\027\n\017startInstanceId\030\001 \002(\003\022\014\n\004s",
+      "ize\030\002 \002(\005\022\024\n\014isArbitrator\030\003 \001(\010\"K\n\017Catch" +
+      "UpResponse\0228\n\021successfulRecords\030\001 \003(\0132\035." +
+      "protocolbuffer.CatchUpRecord\"T\n\rCatchUpR" +
+      "ecord\022\022\n\ninstanceId\030\001 \002(\003\022/\n\005value\030\002 \002(\013" +
+      "2 .protocolbuffer.SuccessfulRecord\"[\n\026In" +
+      "stancePrepareRequest\022\022\n\ninstanceId\030\001 \002(\003" +
+      "\022\036\n\002id\030\002 \002(\0132\022.protocolbuffer.Id\022\r\n\005chai" +
+      "n\030\003 \003(\t\"X\n\022PrepareResponseBad\022\025\n\rlastPre" +
+      "pareId\030\001 \002(\003\022+\n\014successValue\030\002 \001(\0132\025.pro" +
+      "tocolbuffer.Value\"d\n\023PrepareResponseGood",
+      "\022\'\n\013lastVotedId\030\001 \002(\0132\022.protocolbuffer.I" +
+      "d\022$\n\005value\030\002 \001(\0132\025.protocolbuffer.Value\"" +
+      "\204\001\n\023InstanceVoteRequest\022\022\n\ninstanceId\030\001 " +
+      "\002(\003\022\"\n\006voteId\030\002 \002(\0132\022.protocolbuffer.Id\022" +
+      "\r\n\005chain\030\004 \003(\t\022\021\n\tvaluetype\030\005 \002(\005\022\023\n\013val" +
+      "ueLength\030\006 \002(\005\"M\n\014VoteResponse\022\020\n\010refuse" +
       "Id\030\001 \002(\003\022+\n\014successValue\030\002 \001(\0132\025.protoco" +
-      "lbuffer.Value\"d\n\023PrepareResponseGood\022\'\n\013" +
-      "lastVotedId\030\001 \002(\0132\022.protocolbuffer.Id\022$\n",
-      "\005value\030\002 \001(\0132\025.protocolbuffer.Value\"\204\001\n\023" +
-      "InstanceVoteRequest\022\022\n\ninstanceId\030\001 \002(\003\022" +
-      "\"\n\006voteId\030\002 \002(\0132\022.protocolbuffer.Id\022\r\n\005c" +
-      "hain\030\004 \003(\t\022\021\n\tvaluetype\030\005 \002(\005\022\023\n\013valueLe" +
-      "ngth\030\006 \002(\005\"M\n\014VoteResponse\022\020\n\010refuseId\030\001" +
-      " \002(\003\022+\n\014successValue\030\002 \001(\0132\025.protocolbuf" +
-      "fer.Value\"T\n\026ElectionPrepareRequest\022&\n\002i" +
-      "d\030\001 \002(\0132\032.protocolbuffer.ElectionId\022\022\n\nl" +
-      "astVoteId\030\002 \002(\003\"Q\n\023ElectionVoteRequest\022&" +
-      "\n\002id\030\001 \002(\0132\032.protocolbuffer.ElectionId\022\022",
-      "\n\nlastVoteId\030\002 \002(\003\"@\n\026ElectionSuccessMes" +
-      "sage\022&\n\002id\030\001 \002(\0132\032.protocolbuffer.Electi" +
-      "onId\"4\n\036LookUpLatestInstanceIdResponse\022\022" +
-      "\n\ninstanceId\030\001 \002(\003\"\314\001\n\026InstanceSuccessMe" +
-      "ssage\022\n\n\002id\030\001 \002(\003\022$\n\005value\030\002 \001(\0132\025.proto" +
-      "colbuffer.Value\022*\n\016highestVoteNum\030\003 \002(\0132" +
-      "\022.protocolbuffer.Id\022\025\n\rnotifyAddress\030\004 \003" +
-      "(\t\022=\n\013notifyChain\030\005 \003(\0132(.protocolbuffer" +
-      ".InstanceSuccessTransport\"X\n\030InstanceSuc" +
-      "cessTransport\022\017\n\007address\030\001 \002(\t\022\025\n\rnotify",
-      "Address\030\002 \003(\t\022\024\n\014isTransValue\030\003 \002(\010\"\031\n\027I" +
-      "nstanceSuccessResponse\"=\n\nElectionId\022\036\n\002" +
-      "id\030\001 \002(\0132\022.protocolbuffer.Id\022\017\n\007version\030" +
-      "\002 \002(\003\"6\n\017CommandResponse\022\024\n\014isSuccessful" +
-      "\030\001 \002(\010\022\r\n\005error\030\002 \002(\t\"D\n\nAddRequest\022\023\n\013c" +
-      "ommandType\030\001 \002(\005\022\r\n\005value\030\002 \002(\014\022\022\n\ninsta" +
-      "nceId\030\003 \001(\003\"1\n\013AddResponse\022\016\n\006result\030\001 \002" +
-      "(\014\022\022\n\ninstanceId\030\002 \001(\003\"(\n\016ConnectRequest" +
-      "\022\026\n\016masterDistance\030\001 \002(\005\"\'\n\017ConnectRespo" +
-      "nse\022\024\n\014isSuccessful\030\001 \002(\010B@\n/cn.com.spar",
-      "kle.firefly.protocolprocessor.v0_0_1B\rPa" +
-      "xosMessages"
+      "lbuffer.Value\"T\n\026ElectionPrepareRequest\022" +
+      "&\n\002id\030\001 \002(\0132\032.protocolbuffer.ElectionId\022" +
+      "\022\n\nlastVoteId\030\002 \002(\003\"Q\n\023ElectionVoteReque",
+      "st\022&\n\002id\030\001 \002(\0132\032.protocolbuffer.Election" +
+      "Id\022\022\n\nlastVoteId\030\002 \002(\003\"@\n\026ElectionSucces" +
+      "sMessage\022&\n\002id\030\001 \002(\0132\032.protocolbuffer.El" +
+      "ectionId\"4\n\036LookUpLatestInstanceIdRespon" +
+      "se\022\022\n\ninstanceId\030\001 \002(\003\"\314\001\n\026InstanceSucce" +
+      "ssMessage\022\n\n\002id\030\001 \002(\003\022$\n\005value\030\002 \001(\0132\025.p" +
+      "rotocolbuffer.Value\022*\n\016highestVoteNum\030\003 " +
+      "\002(\0132\022.protocolbuffer.Id\022\025\n\rnotifyAddress" +
+      "\030\004 \003(\t\022=\n\013notifyChain\030\005 \003(\0132(.protocolbu" +
+      "ffer.InstanceSuccessTransport\"X\n\030Instanc",
+      "eSuccessTransport\022\017\n\007address\030\001 \002(\t\022\025\n\rno" +
+      "tifyAddress\030\002 \003(\t\022\024\n\014isTransValue\030\003 \002(\010\"" +
+      "\031\n\027InstanceSuccessResponse\"=\n\nElectionId" +
+      "\022\036\n\002id\030\001 \002(\0132\022.protocolbuffer.Id\022\017\n\007vers" +
+      "ion\030\002 \002(\003\"6\n\017CommandResponse\022\024\n\014isSucces" +
+      "sful\030\001 \002(\010\022\r\n\005error\030\002 \002(\t\"D\n\nAddRequest\022" +
+      "\023\n\013commandType\030\001 \002(\005\022\r\n\005value\030\002 \002(\014\022\022\n\ni" +
+      "nstanceId\030\003 \001(\003\"1\n\013AddResponse\022\016\n\006result" +
+      "\030\001 \002(\014\022\022\n\ninstanceId\030\002 \001(\003\"(\n\016ConnectReq" +
+      "uest\022\026\n\016masterDistance\030\001 \002(\005\"\'\n\017ConnectR",
+      "esponse\022\024\n\014isSuccessful\030\001 \002(\010B@\n/cn.com." +
+      "sparkle.firefly.protocolprocessor.v0_0_1" +
+      "B\rPaxosMessages"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -23443,7 +23606,7 @@ public final class PaxosMessages {
           internal_static_protocolbuffer_ActiveHeartBeatRequest_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_protocolbuffer_ActiveHeartBeatRequest_descriptor,
-              new java.lang.String[] { "Address", "HeartBeatResponse", "Lifecycle", });
+              new java.lang.String[] { "Address", "HeartBeatResponse", "Lifecycle", "IsArbitrator", });
           internal_static_protocolbuffer_SenatorHeartBeatResponse_descriptor =
             getDescriptor().getMessageTypes().get(4);
           internal_static_protocolbuffer_SenatorHeartBeatResponse_fieldAccessorTable = new
@@ -23473,7 +23636,7 @@ public final class PaxosMessages {
           internal_static_protocolbuffer_CatchUpRequest_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_protocolbuffer_CatchUpRequest_descriptor,
-              new java.lang.String[] { "StartInstanceId", "Size", });
+              new java.lang.String[] { "StartInstanceId", "Size", "IsArbitrator", });
           internal_static_protocolbuffer_CatchUpResponse_descriptor =
             getDescriptor().getMessageTypes().get(9);
           internal_static_protocolbuffer_CatchUpResponse_fieldAccessorTable = new

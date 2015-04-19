@@ -52,7 +52,7 @@ public class ClusterStateProcessor extends AbstractAdminProcessor {
 		pw.println(String.format(SENATOR_FORMAT, "id","room", "isMasterConnected", "lastHeartTime", "maxLogId", "master-distance", "isUpToDate"));
 		NodesCollection collections = context.getcState().getSenators();
 		for (NodeState ns : collections.getNodeStates().values()) {
-			String masterDistance = ns.getMasterDistance() + ((ns.getMasterDistance() == 0 && ns.isConnected()) ? "(master)" : "");
+			String masterDistance = ns.getMasterDistance() + ((ns.getMasterDistance() == 0 && ns.isConnected()) ? "(master)" : (ns.isArbitrator()?"(arbitrator)":""));
 			String room = ns.getRoom();
 			pw.println(String.format(SENATOR_FORMAT, ns.getAddress(),room, ns.isConnected(), sdf.format(new Date(ns.getLastBeatHeatTime())),
 					ns.getLastCanExecuteInstanceId(), masterDistance, ns.isUpToDate()));

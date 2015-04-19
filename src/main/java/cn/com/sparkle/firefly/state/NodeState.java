@@ -20,6 +20,8 @@ public class NodeState {
 	private boolean isUpToDate = false;
 	
 	private String room = "";
+	
+	private boolean isArbitrator;
 
 	private int masterDistance = Integer.MAX_VALUE;
 
@@ -121,5 +123,14 @@ public class NodeState {
 	public void setInit(boolean isInit) {
 		this.isInit = isInit;
 	}
+
+	public boolean isArbitrator() {
+		return isArbitrator;
+	}
+
+	public void setArbitrator(boolean isArbitrator) {
+		this.isArbitrator = isArbitrator;
+	}
+	
 
 }

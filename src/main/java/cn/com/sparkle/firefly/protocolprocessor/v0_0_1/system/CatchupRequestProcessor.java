@@ -9,10 +9,15 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
 
+import com.google.protobuf.ByteString;
+
 import cn.com.sparkle.firefly.Context;
 import cn.com.sparkle.firefly.checksum.ChecksumUtil.UnsupportedChecksumAlgorithm;
 import cn.com.sparkle.firefly.config.Configuration;
+import cn.com.sparkle.firefly.model.Value.ValueType;
+import cn.com.sparkle.firefly.net.client.system.SystemNetNode;
 import cn.com.sparkle.firefly.net.netlayer.PaxosSession;
+import cn.com.sparkle.firefly.net.netlayer.PaxosSessionKeys;
 import cn.com.sparkle.firefly.protocolprocessor.v0_0_1.AbstractProtocolV0_0_1Processor;
 import cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.CatchUpRecord;
 import cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.CatchUpRequest;
@@ -23,8 +28,11 @@ import cn.com.sparkle.firefly.stablestorage.ReadRecordCallback;
 import cn.com.sparkle.firefly.stablestorage.ReadSuccessReadFilter;
 import cn.com.sparkle.firefly.stablestorage.SortedReadCallback;
 import cn.com.sparkle.firefly.stablestorage.model.StoreModel;
+import cn.com.sparkle.firefly.stablestorage.model.StoreModel.Id;
 import cn.com.sparkle.firefly.stablestorage.model.StoreModel.SuccessfulRecord;
+import cn.com.sparkle.firefly.stablestorage.model.StoreModel.Value;
 import cn.com.sparkle.firefly.stablestorage.model.SuccessfulRecordWrap;
+import cn.com.sparkle.firefly.util.LongUtil;
 
 public class CatchupRequestProcessor extends AbstractProtocolV0_0_1Processor{
 	private final static Logger logger = Logger.getLogger(CatchupRequestProcessor.class);
@@ -47,8 +55,27 @@ public class CatchupRequestProcessor extends AbstractProtocolV0_0_1Processor{
 	public void receive(final MessagePackage messagePackage, final PaxosSession session) throws InterruptedException {
 		if (messagePackage.hasCatchUpRequest()) {
 			CatchUpRequest request = messagePackage.getCatchUpRequest();
+			
 			try{
-				executor.execute(makeTask(request,session,messagePackage.getId()));
+				if(!request.hasIsArbitrator() || !request.getIsArbitrator()){
+					executor.execute(makeTask(request,session,messagePackage.getId()));
+				}else{
+					
+					CatchUpResponse.Builder b = CatchUpResponse.newBuilder();
+					if(aBook.getLastCanExecutableInstanceId() > request.getStartInstanceId()){
+						byte[] buff = new byte[8];
+						LongUtil.toByte(aBook.getLastCanExecutableInstanceId(), buff, 0);
+						Value.Builder value = Value.newBuilder().setValues(ByteString.copyFrom(buff)).setType(ValueType.PLACE.getValue());
+						SuccessfulRecord.Builder successRecord = SuccessfulRecord.newBuilder().setHighestVoteNum(Id.newBuilder().setAddress("").setIncreaseId(0)).setV(value);
+						CatchUpRecord.Builder record = CatchUpRecord.newBuilder().setInstanceId(request.getStartInstanceId()).setValue(successRecord);
+						b.addSuccessfulRecords(record);
+					}
+					MessagePackage.Builder responseBuilder = MessagePackage.newBuilder().setCatchUpResponse(b.build());
+					responseBuilder.setId(messagePackage.getId());
+					responseBuilder.setIsLast(true);
+					responseBuilder.setCatchUpResponse(b);
+					sendResponse(session, responseBuilder.build().toByteArray());
+				}
 			}catch(RejectedExecutionException e){
 				CatchUpResponse.Builder b = CatchUpResponse.newBuilder();
 				MessagePackage.Builder responseBuilder = MessagePackage.newBuilder().setCatchUpResponse(b.build());
@@ -76,9 +103,12 @@ public class CatchupRequestProcessor extends AbstractProtocolV0_0_1Processor{
 
 					ReadRecordCallback<SuccessfulRecord.Builder> callback = new ReadRecordCallback<StoreModel.SuccessfulRecord.Builder>() {
 						int packageSize = 0;
-
+						boolean isStop = false;
 						@Override
 						public void read(long instanceId, cn.com.sparkle.firefly.stablestorage.model.StoreModel.SuccessfulRecord.Builder successRecord) {
+							if(isStop){
+								return;
+							}
 							SuccessfulRecordWrap successfulRecordWrap = new SuccessfulRecordWrap(instanceId, successRecord.build(), null);
 							CatchUpRecord catchUpRecord = CatchUpRecord.newBuilder().setInstanceId(successfulRecordWrap.getInstanceId())
 									.setValue(successfulRecordWrap.getRecord()).build();
@@ -92,8 +122,13 @@ public class CatchupRequestProcessor extends AbstractProtocolV0_0_1Processor{
 								b.clear();
 								packageSize = 0;
 							}
-							packageSize += recordSize;
-							b.addSuccessfulRecords(catchUpRecord);
+							if(successRecord.getV().getType() == ValueType.PLACE.getValue()){
+								//for arbitrator
+								isStop = true;
+							}else{
+								packageSize += recordSize;
+								b.addSuccessfulRecords(catchUpRecord);
+							}
 						}
 					};
 

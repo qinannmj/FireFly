@@ -15,6 +15,7 @@ import org.apache.log4j.Logger;
 
 import cn.com.sparkle.firefly.Context;
 import cn.com.sparkle.firefly.checksum.ChecksumUtil.UnsupportedChecksumAlgorithm;
+import cn.com.sparkle.firefly.model.Value.ValueType;
 import cn.com.sparkle.firefly.stablestorage.ReadRecordCallback;
 import cn.com.sparkle.firefly.stablestorage.io.RecordFileOut;
 import cn.com.sparkle.firefly.stablestorage.io.RecordFileOutFactory;
@@ -25,6 +26,7 @@ import cn.com.sparkle.firefly.stablestorage.model.RecordType;
 import cn.com.sparkle.firefly.stablestorage.model.StoreModel.InstanceVoteRecord;
 import cn.com.sparkle.firefly.stablestorage.model.StoreModel.SuccessfulRecord;
 import cn.com.sparkle.firefly.util.IdComparator;
+import cn.com.sparkle.firefly.util.LongUtil;
 
 import com.google.protobuf.GeneratedMessage.Builder;
 
@@ -117,7 +119,7 @@ public class DataChunk {
 		}
 	}
 
-	public void writeSuccess(long instanceId, Record record) throws IOException, ChunkFullException {
+	public void writeSuccess(long instanceId,SuccessfulRecord.Builder successRecord, Record record) throws IOException, ChunkFullException {
 		
 		if (successfullInstanceId >= instanceId) {
 			//the success has written and give up write,
@@ -128,6 +130,12 @@ public class DataChunk {
 			if (maxVoteInstanceId >= instanceId || capacity >= (used + recordLen)) {
 				record.writeToStream(writeStream, null, false);
 				++successfullInstanceId;
+				if(successRecord.getV().getType() == ValueType.PLACE.getValue()){
+					long value = LongUtil.toLong(successRecord.getV().getValues().toByteArray(), 0);
+					if(value > successfullInstanceId){
+						successfullInstanceId = value;
+					}
+				}
 				used += recordLen;
 			} else {
 				throw new ChunkFullException();
@@ -135,6 +143,7 @@ public class DataChunk {
 		} else {
 			throw new RuntimeException(String.format("excepted successful instanceId %s , give instanceId %s", successfullInstanceId + 1, instanceId));
 		}
+		logger.debug("222 instanceId:" + instanceId + " isPlace " +  (successRecord.getV().getType() == ValueType.PLACE.getValue()) + " successfullInstanceId " + successfullInstanceId);
 	}
 
 	public void close() throws IOException, UnsupportedChecksumAlgorithm {
@@ -189,6 +198,12 @@ public class DataChunk {
 									readCallback.read(head.getInstanceId(), record);
 									if (head.getInstanceId() > successInstanceId) {
 										successInstanceId = head.getInstanceId();
+									}
+									if(record.getV().getType() == ValueType.PLACE.getValue()){
+										long value = LongUtil.toLong(record.getV().getValues().toByteArray(), 0);
+										if(value > successInstanceId){
+											successInstanceId = value;
+										}
 									}
 								} else {
 									InstanceVoteRecord.Builder voteRecord = InstanceVoteRecord.newBuilder().mergeFrom(body.getBody());

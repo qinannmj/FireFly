@@ -40,7 +40,6 @@ public class Configuration {
 	private String filePath;
 	private long responseDelay;
 	private int transportTcpNum;
-//	private int transportMaxInstanceRunningSize;
 	private int transportSingleTcpMaxWaitingMemSize;
 	private String netLayer;
 	private int diskMemLost;
@@ -60,14 +59,13 @@ public class Configuration {
 	private String fileOutFacotryClass;
 	private int maxInstanceMergePackageSize;
 	private int minInstanceMergePackageSize;
-	
-	
-	
+
 	private boolean isMergeClientRequest;
 	private String room;
-	
-	private HashMap<String,String> allConfig = new HashMap<String, String>();
-	
+	private boolean isArbitrator;
+
+	private HashMap<String, String> allConfig = new HashMap<String, String>();
+
 	public Configuration(String filePath, EventsManager eventsManager) throws ParserConfigurationException, SAXException, IOException {
 		this.eventsManager = eventsManager;
 		this.filePath = filePath;
@@ -78,16 +76,12 @@ public class Configuration {
 		File senator = new File(filePath + "/senators.prop");
 		senatorProp.load(new InputStreamReader(new FileInputStream(senator)));
 		long version = Long.parseLong(senatorProp.getProperty("version"));
-//		HashMap<String, HashSet<String>> roomDisributedMap = new HashMap<String, HashSet<String>>();
 		HashSet<ConfigNode> senators = new HashSet<ConfigNode>();
 		HashMap<String, ConfigNode> senatorsMap = new HashMap<String, ConfigNode>();
 		for (Entry<Object, Object> e : senatorProp.entrySet()) {
 			String key = (String) e.getKey();
 			String value = (String) e.getValue();
 			if (key.indexOf("senators") > -1) {
-//				HashSet<String> sameRoomNodes = new HashSet<String>();
-//				String room = key.split("_")[1];
-//				roomDisributedMap.put(room, sameRoomNodes);
 				for (String address : value.split(",")) {
 					if (address.trim().length() != 0) {
 						address = address.trim();
@@ -106,14 +100,12 @@ public class Configuration {
 		} else {
 			this.room = roomProp.getProperty("room").trim().toLowerCase();
 		}
-		
-		
+
 		this.configNodeSet = new ConfigNodeSet(senators, senatorsMap, version);
 
 		if (senators.size() == 0) {
 			throw new ConfigurationError("one senator at least are needed!");
 		}
-		//		nodes.addAll(followers);
 
 		Properties confProp = new Properties();
 		File conf = new File(filePath + "/config.prop");
@@ -127,9 +119,9 @@ public class Configuration {
 		}
 		// format file path
 		this.stableStorage = file.getCanonicalPath();
-		
-		for(Entry<Object, Object> e : confProp.entrySet()){
-			allConfig.put((String)e.getKey(), (String)e.getValue());
+
+		for (Entry<Object, Object> e : confProp.entrySet()) {
+			allConfig.put((String) e.getKey(), (String) e.getValue());
 		}
 	}
 
@@ -139,8 +131,7 @@ public class Configuration {
 		} else {
 			this.stableStorage = confProp.getProperty("stable-storage");
 		}
-		
-		
+
 		if (confProp.getProperty("ip") == null) {
 			throw new ConfigurationError("ip not be set, please check your configuration!");
 		} else {
@@ -156,7 +147,7 @@ public class Configuration {
 				throw new ConfigurationError("listen-port must be number, please check your configuration!");
 			}
 		}
-		
+
 		if (confProp.getProperty("listen-port-client") == null) {
 			throw new ConfigurationError("listen-port-client not be set, please check your configuration!");
 		} else {
@@ -176,7 +167,7 @@ public class Configuration {
 				throw new ConfigurationError("transport-tcp-num must be number, please check your configuration!");
 			}
 		}
-		
+
 		if (confProp.getProperty("transport-singletcp-max-waiting-mem-size") == null) {
 			throw new ConfigurationError("transport-singletcp-max-waiting-mem-size not be set, please check your configuration!");
 		} else {
@@ -186,16 +177,11 @@ public class Configuration {
 				throw new ConfigurationError("transport-singletcp-max-waiting-mem-size must be number, please check your configuration!");
 			}
 		}
-		
-//		if (confProp.getProperty("transport-max-wait-queue-size") == null) {
-//			throw new ConfigurationError("transport-max-wait-queue-size not be set, please check your configuration!");
-//		} else {
-//			try {
-//				this.transportMaxWaitQueueSize = Integer.parseInt(confProp.getProperty("transport-max-wait-queue-size").trim());
-//			} catch (NumberFormatException e) {
-//				throw new ConfigurationError("transport-max-wait-queue-size must be number, please check your configuration!");
-//			}
-//		}
+		if (confProp.getProperty("isArbitrator") == null) {
+			this.isArbitrator = false;
+		} else {
+			this.isArbitrator = Boolean.parseBoolean(confProp.getProperty("isArbitrator"));
+		}
 
 		if (confProp.getProperty("net-layer") == null) {
 			throw new ConfigurationError("net-layer not be set, please check your configuration!");
@@ -253,7 +239,7 @@ public class Configuration {
 			}
 
 		}
-		
+
 		if (confProp.getProperty("max-instance-merge-package-size") == null) {
 			throw new ConfigurationError("max-instance-merge-package-size not be set, please check your configuration!");
 		} else {
@@ -274,7 +260,7 @@ public class Configuration {
 			}
 
 		}
-		
+
 		if (confProp.getProperty("vote-value-split-size") == null) {
 			throw new ConfigurationError("vote-value-split-size not be set, please check your configuration!");
 		} else {
@@ -392,8 +378,7 @@ public class Configuration {
 				throw new ConfigurationError("transport-timeout must be number, please check your configuration!");
 			}
 		}
-		
-		
+
 		if (confProp.getProperty("is-merge-client-request") == null) {
 			throw new ConfigurationError("debug-log not be set, please check your configuration!");
 		} else {
@@ -408,8 +393,7 @@ public class Configuration {
 		} else {
 			this.fileOutFacotryClass = confProp.getProperty("fileOutFacotry-class").trim();
 		}
-		
-		
+
 		logger.info("system configuration");
 		logger.info("catch-up-delay:" + this.catchUpDelay);
 		logger.info("service-port:" + this.clientPort);
@@ -436,15 +420,14 @@ public class Configuration {
 		logger.info("heart-beat-interval:" + this.heartBeatInterval);
 		logger.info("election-priority:" + this.electionPriority);
 		logger.info("transport-timeout:" + this.transportTimeout);
-		logger.info("fileOutFacotry-class:" + this.fileOutFacotryClass );
+		logger.info("fileOutFacotry-class:" + this.fileOutFacotryClass);
 		logger.info("is-merge-client-request:" + this.isMergeClientRequest);
+		logger.info("isArbitrator:" + this.isArbitrator);
 	}
 
 	public int getMinInstanceMergePackageSize() {
 		return minInstanceMergePackageSize;
 	}
-
-	
 
 	public int getTransportSingleTcpMaxWaitingMemSize() {
 		return transportSingleTcpMaxWaitingMemSize;
@@ -459,32 +442,32 @@ public class Configuration {
 	}
 
 	public synchronized void addSenator(String address, long version) throws ConfigurationException {
-		if(isDebugLog()){
-			logger.debug(String.format("add %s ,version:%s targetVersion: %s",address,this.configNodeSet.getVersion(),version));
+		if (isDebugLog()) {
+			logger.debug(String.format("add %s ,version:%s targetVersion: %s", address, this.configNodeSet.getVersion(), version));
 		}
 		if (version <= this.configNodeSet.getVersion()) {
 			return;
 		}
 		ConfigNodeSet newSet = (ConfigNodeSet) configNodeSet.clone();
 
-//		HashSet<String> sameRoomNode = newSet.getRoomDistributedMap().get(roomName);
-//		if (sameRoomNode == null) {
-//			sameRoomNode = new HashSet<String>();
-//			newSet.getRoomDistributedMap().put(roomName, sameRoomNode);
-//		}
+		//		HashSet<String> sameRoomNode = newSet.getRoomDistributedMap().get(roomName);
+		//		if (sameRoomNode == null) {
+		//			sameRoomNode = new HashSet<String>();
+		//			newSet.getRoomDistributedMap().put(roomName, sameRoomNode);
+		//		}
 		ConfigNode senator = ConfigNode.parseNode(address);
 		newSet.getSenators().add(senator);
 		newSet.getSenatorsMap().put(senator.getAddress(), senator);
 		newSet.setVersion(version);
 		this.configNodeSet = newSet;
-		
+
 		saveSenator();
-		ConfigureEvent.doSenatorsChangeEvent(eventsManager, newSet.getSenators(),senator,Op.ADD, version);
+		ConfigureEvent.doSenatorsChangeEvent(eventsManager, newSet.getSenators(), senator, Op.ADD, version);
 	}
-	
+
 	public synchronized void removeSenator(String address, long version) throws ConfigurationException {
-		if(isDebugLog()){
-			logger.debug(String.format("remove %s ,version:%s targetVersion: %s",address,this.configNodeSet.getVersion(),version));
+		if (isDebugLog()) {
+			logger.debug(String.format("remove %s ,version:%s targetVersion: %s", address, this.configNodeSet.getVersion(), version));
 		}
 		if (version <= this.configNodeSet.getVersion()) {
 			return;
@@ -495,24 +478,24 @@ public class Configuration {
 		if (senator != null && newSet.getSenators().size() == 1) {
 			throw new ConfigurationException("The system must need one senator at least!");
 		} else if (senator != null) {
-//			senator.getSameRoomNode().remove(senator.getAddress());
-//			if (senator.getSameRoomNode().size() == 0) {
-//				newSet.getRoomDistributedMap().remove(senator.getRoom());
-//			}
+			//			senator.getSameRoomNode().remove(senator.getAddress());
+			//			if (senator.getSameRoomNode().size() == 0) {
+			//				newSet.getRoomDistributedMap().remove(senator.getRoom());
+			//			}
 			newSet.getSenatorsMap().remove(senator.getAddress());
 			newSet.getSenators().remove(senator);
-//			newSet.getRoomDistributedMap().remove(senator.getAddress());
+			//			newSet.getRoomDistributedMap().remove(senator.getAddress());
 			newSet.setVersion(version);
 			this.configNodeSet = newSet;
 			saveSenator();
-			ConfigureEvent.doSenatorsChangeEvent(eventsManager, newSet.getSenators(),oldsenator,Op.REMOVE, version);
+			ConfigureEvent.doSenatorsChangeEvent(eventsManager, newSet.getSenators(), oldsenator, Op.REMOVE, version);
 		}
 	}
-	
-	public String getIp(){
+
+	public String getIp() {
 		return ip;
 	}
-	
+
 	private void checkNewFile() {
 		File sf = new File(filePath + "/senators.prop");
 		File sfn = new File(filePath + "/senators.prop.new");
@@ -524,8 +507,7 @@ public class Configuration {
 			}
 		}
 		FileUtil.deleteFile(sfn);
-		
-		
+
 		sf = new File(filePath + "/room.prop");
 		sfn = new File(filePath + "/room.prop.new");
 		if (!sf.exists()) {
@@ -536,7 +518,7 @@ public class Configuration {
 			}
 		}
 		FileUtil.deleteFile(sfn);
-		
+
 	}
 
 	public boolean isElectSelfMaster() {
@@ -546,8 +528,7 @@ public class Configuration {
 	public int getCatchUpDelay() {
 		return catchUpDelay;
 	}
-	
-	
+
 	public int getVoteValueSplitSize() {
 		return voteValueSplitSize;
 	}
@@ -559,9 +540,9 @@ public class Configuration {
 	public long getTransportTimeout() {
 		return transportTimeout;
 	}
-	
-	public synchronized void changeRoom(String room){
-		
+
+	public synchronized void changeRoom(String room) {
+
 		Properties p = new Properties();
 		p.setProperty("room", room);
 		File f;
@@ -600,17 +581,17 @@ public class Configuration {
 			sb.append(senator.getAddress()).append(",");
 		}
 
-//		for (Entry<String, StringBuffer> e : map.entrySet()) {
-//			p.setProperty("senators_" + e.getKey(), e.getValue().toString());
-//		}
+		//		for (Entry<String, StringBuffer> e : map.entrySet()) {
+		//			p.setProperty("senators_" + e.getKey(), e.getValue().toString());
+		//		}
 		p.setProperty("senators", sb.toString());
-		
-			File f;
-			try {
-				f = FileUtil.getFile(filePath + "/senators.prop.new");
-			} catch (IOException e1) {
-				throw new ConfigurationError("senator configuration write file failed.");
-			}
+
+		File f;
+		try {
+			f = FileUtil.getFile(filePath + "/senators.prop.new");
+		} catch (IOException e1) {
+			throw new ConfigurationError("senator configuration write file failed.");
+		}
 		OutputStream os = null;
 		try {
 			os = new FileOutputStream(f);
@@ -650,7 +631,7 @@ public class Configuration {
 	public String getSelfAddress() {
 		return selfAddress;
 	}
-	
+
 	public void setStableStorage(String stableStorage) {
 		this.stableStorage = stableStorage;
 	}
@@ -714,15 +695,22 @@ public class Configuration {
 	public int getElectionPriority() {
 		return electionPriority;
 	}
-	
-	
-	
+
 	public String getFileOutFacotryClass() {
 		return fileOutFacotryClass;
 	}
 
-	public String getConfigValue(String key){
+	public String getConfigValue(String key) {
 		return allConfig.get(key);
 	}
-	
+
+	public boolean isArbitrator() {
+		return isArbitrator;
+	}
+	public void checkArbitrator(){
+		if(!isArbitrator){
+			throw new RuntimeException("this node is not arbitrator!");
+		}
+	}
+
 }

@@ -60,7 +60,7 @@ public interface Protocol {
 
 	public byte[] createElectionSuccessRequest(long packageId, ElectionId electionId);
 
-	public byte[] createCatchUpRequest(long packageId, long instanceId, int size);
+	public byte[] createCatchUpRequest(long packageId, long instanceId, int size,boolean isArbitratory);
 
 	public byte[] createAddResponse(long packageId, long instanceId, byte[] bytes, boolean isLast);
 
@@ -74,4 +74,5 @@ public interface Protocol {
 	public byte[] createValueTrunk(long packageId, byte[] value, int offset, int size);
 
 	public byte[] createActiveHeartMessage(NodeState nodeState, int lifecycle);
+
 }

@@ -54,6 +54,7 @@ public class HeartBeatCheckDeamon extends Thread implements NodeStateChangeEvent
 							NodeState nodeState = new NodeState(context.getConfiguration().getSelfAddress());
 							nodeState.setConnected(false);
 							nodeState.setRoom(context.getConfiguration().getRoom());
+							nodeState.setArbitrator(context.getConfiguration().isArbitrator());
 							nodeState.setInit(isAccountBookInit);
 							nodeState.setLastBeatHeatTime(TimeUtil.currentTimeMillis());
 							nodeState.setLastCanExecuteInstanceId(context.getAccountBook().getLastCanExecutableInstanceId());

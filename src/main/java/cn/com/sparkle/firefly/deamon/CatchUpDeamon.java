@@ -189,7 +189,7 @@ public class CatchUpDeamon implements Runnable {
 	private void catchUp(NetNode netNode, long startInstanceId, final int size) {
 		SystemNetNode node = (SystemNetNode) netNode;
 		CatchUpCallBack callback = new CatchUpCallBack(conf, aBook);
-		node.sendCatchUpRequest(startInstanceId, size, callback);
+		node.sendCatchUpRequest(startInstanceId, size,conf.isArbitrator(), callback);
 		if (conf.isDebugLog()) {
 			logger.debug(String.format("catch up [%s,%s] from %s", startInstanceId, startInstanceId + size, netNode.getAddress()));
 		}

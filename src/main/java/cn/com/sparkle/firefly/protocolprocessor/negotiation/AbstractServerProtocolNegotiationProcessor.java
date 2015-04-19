@@ -78,9 +78,11 @@ public abstract class AbstractServerProtocolNegotiationProcessor extends Abstrac
 
 			String acceptProtocolVersion = "";
 			String acceptChecksumType = "";
+			
+			String errorCode = isAcceptConnect(targetAddress, nodeAddress);
 
-			if (isAcceptConnect(targetAddress, nodeAddress)) {
-
+			if (errorCode == null) {
+				errorCode = "";
 				Set<String> compatibleProtocolVersion = this.protocolManager.getCompatibleProtocolVersion();
 				for (String pv : protocolVersion) {
 					if (compatibleProtocolVersion.contains(pv)) {
@@ -111,7 +113,7 @@ public abstract class AbstractServerProtocolNegotiationProcessor extends Abstrac
 			pw.println(acceptProtocolVersion);
 			pw.println(acceptChecksumType);
 			pw.println(conf.getHeartBeatInterval());
-			pw.println("");
+			pw.println(errorCode);
 			writeCustomParam(pw);
 			pw.flush();
 			try {
@@ -139,5 +141,5 @@ public abstract class AbstractServerProtocolNegotiationProcessor extends Abstrac
 	
 	protected abstract ProtocolProcessorChain getChain(String version);
 
-	protected abstract boolean isAcceptConnect(String targetAddress, String sourceAddress);
+	protected abstract String isAcceptConnect(String targetAddress, String sourceAddress);
 }

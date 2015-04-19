@@ -27,7 +27,7 @@ public class Value implements Iterable<Value.IterElement> {
 	}
 
 	public static enum ValueType {
-		ADMIN(0), COMM(1);
+		ADMIN(0), COMM(1), /*for indicates last successful instanceId*/PLACE(2);
 		private int value;
 
 		private ValueType(int value) {
@@ -44,6 +44,8 @@ public class Value implements Iterable<Value.IterElement> {
 				return ADMIN;
 			case 1:
 				return COMM;
+			case 2:
+				return PLACE;
 			default:
 				throw new RuntimeException("unsupported type:" + type);
 			}
@@ -70,8 +72,6 @@ public class Value implements Iterable<Value.IterElement> {
 		this.addPackage = addPackage;
 	}
 
-	
-
 	private void writeVariableLength(int length) {
 		while (true) {
 			if ((length & ~0x7FL) == 0) {
@@ -87,17 +87,18 @@ public class Value implements Iterable<Value.IterElement> {
 	public void add(byte[] b) {
 		add(b, 0, b.length);
 	}
-	
+
 	public void add(byte[] b, int offset, int length) {
 		writeVariableLength(b.length);
 		System.arraycopy(b, offset, valuebytes, valueoffset, length);
 		valueoffset += length;
 	}
-	
-	public void fill(byte[] b){
-		fill(b,0,b.length);
+
+	public void fill(byte[] b) {
+		fill(b, 0, b.length);
 	}
-	public void fill(byte[] b,int offset,int length){
+
+	public void fill(byte[] b, int offset, int length) {
 		System.arraycopy(b, offset, valuebytes, valueoffset, length);
 		valueoffset += length;
 	}
@@ -109,7 +110,7 @@ public class Value implements Iterable<Value.IterElement> {
 		private IterElement result = new IterElement();
 		private int length;
 
-		public ValueIterator(byte[] bytes,int length) {
+		public ValueIterator(byte[] bytes, int length) {
 			this.bytes = bytes;
 			this.length = length;
 			int nextSize = readVariableLength();
@@ -184,7 +185,7 @@ public class Value implements Iterable<Value.IterElement> {
 
 	@Override
 	public Iterator<IterElement> iterator() {
-		return new ValueIterator(valuebytes,valueoffset);
+		return new ValueIterator(valuebytes, valueoffset);
 	}
 
 	public static void main(String[] args) {

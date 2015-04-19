@@ -35,7 +35,7 @@ public class TestClient {
 
 		String type = args.length > 0 ?args[0] : "raptor";
 		int cycle = args.length > 1 ? Integer.parseInt(args[1]):1;
-		int threadSize = args.length > 2 ? Integer.parseInt(args[2]):10;
+		int threadSize = args.length > 2 ? Integer.parseInt(args[2]):1;
 		String[] address = {"127.0.0.1:10001", "127.0.0.1:11001","127.0.0.1:9001",  "127.0.0.1:12001","127.0.0.1:10001" };
 		
 		if(args.length > 3){
@@ -46,7 +46,7 @@ public class TestClient {
 		}
 		
 		final PaxosClient client = new PaxosClient(address, "target/classes/service_out_net.prop", type,
-				ChecksumUtil.NO_CHECKSUM, 2000, 2, 1,10 * 1024 * 1024,true);
+				ChecksumUtil.NO_CHECKSUM, 2000, 2, 1000,10 * 1024 * 1024,true);
 		
 		
 

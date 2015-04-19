@@ -73,11 +73,17 @@ public class ClassicPaxosServer implements AccountBookEventListener, ConfigureEv
 		PropertyConfigurator.configure(filePath + "/log4j.properties");
 
 		Configuration configuration = new Configuration(filePath, eManager);
+		
+		
+
 		client = NetFactory.makeClient(configuration.getNetLayer(), configuration.isDebugLog());
 
 		ClusterState clusterState = new ClusterState(eManager, configuration);
 		this.context = new Context(configuration, clusterState, eManager);
 		handler = new SystemServerHandler(getEventsManager(), configuration);
+		//init server
+		NetServer server = NetFactory.makeServer(configuration.getNetLayer(), configuration.isDebugLog());
+		server.init(configuration.getFilePath() + "/system_in_net.prop", configuration.getHeartBeatInterval(), handler,configuration.getIp(), configuration.getPort(), "systemserver");
 		//initiate instance executor
 		InstanceExecutor ie = new InstanceExecutor(context, userHandlerInterface, lastExceptInstanceId == null ? -1 : lastExceptInstanceId);
 		context.setInstanceExecutor(ie);
@@ -117,11 +123,9 @@ public class ClassicPaxosServer implements AccountBookEventListener, ConfigureEv
 		Thread catchUpDeamon = new Thread(new CatchUpDeamon(context));
 		catchUpDeamon.setName("catchUpDeamon");
 		catchUpDeamon.start();
-		
-		ConfigNode configNode = new ConfigNode(configuration.getIp(), String.valueOf(configuration.getPort()));
 		context.getcState().getSelfState().init(context);
-		tryBind(configNode, handler);
 		
+		server.listen();
 		accountBook.initLoad();
 	}
 
@@ -163,22 +167,14 @@ public class ClassicPaxosServer implements AccountBookEventListener, ConfigureEv
 		return phandler;
 	}
 
-	private void tryBind(ConfigNode configNode, SystemServerHandler handler) throws Throwable {
-		Configuration conf = context.getConfiguration();
-		NetServer server = NetFactory.makeServer(conf.getNetLayer(), conf.isDebugLog());
-		server.init(conf.getFilePath() + "/system_in_net.prop", conf.getHeartBeatInterval(), handler, "systemserver");
-
-		server.listen(configNode.getIp(), Integer.parseInt(configNode.getPort()));
-	}
-
 	private UserServerHandler tryBindUserServer(HandlerInterface userHandlerInterface) throws Throwable {
 		EventsManager eventsManager = context.getEventsManager();
 		Configuration conf = context.getConfiguration();
 		UserServerHandler handler = new UserServerHandler(eventsManager, conf, userHandlerInterface, context.getProtocolManager());
 		NetServer server = NetFactory.makeServer(conf.getNetLayer(), conf.isDebugLog());
-		server.init(conf.getFilePath() + "/service_in_net.prop", conf.getHeartBeatInterval(), handler, "userserver");
+		server.init(conf.getFilePath() + "/service_in_net.prop", conf.getHeartBeatInterval(), handler,conf.getIp(), conf.getClientPort(), "userserver");
 
-		server.listen(conf.getIp(), conf.getClientPort());
+		server.listen();
 		return handler;
 	}
 

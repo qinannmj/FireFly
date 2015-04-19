@@ -26,7 +26,11 @@ public class SystemClientNegotiationProcessor extends AbstractClientNegotiationP
 
 	@Override
 	public NetNode createNetNode(String appVersion, String address,List<String> customParam, PaxosSession session, Protocol protocol, int heartBeatInterval) {
-		SystemNetNode netNode = new SystemNetNode(conf, session, address,Integer.parseInt(customParam.get(0)), protocol, appVersion, heartBeatInterval);
+		boolean isArbitrator = false;
+		if(customParam.size() > 1){
+			isArbitrator = Boolean.parseBoolean(customParam.get(1));
+		}
+		SystemNetNode netNode = new SystemNetNode(conf, session, address,Integer.parseInt(customParam.get(0)), protocol, appVersion, heartBeatInterval,isArbitrator);
 		netNode.sendFirstHeartBeat(eventsManager);
 		return netNode;
 	}
@@ -34,7 +38,13 @@ public class SystemClientNegotiationProcessor extends AbstractClientNegotiationP
 	@Override
 	protected List<String> readCustomParam(BufferedReader br) throws IOException {
 		ArrayList<String> list = new ArrayList<String>();
-		list.add(br.readLine());//read user port
+		String line = null;
+		//read user port
+		//read isArbitrator
+		while((line = br.readLine()) != null){
+			list.add(line);
+		}
+		
 		return list;
 	}
 

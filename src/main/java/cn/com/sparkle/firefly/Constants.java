@@ -11,4 +11,9 @@ public class Constants {
 	public final static long ELECTION_VOTE_ID_TOLERATION = 200; // for master can catch up fast
 	public final static int MAX_MASTER_DISTANCE = Integer.MAX_VALUE;
 	public final static int MAX_ACTIVE_HEART_BEAT_LIFE_CYCLE = 10;
+	
+	//error code
+	public final static String ERROR_NEGOTIATE_ARBITRATOR = "0001";
+	public final static String ERROR_NEGOTIATE_UNCOMPATIBLE = "0002";
+	public final static String ERROR_NEGOTIATE_UNACCEPT_IP = "0003";
 }

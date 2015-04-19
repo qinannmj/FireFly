@@ -53,8 +53,8 @@ public class TestV0_0_1NettyServer {
 			@Override
 			public void onConnect(PaxosSession session, Object connectAttachment) {
 			}
-		},"server");
-		server.listen("127.0.0.1", 1234);
+		},"127.0.0.1", 1234,"server");
+		server.listen();
 	}
 
 }

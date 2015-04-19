@@ -7,11 +7,13 @@ import java.util.List;
 import org.apache.log4j.Logger;
 
 import cn.com.sparkle.firefly.Context;
+import cn.com.sparkle.firefly.NodesCollection;
 import cn.com.sparkle.firefly.checksum.ChecksumUtil.UnsupportedChecksumAlgorithm;
 import cn.com.sparkle.firefly.config.Configuration;
 import cn.com.sparkle.firefly.model.Id;
 import cn.com.sparkle.firefly.model.SuccessTransportConfig;
 import cn.com.sparkle.firefly.model.Value;
+import cn.com.sparkle.firefly.model.Value.ValueType;
 import cn.com.sparkle.firefly.net.client.system.SystemNetNode;
 import cn.com.sparkle.firefly.net.netlayer.PaxosSession;
 import cn.com.sparkle.firefly.protocolprocessor.v0_0_1.AbstractProtocolV0_0_1Processor;
@@ -43,7 +45,9 @@ public class InstanceSuccessRequestProcessor extends AbstractProtocolV0_0_1Proce
 	public void receive(MessagePackage messagePackage, PaxosSession session) throws InterruptedException {
 		if (messagePackage.hasInstanceSuccessMessage()) {
 			InstanceSuccessMessage message = messagePackage.getInstanceSuccessMessage();
-
+			if(this.conf.isDebugLog()){
+				logger.debug("instanceid " +  message.getId() + " " + message.getHighestVoteNum() + " value " + message.hasValue() + " isArbitratorV " + (message.hasValue() ? message.getValue().getType() == ValueType.PLACE.getValue() : false) );
+			}
 			try {
 
 				SuccessfulRecord.Builder record = SuccessfulRecord.newBuilder().setHighestVoteNum(message.getHighestVoteNum());
@@ -109,7 +113,8 @@ public class InstanceSuccessRequestProcessor extends AbstractProtocolV0_0_1Proce
 	}
 
 	private void trySendSuccess(String address, long instanceId, Id id, Value value, List<String> notifyList, List<InstanceSuccessTransport> notifyChain) {
-		SystemNetNode node = (SystemNetNode) context.getcState().getSenators().getValidActiveNodes().get(address);
+		NodesCollection senators = context.getcState().getSenators();
+		SystemNetNode node = (SystemNetNode) senators.getValidActiveNodes().get(address);
 		List<SuccessTransportConfig> transportConfigList = null;
 		if (notifyChain != null && notifyChain.size() != 0) { //transform InstanceSuccessTransport to SuccessTransportConfig
 			transportConfigList = new LinkedList<SuccessTransportConfig>();

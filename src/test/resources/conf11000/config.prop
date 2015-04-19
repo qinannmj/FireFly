@@ -1,4 +1,5 @@
 stable-storage=d:/jbpaxos
+isArbitrator=true
 fileOutFacotry-class=cn.com.sparkle.firefly.stablestorage.io.rwsbuffered.RwsBufferedRecordFileOutFactory
 #fileOutFacotry-class=cn.com.sparkle.firefly.stablestorage.io.rwbuffered.RwBufferedRecordFileOutFactory
 rwsbuffered-file-io-buffsize=5242880
@@ -17,7 +18,7 @@ net-layer=raptor
 #net-layer=netty
 disk-mem-lost=0
 catchup-delay=5000
-debug-log=false
+debug-log=true
 elect-self-master=true
 vote-value-split-size=65535
 min-instance-merge-package-size=5242880

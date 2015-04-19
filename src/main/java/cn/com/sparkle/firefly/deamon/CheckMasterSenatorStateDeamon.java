@@ -104,7 +104,7 @@ public class CheckMasterSenatorStateDeamon implements Runnable, CatchUpEventList
 						isActiveElection = false;
 						logger.info("active elect self be the master");
 					}
-					if (conf.isElectSelfMaster()) {
+					if (conf.isElectSelfMaster() && !conf.isArbitrator()) {
 						startSelection(validActiveSenator, quorum);
 					} else {
 						if (conf.isDebugLog()) {

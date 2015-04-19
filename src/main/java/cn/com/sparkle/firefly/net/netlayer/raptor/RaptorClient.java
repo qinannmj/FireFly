@@ -28,7 +28,6 @@ public class RaptorClient implements NetClient {
 
 	@Override
 	public void init(String path, int heartBeatInterval, NetHandler netHandler,String name) throws IOException {
-
 		Conf conf = new Conf(path);
 		String threadName = name + INSTANCE_NUM.incrementAndGet();
 

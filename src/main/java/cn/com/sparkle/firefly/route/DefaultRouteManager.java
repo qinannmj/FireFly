@@ -173,7 +173,10 @@ public class DefaultRouteManager implements RouteManage, MasterDistanceChangeLis
 		String lnode = dfsCalcList.temp.size() == 0 ? null : dfsCalcList.temp.getLast();
 		dfsCalcList.temp.addLast(v.getAddress());//push to temp
 		try {
-			if (lnode == null || clusterState.getSenators().isSameRoom(v.getAddress(), lnode)) {
+			NodesCollection senators = clusterState.getSenators();
+			if(senators.isArbitrator(v.getAddress())){
+				dfsCalcList.tempWeight -= 1000;
+			}else if (lnode == null || senators.isSameRoom(v.getAddress(), lnode)) {
 				dfsCalcList.tempWeight += 1;
 			} else {
 				dfsCalcList.tempWeight -= 1;

@@ -46,7 +46,7 @@ message ActiveHeartBeatRequest{
 	required string address=1;
 	required SenatorHeartBeatResponse heartBeatResponse=2;
 	required int32 lifecycle=3;//for avoid boardcast storm
-	
+	optional bool isArbitrator=4;
 }
 message SenatorHeartBeatResponse{
 	required int64 lastCanExecuteInstanceId=1;
@@ -76,6 +76,7 @@ message GetNewsSenatorsResponse{
 message CatchUpRequest{
 	required int64 startInstanceId=1;
 	required int32 size=2;
+	optional bool isArbitrator=3;
 }
 message CatchUpResponse{
 	repeated CatchUpRecord successfulRecords=1;

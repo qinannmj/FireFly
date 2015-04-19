@@ -28,9 +28,14 @@ public class ActiveHeartProcessor extends AbstractProtocolV0_0_1Processor {
 			ActiveHeartBeatRequest request = t.getActiveHeartBeatRequest();
 			String address = session.get(PaxosSessionKeys.ADDRESS_KEY);
 			SenatorHeartBeatResponse heart = request.getHeartBeatResponse();
+			boolean isArbitrator = false;
+			if(request.hasIsArbitrator()){
+				isArbitrator = request.getIsArbitrator();
+			}
 
 			NodeState nodeState = new NodeState(request.getAddress());
 			nodeState.setRoom(heart.getRoom());
+			nodeState.setArbitrator(isArbitrator);
 			nodeState.setLastBeatHeatTime(TimeUtil.currentTimeMillis());
 			nodeState.setMasterConnected(heart.getIsMasterConnected());
 			nodeState.setLastElectionId(new ElectionId(heart.getElectionAddress(), heart.getElectionId(), heart.getElectionVersion()));

@@ -22,7 +22,9 @@ public class HeartBeatCallBack {
 
 	public void call(NetNode nnode,String room, boolean isMasterConnected, long electionIncreaseId, String electionAddress, long electionVersion,
 			long lastExecutableInstanceId, boolean isInited, boolean isUptoDate, int masterDistance, List<String> connectedValidNodes) {
+		SystemNetNode node = (SystemNetNode)nnode;
 		NodeState nodeState = new NodeState(nnode.getAddress());
+		nodeState.setArbitrator(node.isArbitrator());
 		nodeState.setRoom(room);
 		nodeState.setLastBeatHeatTime(System.currentTimeMillis());
 		nodeState.setMasterConnected(isMasterConnected);

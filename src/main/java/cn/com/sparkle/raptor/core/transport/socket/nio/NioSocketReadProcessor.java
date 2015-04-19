@@ -206,10 +206,11 @@ public class NioSocketReadProcessor extends AbstractNioProcessor implements NioR
 			if (now - entity.getElement().getLastActiveTime() < nscfg.getClearTimeoutSessionInterval()) {
 				break;
 			}
-			entity.getElement().closeSession();
+			
 			if (logger.isDebugEnabled()) {
-				logger.debug("close timeout connection!" + (now - entity.getElement().getLastActiveTime()));
+				logger.debug("close timeout connection!" + (now - entity.getElement().getLastActiveTime()) + entity.getElement().getChannel());
 			}
+			entity.getElement().closeSession();
 			activeSessionLinedLinkedList.remove(entity);
 		}
 	}

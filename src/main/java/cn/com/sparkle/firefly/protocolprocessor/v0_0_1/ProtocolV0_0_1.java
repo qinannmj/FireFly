@@ -70,8 +70,8 @@ import com.google.protobuf.ByteString;
 public class ProtocolV0_0_1 extends AbstraceProtocol {
 
 	public static ProtocolV0_0_1 createServerProtocol(Context context, HandlerInterface userHandlerInterface, HandlerInterface adminHandlerInterface) {
-		AddRequestProcessor addRequestProcessor=	new AddRequestProcessor(context, userHandlerInterface, adminHandlerInterface);
-		
+		AddRequestProcessor addRequestProcessor = new AddRequestProcessor(context, userHandlerInterface, adminHandlerInterface);
+
 		//initiate server in protocol
 		ProtocolProcessorChain serverInprotocolChain = new DefaultProtocolProcessorChain();
 		serverInprotocolChain.addFirst(addRequestProcessor);
@@ -87,7 +87,6 @@ public class ProtocolV0_0_1 extends AbstraceProtocol {
 		serverInprotocolChain.addFirst(new InstanceVoteRequestProcessor(context));
 		serverInprotocolChain.addFirst(new InstanceVoteValueTransportProcessor(context));
 		serverInprotocolChain.addFirst(new ProtocolTransformProcessor());
-		
 
 		//initiate user in protocol
 
@@ -175,7 +174,7 @@ public class ProtocolV0_0_1 extends AbstraceProtocol {
 	}
 
 	@Override
-	public byte[] createInstanceVoteRequest(long packageId, long instanceId, Id id,int valueType,int valueLength, List<String> chain) {
+	public byte[] createInstanceVoteRequest(long packageId, long instanceId, Id id, int valueType, int valueLength, List<String> chain) {
 
 		StoreModel.Id.Builder idBuilder = IdTranslator.toStoreModelId(id);
 
@@ -203,16 +202,16 @@ public class ProtocolV0_0_1 extends AbstraceProtocol {
 	}
 
 	@Override
-	public byte[] createInstanceSuccessRequest(long packageId, long instanceId, Id id,Value value, List<String> notifyList,
+	public byte[] createInstanceSuccessRequest(long packageId, long instanceId, Id id, Value value, List<String> notifyList,
 			List<SuccessTransportConfig> notifyChain) {
 		InstanceSuccessMessage.Builder builder = InstanceSuccessMessage.newBuilder();
 		builder.setId(instanceId);
 		StoreModel.Id.Builder sid = IdTranslator.toStoreModelId(id);
 		builder.setHighestVoteNum(sid);
-		if(value != null){
+		if (value != null) {
 			builder.setValue(ValueTranslator.toStoreModelValue(value));
 		}
-		
+
 		if (notifyList != null && notifyList.size() != 0) {
 			builder.addAllNotifyAddress(notifyList);
 		}
@@ -258,10 +257,11 @@ public class ProtocolV0_0_1 extends AbstraceProtocol {
 	}
 
 	@Override
-	public byte[] createCatchUpRequest(long packageId, long instanceId, int size) {
+	public byte[] createCatchUpRequest(long packageId, long instanceId, int size,boolean isArbitratory) {
 		CatchUpRequest.Builder builder = CatchUpRequest.newBuilder();
 		builder.setStartInstanceId(instanceId);
 		builder.setSize(size);
+		builder.setIsArbitrator(isArbitratory);
 		return makeMessagePackage(packageId).setCatchUpRequest(builder).build().toByteArray();
 	}
 
@@ -271,10 +271,10 @@ public class ProtocolV0_0_1 extends AbstraceProtocol {
 	}
 
 	@Override
-	public byte[] createAddResponse(long packageId,long instanceId, byte[] bytes, boolean isLast) {
+	public byte[] createAddResponse(long packageId, long instanceId, byte[] bytes, boolean isLast) {
 		AddResponse.Builder builder = AddResponse.newBuilder();
 		builder.setResult(ByteString.copyFrom(bytes));
-		if(instanceId != -1){
+		if (instanceId != -1) {
 			builder.setInstanceId(instanceId);
 		}
 		return makeMessagePackage(packageId, isLast).setAddResponse(builder).build().toByteArray();
@@ -297,7 +297,7 @@ public class ProtocolV0_0_1 extends AbstraceProtocol {
 	}
 
 	@Override
-	public byte[] createAddRequest(long packageId, CommandType commandType, byte[] value,long instaceId) {
+	public byte[] createAddRequest(long packageId, CommandType commandType, byte[] value, long instaceId) {
 		AddRequest.Builder builder = AddRequest.newBuilder();
 		builder.setValue(ByteString.copyFrom(value));
 		builder.setCommandType(commandType.getValue());
@@ -310,9 +310,8 @@ public class ProtocolV0_0_1 extends AbstraceProtocol {
 		return new AddRequestCallBackV0_0_1(callback);
 	}
 
-
 	@Override
-	public byte[] createActiveHeartMessage(NodeState nodeState,int lifecycle) {
+	public byte[] createActiveHeartMessage(NodeState nodeState, int lifecycle) {
 		SenatorHeartBeatResponse.Builder heart = SenatorHeartBeatResponse.newBuilder();
 		heart.addAllConnectedValidNodes(nodeState.getConnectedValidNode());
 		heart.setElectionAddress(nodeState.getLastElectionId().getAddress());
@@ -325,7 +324,8 @@ public class ProtocolV0_0_1 extends AbstraceProtocol {
 		heart.setMasterDistance(nodeState.getMasterDistance());
 		heart.setRoom(nodeState.getRoom());
 
-		ActiveHeartBeatRequest.Builder request = ActiveHeartBeatRequest.newBuilder().setAddress(nodeState.getAddress()).setHeartBeatResponse(heart).setLifecycle(lifecycle);
+		ActiveHeartBeatRequest.Builder request = ActiveHeartBeatRequest.newBuilder().setAddress(nodeState.getAddress())
+				.setIsArbitrator(nodeState.isArbitrator()).setHeartBeatResponse(heart).setLifecycle(lifecycle);
 
 		return makeMessagePackage(-1).setActiveHeartBeatRequest(request).build().toByteArray();
 	}
@@ -336,7 +336,7 @@ public class ProtocolV0_0_1 extends AbstraceProtocol {
 	}
 
 	@Override
-	public byte[] createValueTrunk(long packageId, byte[] value,int valueOffset,int size) {
+	public byte[] createValueTrunk(long packageId, byte[] value, int valueOffset, int size) {
 		ValueTrunk.Builder vt = ValueTrunk.newBuilder();
 		vt.setPart(ByteString.copyFrom(value, valueOffset, size));
 		return makeMessagePackage(packageId, size == 0).setValueTrunk(vt).build().toByteArray();

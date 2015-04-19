@@ -18,10 +18,13 @@ import cn.com.sparkle.firefly.net.netlayer.NetServer;
 
 public class NettyServer implements NetServer {
 	private ServerBootstrap bootstrap = new ServerBootstrap();
-
+	private String ip = null;
+	private int port;
 	@Override
-	public void init(String confPath, final int heartBeatInterval, final NetHandler handler, String threadName) throws FileNotFoundException, IOException {
+	public void init(String confPath, final int heartBeatInterval, final NetHandler handler,String ip,int port, String threadName) throws FileNotFoundException, IOException {
 		final Conf conf = new Conf(confPath);
+		this.ip = ip;
+		this.port = port;
 		NioEventLoopGroup group = new NioEventLoopGroup(conf.getIothreadnum());
 		bootstrap.group(group).channel(NioServerSocketChannel.class).option(ChannelOption.TCP_NODELAY, true).option(ChannelOption.SO_REUSEADDR, true)
 				.option(ChannelOption.SO_SNDBUF, conf.getSendBuf()).option(ChannelOption.SO_RCVBUF, conf.getRecvBuf())
@@ -41,7 +44,10 @@ public class NettyServer implements NetServer {
 	}
 
 	@Override
-	public void listen(String ip, int port) throws Throwable {
+	public void listen() throws Throwable {
+		if(ip == null) {
+			throw new RuntimeException("Not initialize the server!Please run init method!");
+		}
 		ChannelFuture f = bootstrap.bind(InetAddress.getByName(ip), port);
 		f.await();
 		if (!f.isSuccess()) {

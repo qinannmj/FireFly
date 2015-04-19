@@ -51,5 +51,13 @@ public class NodesCollection {
 			return state1.getRoom().equals(state2.getRoom());
 		}
 	}
-
+	
+	public boolean isArbitrator(String ads){
+		NodeState state1 = nodeStates.get(ads);
+		if(state1 == null){
+			return true;
+		}else{
+			return state1.isArbitrator();
+		}
+	}
 }

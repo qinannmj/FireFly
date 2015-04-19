@@ -27,7 +27,7 @@ public class JvmPipeClient implements NetClient {
 
 	@Override
 	public Future<Boolean> connect(String ip, int port, Object connectAttachment) throws Throwable {
-		String address = ip + port;
+		String address = ip + ":" + port;
 		NetHandler serverHandler = JvmPipeServer.addressMap.get(address);
 		if (serverHandler != null) {
 			SystemFuture<Boolean> future = new SystemFuture<Boolean>();

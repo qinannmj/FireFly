@@ -4,6 +4,7 @@ import java.io.PrintWriter;
 
 import org.apache.log4j.Logger;
 
+import cn.com.sparkle.firefly.Constants;
 import cn.com.sparkle.firefly.config.Configuration;
 import cn.com.sparkle.firefly.protocolprocessor.Protocol;
 import cn.com.sparkle.firefly.protocolprocessor.ProtocolManager;
@@ -29,18 +30,19 @@ public class SystemServerProtocolNegotiationProcessor extends AbstractServerProt
 	}
 
 	@Override
-	public boolean isAcceptConnect(String targetAddress,String sourceAddress) {
+	public String isAcceptConnect(String targetAddress,String sourceAddress) {
 		logger.info(String.format("negotiation from %s to %s",sourceAddress, targetAddress ));
 		if(conf.getSelfAddress().equals(targetAddress)){
-			return true;
+			return null;
 		}else{
 			logger.info(String.format("Close system connection[from %s]!Cause: the targetAddress is not match the ip of this node!", sourceAddress));
-			return false;
+			return Constants.ERROR_NEGOTIATE_UNACCEPT_IP;
 		}
 	}
 
 	@Override
 	protected void writeCustomParam(PrintWriter pw) {
 		pw.println(conf.getClientPort());
+		pw.println(conf.isArbitrator());
 	}
 }

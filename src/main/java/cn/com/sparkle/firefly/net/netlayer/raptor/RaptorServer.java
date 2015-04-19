@@ -19,9 +19,13 @@ public class RaptorServer implements NetServer {
 	private final static AtomicInteger INSTANCE_NUM = new AtomicInteger(0);
 	private NioSocketServer server;
 	private IoHandler handler;
+	private String ip = null;
+	private int port;
 
 	@Override
-	public void init(String confPath, int heartBeatInterval, NetHandler netHandler, String threadName) throws IOException {
+	public void init(String confPath, int heartBeatInterval, NetHandler netHandler,String ip,int port, String threadName) throws IOException {
+		this.ip = ip;
+		this.port = port;
 		Conf conf = new Conf(confPath);
 		NioSocketConfigure nsc = new NioSocketConfigure();
 		nsc.setProcessorNum(conf.getIothreadnum());
@@ -44,7 +48,10 @@ public class RaptorServer implements NetServer {
 	}
 
 	@Override
-	public void listen(String ip, int port) throws UnknownHostException, IOException {
+	public void listen() throws UnknownHostException, IOException {
+		if(ip == null) {
+			throw new RuntimeException("Not initialize the server!Please run init method!");
+		}
 		server.waitToBind(new InetSocketAddress(InetAddress.getByName(ip), port), handler);
 	}
 
