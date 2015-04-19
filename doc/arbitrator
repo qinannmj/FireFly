@@ -1,0 +1,5 @@
+arbitrator 主要目的用于减少副本磁盘占用，减少机器使用数量，可以多个paxos集群共享arbitrator的机器。每个paxos集群需要一个arbitrator进程。
+
+arbitrator尽量减少日志记录数量，仅在认为paxos集群挂掉 qurom-1的时候，开始记录投票信息，并记录成功信息。
+一个paxos集群仅可部署qurom-1的arbitrator,再多会影响可用性及容错。在极端情况下，集群正常节点需恢复到等同于arbitrator节点数量，才可正常服务。
+例如3节点paxos集群其中1个arbitrator，必须恢复一个正常节点，才可进行服务，5节点paxos集群其中2个arbitrator，需恢复2个正常节点.

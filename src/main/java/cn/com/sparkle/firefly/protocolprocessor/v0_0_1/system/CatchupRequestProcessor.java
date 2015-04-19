@@ -14,10 +14,9 @@ import com.google.protobuf.ByteString;
 import cn.com.sparkle.firefly.Context;
 import cn.com.sparkle.firefly.checksum.ChecksumUtil.UnsupportedChecksumAlgorithm;
 import cn.com.sparkle.firefly.config.Configuration;
+import cn.com.sparkle.firefly.event.listeners.MasterChangePosEventListener;
 import cn.com.sparkle.firefly.model.Value.ValueType;
-import cn.com.sparkle.firefly.net.client.system.SystemNetNode;
 import cn.com.sparkle.firefly.net.netlayer.PaxosSession;
-import cn.com.sparkle.firefly.net.netlayer.PaxosSessionKeys;
 import cn.com.sparkle.firefly.protocolprocessor.v0_0_1.AbstractProtocolV0_0_1Processor;
 import cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.CatchUpRecord;
 import cn.com.sparkle.firefly.protocolprocessor.v0_0_1.PaxosMessages.CatchUpRequest;
@@ -34,7 +33,7 @@ import cn.com.sparkle.firefly.stablestorage.model.StoreModel.Value;
 import cn.com.sparkle.firefly.stablestorage.model.SuccessfulRecordWrap;
 import cn.com.sparkle.firefly.util.LongUtil;
 
-public class CatchupRequestProcessor extends AbstractProtocolV0_0_1Processor{
+public class CatchupRequestProcessor extends AbstractProtocolV0_0_1Processor implements MasterChangePosEventListener{
 	private final static Logger logger = Logger.getLogger(CatchupRequestProcessor.class);
 
 	private final static int MAX_CATCH_SIZE = 1024 * 128;
@@ -43,12 +42,15 @@ public class CatchupRequestProcessor extends AbstractProtocolV0_0_1Processor{
 
 	private AccountBook aBook;
 	
+	private volatile boolean isMaster = false;
+	
 	private static Executor executor = new ThreadPoolExecutor(3,3,5,TimeUnit.SECONDS,new ArrayBlockingQueue<Runnable>(100));
 
 	public CatchupRequestProcessor(Context context) {
 		super();
 		this.conf = context.getConfiguration();
 		this.aBook = context.getAccountBook();
+		context.getEventsManager().registerListener(this);
 	}
 
 	@Override
@@ -57,7 +59,7 @@ public class CatchupRequestProcessor extends AbstractProtocolV0_0_1Processor{
 			CatchUpRequest request = messagePackage.getCatchUpRequest();
 			
 			try{
-				if(!request.hasIsArbitrator() || !request.getIsArbitrator()){
+				if(isMaster || !request.hasIsArbitrator() || !request.getIsArbitrator()){
 					executor.execute(makeTask(request,session,messagePackage.getId()));
 				}else{
 					
@@ -145,6 +147,22 @@ public class CatchupRequestProcessor extends AbstractProtocolV0_0_1Processor{
 				sendResponse(session, responseBuilder.build().toByteArray());
 			}
 		};
+		
+	}
+
+	@Override
+	public void getMasterPos() {
+		isMaster = true;
+	}
+
+	@Override
+	public void lostPos() {
+		isMaster = false;
+	}
+
+	@Override
+	public void masterChange(String address) {
+		// TODO Auto-generated method stub
 		
 	}
 }

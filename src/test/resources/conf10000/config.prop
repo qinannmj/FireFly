@@ -9,7 +9,7 @@ async-file-allocator-fileblock-num=8
 
 ip=127.0.0.1
 listen-port=10000
-listen-port-client=10001
+listen-port-client=10004
 max-response-delay=100
 transport-tcp-num=2
 transport-singletcp-max-waiting-mem-size=5242880
@@ -17,7 +17,7 @@ transport-singletcp-max-waiting-mem-size=5242880
 net-layer=raptor
 disk-mem-lost=0
 catchup-delay=5000
-debug-log=false
+debug-log=true
 elect-self-master=true
 vote-value-split-size=65535
 min-instance-merge-package-size=5242880

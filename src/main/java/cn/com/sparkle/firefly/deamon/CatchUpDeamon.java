@@ -10,6 +10,7 @@ import cn.com.sparkle.firefly.NodesCollection;
 import cn.com.sparkle.firefly.config.Configuration;
 import cn.com.sparkle.firefly.event.EventsManager;
 import cn.com.sparkle.firefly.event.events.CatchUpEvent;
+import cn.com.sparkle.firefly.event.listeners.MasterChangePosEventListener;
 import cn.com.sparkle.firefly.net.client.NetNode;
 import cn.com.sparkle.firefly.net.client.system.SystemNetNode;
 import cn.com.sparkle.firefly.net.client.system.callback.CatchUpCallBack;
@@ -19,7 +20,7 @@ import cn.com.sparkle.firefly.state.NodeState;
 import cn.com.sparkle.firefly.util.QuorumCalcUtil;
 import cn.com.sparkle.raptor.core.util.TimeUtil;
 
-public class CatchUpDeamon implements Runnable {
+public class CatchUpDeamon implements Runnable,MasterChangePosEventListener {
 	private final Logger logger = Logger.getLogger(CatchUpDeamon.class);
 
 	private ClusterState cState;
@@ -27,15 +28,20 @@ public class CatchUpDeamon implements Runnable {
 	private AccountBook aBook;
 	private EventsManager eventsManager;
 	private String selfAddress;
-
+	private volatile String masterAddress = "";
+	
 	public CatchUpDeamon(Context context) {
 		this.eventsManager = context.getEventsManager();
 		this.cState = context.getcState();
 		this.conf = context.getConfiguration();
 		this.selfAddress = conf.getSelfAddress();
 		this.aBook = context.getAccountBook();
+		eventsManager.registerListener(this);
 	}
-
+	@Override
+	public void masterChange(String address) {
+		masterAddress = address;
+	}
 	@Override
 	public void run() {
 		int curCatchUpState = CatchUpEvent.FAIL_CATCH_UP;
@@ -74,12 +80,21 @@ public class CatchUpDeamon implements Runnable {
 
 				while (maxInstanceId > selfInstanceId) {
 					tempselfInstanceId = selfInstanceId;
-					for (int j = 0; j < 2; ++j) {
-						//for j == 0 , give prior to study from nodes of same room with self
+					for (int j = 0; j < 3; ++j) {
+						
 						for (NetNode nnode : allActiveSenator.values()) {
-							if (nnode.getAddress().equals(selfAddress) || (j == 0 && !senators.isSameRoom(selfAddress, nnode.getAddress()))) {
+							if(nnode.getAddress().equals(selfAddress)){
 								continue;
 							}
+							//for j == 0 , give prior to study from nodes not master of same room with self
+							if (j == 0 && (!senators.isSameRoom(selfAddress, nnode.getAddress()) || nnode.getAddress().equals(masterAddress))) {
+								continue;
+							}
+							//for j == 1 , give prior to study from nodes of same room with self
+							if(j==1 && !senators.isSameRoom(selfAddress, nnode.getAddress())){
+								continue;
+							}
+							
 							NodeState nodeState = senators.getNodeStates().get(nnode.getAddress());
 							long nnodeInstanceId = nodeState.getLastCanExecuteInstanceId();
 							nnodeInstanceId = maxInstanceId > nnodeInstanceId ? nnodeInstanceId : maxInstanceId;
@@ -198,6 +213,14 @@ public class CatchUpDeamon implements Runnable {
 		} catch (InterruptedException e) {
 			logger.error("unexcepted error", e);
 		}
+	}
+
+	@Override
+	public void getMasterPos() {
+	}
+
+	@Override
+	public void lostPos() {
 	}
 
 }
