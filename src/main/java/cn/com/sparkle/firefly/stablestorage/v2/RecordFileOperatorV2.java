@@ -176,9 +176,6 @@ public class RecordFileOperatorV2 implements RecordFileOperator {
 			LinkedList<AddRequestPackage> addRequestPackages, Callable<Object> realEvent) throws IOException, UnsupportedChecksumAlgorithm {
 		try {
 			writeLock.lock();
-			if (realEvent != null) {
-				throw new RuntimeException("unsupported callback!");
-			}
 
 			while (true) { //for detect chunk full
 				DataChunk dataChunk = null;
@@ -228,7 +225,7 @@ public class RecordFileOperatorV2 implements RecordFileOperator {
 							context.getConfiguration().checkArbitrator();
 						}
 						
-						dataChunk.writeSuccess(instanceId,successfulRecord, record);
+						dataChunk.writeSuccess(instanceId,successfulRecord, record,realEvent);
 						
 						if(successfulRecord.getV().getType() == ValueType.PLACE.getValue()){
 							long value = LongUtil.toLong(successfulRecord.getV().getValues().toByteArray(), 0);

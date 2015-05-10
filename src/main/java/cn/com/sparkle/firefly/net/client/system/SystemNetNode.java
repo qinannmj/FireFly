@@ -145,7 +145,9 @@ public class SystemNetNode extends NetNode {
 
 	public void sendInstanceSuccessMessage(long instanceId, Id id, Value value, List<String> notifyList, List<SuccessTransportConfig> notifyChain)
 			throws InterruptedException {
-		logger.debug("1111" + isArbitrator + "  value" + (value != null) + " id " + id);
+		if(conf.isDebugLog()){
+			logger.debug("isArbitrator " + isArbitrator + "  value" + (value != null) + " id " + id);
+		}
 		if(isArbitrator && value != null){
 			/*if value is null indicates the node is quorum.And if the node is arbitrator , 
 			must be transport to the arbitrator to help node clear the mem of vote record.*/ 

@@ -3,6 +3,7 @@ package cn.com.sparkle.firefly.stablestorage;
 import java.io.File;
 import java.io.IOException;
 import java.util.LinkedList;
+import java.util.concurrent.Callable;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.log4j.Logger;
@@ -82,9 +83,13 @@ public class AccountBook {
 		instanceIdNoRedoHint = instanceId;
 	}
 
-	public void writeSuccessfulRecord(final long instanceId, final SuccessfulRecord.Builder successfulRecord, LinkedList<AddRequestPackage> addRequestPackages)
+	public boolean writeSuccessfulRecord(final long instanceId, final SuccessfulRecord.Builder successfulRecord, LinkedList<AddRequestPackage> addRequestPackages)
 			throws IOException, UnsupportedChecksumAlgorithm {
-		fileOperator.writeSuccessfulRecord(instanceId, successfulRecord, addRequestPackages, null);
+		return writeSuccessfulRecord(instanceId, successfulRecord, addRequestPackages,null);
+	}
+	
+	public boolean  writeSuccessfulRecord(final long instanceId, final SuccessfulRecord.Builder successfulRecord, LinkedList<AddRequestPackage> addRequestPackages,Callable<Object> realEvent) throws IOException, UnsupportedChecksumAlgorithm{
+		boolean res = fileOperator.writeSuccessfulRecord(instanceId, successfulRecord, addRequestPackages, realEvent);
 		if (!fileOperator.isDamaged() && !isInitAndNoDamage) {
 			synchronized (this) {
 				if (!fileOperator.isDamaged() && !isInitAndNoDamage) {
@@ -93,8 +98,8 @@ public class AccountBook {
 				}
 			}
 		}
+		return res;
 	}
-
 	public long getInstanceIdNoRedoHint() {
 		return instanceIdNoRedoHint;
 	}

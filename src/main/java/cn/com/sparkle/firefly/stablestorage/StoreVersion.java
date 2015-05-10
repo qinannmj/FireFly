@@ -2,6 +2,7 @@ package cn.com.sparkle.firefly.stablestorage;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -25,6 +26,7 @@ public class StoreVersion {
 	private final static Logger logger = Logger.getLogger(StoreVersion.class);
 	public final static String VERSION = "v2";
 	public final static Map<String, String> operatorClassMap = new HashMap<String, String>();
+	private static RandomAccessFile PROCESS_MUTEX_LOCK;
 
 	static {
 		operatorClassMap.put("v1", "cn.com.sparkle.firefly.stablestorage.v1.RecordFileOperatorDefault");
@@ -89,35 +91,48 @@ public class StoreVersion {
 		File[] files = f.listFiles();
 		File tmpVersion = null;
 		File version = null;
-		for (File file : files) {
-			if (!file.isDirectory()) {
-				String[] name = file.getName().split("-");
-				if (name.length == 2) {
-					//restore from tmp
-					if (name[0].equals("tmpversion")) {
-						tmpVersion = file;
-					} else if (name[0].equals("version")) {
-						version = file;
+		try{
+			for (File file : files) {
+				if (!file.isDirectory()) {
+					String[] name = file.getName().split("-");
+					if (name.length == 2) {
+						//restore from tmp
+						if (name[0].equals("tmpversion")) {
+							tmpVersion = file;
+						} else if (name[0].equals("version")) {
+							version = file;
+						}
 					}
 				}
 			}
-		}
-		if (tmpVersion != null) {
-			//the tmp version is latest, restore from tmp version
-			if (version != null) {
-				FileUtil.deleteFile(version);
+			if (tmpVersion != null) {
+				//the tmp version is latest, restore from tmp version
+				if (version != null) {
+					FileUtil.deleteFile(version);
+				}
+				String[] name = tmpVersion.getName().split("-");
+				File newFile = new File(f.getCanonicalPath() + "/version-" + name[1]);
+				FileUtil.rename(tmpVersion, newFile);
+				return name[1];
+			} else if (version != null) {
+				String[] name = version.getName().split("-");
+				return name[1];
+			} else {
+				FileUtil.getFile(f.getCanonicalPath() + "/version-" + VERSION);
+				return VERSION;
 			}
-			String[] name = tmpVersion.getName().split("-");
-			File newFile = new File(f.getCanonicalPath() + "/version-" + name[1]);
-			FileUtil.rename(tmpVersion, newFile);
-			return name[1];
-		} else if (version != null) {
-			String[] name = version.getName().split("-");
-			return name[1];
-		} else {
-			FileUtil.getFile(f.getCanonicalPath() + "/version-" + VERSION);
-			return VERSION;
+		}finally{
+			synchronized (StoreVersion.class) {
+				if(PROCESS_MUTEX_LOCK == null){
+					PROCESS_MUTEX_LOCK = new RandomAccessFile(version, "rws");
+					if(PROCESS_MUTEX_LOCK.getChannel().tryLock() == null){
+						throw new RuntimeException("File has been locked twice!");
+					}
+					
+				}
+			}
 		}
+		
 	}
 
 	private static void clearWorkspace(String dir, String version) {

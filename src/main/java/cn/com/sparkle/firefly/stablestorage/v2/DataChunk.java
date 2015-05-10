@@ -119,8 +119,8 @@ public class DataChunk {
 		}
 	}
 
-	public void writeSuccess(long instanceId,SuccessfulRecord.Builder successRecord, Record record) throws IOException, ChunkFullException {
-		
+	public void writeSuccess(long instanceId, SuccessfulRecord.Builder successRecord, Record record,Callable<Object> realEvent) throws IOException, ChunkFullException {
+
 		if (successfullInstanceId >= instanceId) {
 			//the success has written and give up write,
 			return;
@@ -128,11 +128,11 @@ public class DataChunk {
 			checkBufferout();
 			int recordLen = record.getSerializeSize();
 			if (maxVoteInstanceId >= instanceId || capacity >= (used + recordLen)) {
-				record.writeToStream(writeStream, null, false);
+				record.writeToStream(writeStream, realEvent, realEvent != null);
 				++successfullInstanceId;
-				if(successRecord.getV().getType() == ValueType.PLACE.getValue()){
+				if (successRecord.getV().getType() == ValueType.PLACE.getValue()) {
 					long value = LongUtil.toLong(successRecord.getV().getValues().toByteArray(), 0);
-					if(value > successfullInstanceId){
+					if (value > successfullInstanceId) {
 						successfullInstanceId = value;
 					}
 				}
@@ -143,7 +143,10 @@ public class DataChunk {
 		} else {
 			throw new RuntimeException(String.format("excepted successful instanceId %s , give instanceId %s", successfullInstanceId + 1, instanceId));
 		}
-		logger.debug("222 instanceId:" + instanceId + " isPlace " +  (successRecord.getV().getType() == ValueType.PLACE.getValue()) + " successfullInstanceId " + successfullInstanceId);
+		if (context.getConfiguration().isDebugLog()) {
+			logger.debug("instanceId:" + instanceId + " isPlace " + (successRecord.getV().getType() == ValueType.PLACE.getValue()) + " successfullInstanceId "
+					+ successfullInstanceId);
+		}
 	}
 
 	public void close() throws IOException, UnsupportedChecksumAlgorithm {
@@ -199,9 +202,9 @@ public class DataChunk {
 									if (head.getInstanceId() > successInstanceId) {
 										successInstanceId = head.getInstanceId();
 									}
-									if(record.getV().getType() == ValueType.PLACE.getValue()){
+									if (record.getV().getType() == ValueType.PLACE.getValue()) {
 										long value = LongUtil.toLong(record.getV().getValues().toByteArray(), 0);
-										if(value > successInstanceId){
+										if (value > successInstanceId) {
 											successInstanceId = value;
 										}
 									}
