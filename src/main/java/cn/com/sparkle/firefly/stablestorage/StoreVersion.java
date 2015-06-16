@@ -118,7 +118,7 @@ public class StoreVersion {
 				String[] name = version.getName().split("-");
 				return name[1];
 			} else {
-				FileUtil.getFile(f.getCanonicalPath() + "/version-" + VERSION);
+				version = FileUtil.getFile(f.getCanonicalPath() + "/version-" + VERSION);
 				return VERSION;
 			}
 		}finally{
