@@ -38,12 +38,6 @@ public class MaximumSizeArrayCycleQueue<T> implements Queue<T> {
 			throw new QueueFullException("The queue is full.You should increase the size of the queue.");
 		}
 
-		//		if (es != s) {
-		//			
-		//		} else {
-		//			
-		//		}
-
 	}
 
 	public void poll() {
@@ -135,76 +129,6 @@ public class MaximumSizeArrayCycleQueue<T> implements Queue<T> {
 			return length;
 		}
 
-	}
-
-	public static void main(String[] args) throws QueueFullException, InterruptedException {
-		MaximumSizeArrayCycleQueue<Integer> cq = new MaximumSizeArrayCycleQueue<Integer>(Integer.class, 7);
-		for(int i =0 ; i < 1000; ++i){
-			cq.push(i);
-			System.out.println(i);
-		}
-//		MaximumSizeArrayCycleQueue<Integer> cq = new MaximumSizeArrayCycleQueue<Integer>(Integer.class, 7);
-//		for (int i = 0; i < 7; i++) {
-//			cq.push(i);
-//			MaximumSizeArrayCycleQueue<Integer>.Bulk b = cq.getBulk();
-//			System.out.println(b.getQueue()[b.getOffset()] + " " + b.getOffset() + " " + b.getLength());
-//		}
-//		cq.poll();
-//		for (int i = 0; i < 7; i++) {
-//			cq.poll();
-//			cq.push(i);
-//			MaximumSizeArrayCycleQueue<Integer>.Bulk b = cq.getBulk();
-//			System.out.println(b.getQueue()[b.getOffset()] + " " + b.getOffset() + " " + b.getLength());
-//		}
-		//		cq.push(1);
-		//		cq.push(2);
-		//		cq.push(3);
-		//		for(int i = 0 ;i < 10 ; i++){
-		//			cq.push(i);
-		//		}
-		//		System.out.println(cq.last());
-		//		cq.pollLast();
-		//		System.out.println(cq.peek());
-		//		cq.poll();
-		//		
-		//		System.out.println(cq.last());
-		//		cq.pollLast();
-		//		System.out.println(cq.last());
-		//		cq.pollLast();
-		//		
-		//		System.out.println(cq.peek());
-		//		cq.poll();
-		/*
-		for(int i = 0 ; i < 1000 ; i++){
-			System.out.println("test");
-			cq.push(i);
-			System.out.println(cq.last());
-			cq.pollLast();
-			System.out.println(cq.last());
-			System.out.println("size:" + cq.size());
-		}*/
-		//		
-		//		System.out.println(cq.size());
-		//		cq.push(1);
-		//		System.out.println(cq.size());
-		//		cq.poll();
-		//		System.out.println(cq.size());
-		//		System.out.println(cq.peek());
-		//		System.out.println(cq.size());
-
-		// long time = System.currentTimeMillis();
-		// for (int i = 0; i < 1000000; i++) {
-		// cq.push(i);
-		// }
-		// System.out.println(System.currentTimeMillis() - time);
-		//
-		// time = System.currentTimeMillis();
-		// ArrayBlockingQueue<Integer> abq = new ArrayBlockingQueue<Integer>(
-		// 1000000);
-		// for (int i = 0; i < 1000000; i++) {
-		// abq.put(i);
-		// }
-		// System.out.println(System.currentTimeMillis() - time);
 	}
 
 }

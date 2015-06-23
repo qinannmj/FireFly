@@ -7,7 +7,7 @@ rwsbuffered-file-io-queue-deep=5
 async-file-allocator-idle-size=20
 async-file-allocator-fileblock-num=8
 
-ip=ali-65926n
+ip=ali-65926
 listen-port=9000
 listen-port-client=9001
 max-response-delay=1000
@@ -17,7 +17,6 @@ net-layer=raptor
 #net-layer=netty
 disk-mem-lost=0
 catchup-delay=5000
-debug-log=false
 elect-self-master=true
 vote-value-split-size=8196
 min-instance-merge-package-size=5242880

@@ -33,7 +33,7 @@ public class UserServerHandler implements NetHandler {
 
 	@Override
 	public void onDisconnect(PaxosSession session) {
-		if (conf.isDebugLog()) {
+		if (logger.isDebugEnabled()) {
 			logger.debug("user client disconnect!");
 		}
 		processor.onDisConnect(session);
@@ -42,7 +42,7 @@ public class UserServerHandler implements NetHandler {
 
 	@Override
 	public void onConnect(PaxosSession session, Object attachment) {
-		if (conf.isDebugLog()) {
+		if (logger.isDebugEnabled()) {
 			logger.debug("user client connect!");
 		}
 		processor.onConnect(session);

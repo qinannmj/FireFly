@@ -90,7 +90,6 @@ public class RecordFileOperatorDefault implements RecordFileOperator {
 	@Override
 	public void initOperator(File dir, long lastExpectSafeInstanceId, InstanceExecutor instanceExecutor, RecordFileOutFactory recordOutFactory, Context context) {
 		Configuration conf = context.getConfiguration();
-		this.debugLog = conf.isDebugLog();
 		this.dir = dir;
 		this.lastExpectSafeInstanceId = lastExpectSafeInstanceId;
 		this.maxVoteInstanceId = lastExpectSafeInstanceId - 1;

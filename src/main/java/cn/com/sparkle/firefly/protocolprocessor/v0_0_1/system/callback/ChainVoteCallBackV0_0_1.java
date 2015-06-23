@@ -17,9 +17,8 @@ public class ChainVoteCallBackV0_0_1 extends QuorumCallBack<Value> implements Vo
 	private PaxosSession session;
 	private AbstractProtocolV0_0_1Processor processor;
 
-	public ChainVoteCallBackV0_0_1(long instanceId, int needResponseCount, long messageId, PaxosSession session, AbstractProtocolV0_0_1Processor processor,
-			boolean isDebug) {
-		super(needResponseCount, needResponseCount, isDebug);
+	public ChainVoteCallBackV0_0_1(long instanceId, int needResponseCount, long messageId, PaxosSession session, AbstractProtocolV0_0_1Processor processor) {
+		super(needResponseCount, needResponseCount);
 		this.instanceId = instanceId;
 		this.messageId = messageId;
 		this.session = session;

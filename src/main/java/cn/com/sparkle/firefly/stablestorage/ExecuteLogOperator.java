@@ -33,7 +33,7 @@ public class ExecuteLogOperator {
 	
 	public ExecuteLogOperator(File dir) throws IOException {
 		this.dir = dir;
-		flushThreadGroup = new FlushThreadGroup(1024, 3, "executelog", false);
+		flushThreadGroup = new FlushThreadGroup(1024, 3, "executelog");
 	}
 
 	public long init() throws IOException, UnsupportedChecksumAlgorithm {

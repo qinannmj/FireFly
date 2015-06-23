@@ -13,11 +13,7 @@ public class PaxosPrepareCallBack extends QuorumCallBack<Value> implements Prepa
 	private volatile Id lastVotedId = new Id("", -1);
 
 	public PaxosPrepareCallBack(int quorum, int needResponseCount, PaxosInstance paxosInstance) {
-		this(quorum, needResponseCount, paxosInstance, paxosInstance.debugLog);
-	}
-
-	public PaxosPrepareCallBack(int quorum, int needResponseCount, PaxosInstance paxosInstance, boolean isDebug) {
-		super(quorum, needResponseCount, isDebug);
+		super(quorum, needResponseCount);
 		this.paxosInstance = paxosInstance;
 	}
 

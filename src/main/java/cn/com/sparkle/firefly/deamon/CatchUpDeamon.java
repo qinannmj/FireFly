@@ -71,7 +71,7 @@ public class CatchUpDeamon implements Runnable,MasterChangePosEventListener {
 				}
 				long selfInstanceId = aBook.getLastCanExecutableInstanceId();
 				long tempselfInstanceId = -1;
-				if (conf.isDebugLog()) {
+				if (logger.isDebugEnabled()) {
 
 					logger.debug("before catchUp state( maxInstanceId:" + maxInstanceId + " selfInstanceId:" + selfInstanceId + " activeNodeSize:"
 							+ allActiveSenator.size() + " initedNodeSze:" + senators.getValidActiveNodes().size() + ")");
@@ -100,7 +100,7 @@ public class CatchUpDeamon implements Runnable,MasterChangePosEventListener {
 							nnodeInstanceId = maxInstanceId > nnodeInstanceId ? nnodeInstanceId : maxInstanceId;
 							// try study newer instance than self's
 							while (nnodeInstanceId > selfInstanceId) {
-								if (conf.isDebugLog()) {
+								if (logger.isDebugEnabled()) {
 									logger.debug("catch up from " + nnode.getAddress());
 								}
 								long catchUpInstanceId = aBook.getFisrtInstnaceIdOfWaitInsertToExecuteQueue();
@@ -145,7 +145,7 @@ public class CatchUpDeamon implements Runnable,MasterChangePosEventListener {
 					}
 
 				}
-				if (conf.isDebugLog()) {
+				if (logger.isDebugEnabled()) {
 					logger.debug("after catchUp state( maxInstanceId:" + maxInstanceId + " selfInstanceId:" + selfInstanceId + " activeNodeSize:"
 							+ allActiveSenator.size() + " initedNodeSze:" + senators.getValidActiveNodes().size() + ")");
 				}
@@ -178,7 +178,7 @@ public class CatchUpDeamon implements Runnable,MasterChangePosEventListener {
 								// fall behind other nodes too many
 								curCatchUpState = CatchUpEvent.RECOVERY_FROM_CATCH_UP;
 								CatchUpEvent.doRecoveryFromFailEvent(eventsManager);
-								if (conf.isDebugLog()) {
+								if (logger.isDebugEnabled()) {
 									logger.debug("catch up success");
 								}
 							}
@@ -188,12 +188,12 @@ public class CatchUpDeamon implements Runnable,MasterChangePosEventListener {
 						if (curCatchUpState == CatchUpEvent.RECOVERY_FROM_CATCH_UP) {
 							curCatchUpState = CatchUpEvent.FAIL_CATCH_UP;
 							CatchUpEvent.doCatchUpFailEvent(eventsManager);
-							if (conf.isDebugLog()) {
+							if (logger.isDebugEnabled()) {
 								logger.debug("catch up fail");
 							}
 						}
 					}
-				} else if (conf.isDebugLog()) {
+				} else if (logger.isDebugEnabled()) {
 					logger.debug("give up catch up!");
 				}
 				lastInstanceIdCheckTime = TimeUtil.currentTimeMillis();
@@ -205,7 +205,7 @@ public class CatchUpDeamon implements Runnable,MasterChangePosEventListener {
 		SystemNetNode node = (SystemNetNode) netNode;
 		CatchUpCallBack callback = new CatchUpCallBack(conf, aBook);
 		node.sendCatchUpRequest(startInstanceId, size,conf.isArbitrator(), callback);
-		if (conf.isDebugLog()) {
+		if (logger.isDebugEnabled()) {
 			logger.debug(String.format("catch up [%s,%s] from %s", startInstanceId, startInstanceId + size, netNode.getAddress()));
 		}
 		try {

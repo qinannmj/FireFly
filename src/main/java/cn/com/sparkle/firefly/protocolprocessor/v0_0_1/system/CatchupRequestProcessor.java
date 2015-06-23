@@ -36,7 +36,7 @@ import cn.com.sparkle.firefly.util.LongUtil;
 public class CatchupRequestProcessor extends AbstractProtocolV0_0_1Processor implements MasterChangePosEventListener{
 	private final static Logger logger = Logger.getLogger(CatchupRequestProcessor.class);
 
-	private final static int MAX_CATCH_SIZE = 1024 * 128;
+	private final static int MAX_CATCH_SIZE = 1024 * 1024;
 
 	private Configuration conf;
 
@@ -72,18 +72,11 @@ public class CatchupRequestProcessor extends AbstractProtocolV0_0_1Processor imp
 						CatchUpRecord.Builder record = CatchUpRecord.newBuilder().setInstanceId(request.getStartInstanceId()).setValue(successRecord);
 						b.addSuccessfulRecords(record);
 					}
-					MessagePackage.Builder responseBuilder = MessagePackage.newBuilder().setCatchUpResponse(b.build());
-					responseBuilder.setId(messagePackage.getId());
-					responseBuilder.setIsLast(true);
-					responseBuilder.setCatchUpResponse(b);
-					sendResponse(session, responseBuilder.build().toByteArray());
+					sendLastPackage(session,b.build(),messagePackage.getId());
 				}
 			}catch(RejectedExecutionException e){
 				CatchUpResponse.Builder b = CatchUpResponse.newBuilder();
-				MessagePackage.Builder responseBuilder = MessagePackage.newBuilder().setCatchUpResponse(b.build());
-				responseBuilder.setId(messagePackage.getId());
-				responseBuilder.setIsLast(true);
-				sendResponse(session, responseBuilder.build().toByteArray());
+				sendLastPackage(session,b.build(),messagePackage.getId());
 			}
 		} else {
 			super.fireOnReceive(messagePackage, session);
@@ -99,10 +92,10 @@ public class CatchupRequestProcessor extends AbstractProtocolV0_0_1Processor imp
 				
 				final CatchUpResponse.Builder b = CatchUpResponse.newBuilder();
 				try {
-					if (conf.isDebugLog()) {
+					if (logger.isDebugEnabled()) {
 						logger.debug("catchup request startId:" + startId + " size:" + size);
 					}
-
+					
 					ReadRecordCallback<SuccessfulRecord.Builder> callback = new ReadRecordCallback<StoreModel.SuccessfulRecord.Builder>() {
 						int packageSize = 0;
 						boolean isStop = false;
@@ -133,23 +126,32 @@ public class CatchupRequestProcessor extends AbstractProtocolV0_0_1Processor imp
 							}
 						}
 					};
-
+					
 					aBook.readSuccessRecord(startId, startId + size - 1, new ReadSuccessReadFilter(new SortedReadCallback<SuccessfulRecord.Builder>(callback,
 							startId)));
 				} catch (IOException e) {
 					logger.error("fatal error", e);
 				} catch (UnsupportedChecksumAlgorithm e) {
 					logger.error("fatal error", e);
+				} catch (Throwable e){
+					logger.error("fatal error", e);
 				}
-				MessagePackage.Builder responseBuilder = MessagePackage.newBuilder().setCatchUpResponse(b.build());
-				responseBuilder.setId(msgId);
-				responseBuilder.setIsLast(true);
-				sendResponse(session, responseBuilder.build().toByteArray());
+				sendLastPackage(session,b.build(),msgId);
 			}
 		};
 		
 	}
-
+	
+	private void sendLastPackage(PaxosSession session,CatchUpResponse response,long msgId){
+		MessagePackage.Builder responseBuilder = MessagePackage.newBuilder().setCatchUpResponse(response);
+		responseBuilder.setId(msgId);
+		responseBuilder.setIsLast(true);
+		sendResponse(session, responseBuilder.build().toByteArray());
+		if(logger.isDebugEnabled()){
+			logger.debug("proceeded a catch request");
+		}
+	}
+	
 	@Override
 	public void getMasterPos() {
 		isMaster = true;

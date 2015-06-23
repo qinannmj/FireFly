@@ -107,7 +107,7 @@ public class CheckMasterSenatorStateDeamon implements Runnable, CatchUpEventList
 					if (conf.isElectSelfMaster() && !conf.isArbitrator()) {
 						startSelection(validActiveSenator, quorum);
 					} else {
-						if (conf.isDebugLog()) {
+						if (logger.isDebugEnabled()) {
 							logger.info("elect_self_master=false , give up election!");
 						}
 					}
@@ -126,7 +126,7 @@ public class CheckMasterSenatorStateDeamon implements Runnable, CatchUpEventList
 	private void startSelection(Map<String, NetNode> activeSenator, int quorum) {
 		// fix address to selfaddress
 		cState.getSelfState().getElectionVoteIdBySelf().setAddress(selfAddress);
-		if (conf.isDebugLog()) {
+		if (logger.isDebugEnabled()) {
 			logger.debug("start election, instanceId:" + cState.getSelfState().getElectionVoteIdBySelf().getIncreaseId());
 		}
 		ElectionPaxosInstance paxosInstance = new ElectionPaxosInstance(activeSenator, quorum, cState.getSelfState().getElectionVoteIdBySelf(), context,
@@ -140,7 +140,7 @@ public class CheckMasterSenatorStateDeamon implements Runnable, CatchUpEventList
 		} catch (ExecutionException e1) {
 			logger.error("fatal error", e1);
 		}
-		if (conf.isDebugLog()) {
+		if (logger.isDebugEnabled()) {
 			logger.debug("election voteId.increaseId:" + cState.getSelfState().getElectionVoteIdBySelf().getIncreaseId() + "  election isSuccessful:"
 					+ isSuccess);
 		}

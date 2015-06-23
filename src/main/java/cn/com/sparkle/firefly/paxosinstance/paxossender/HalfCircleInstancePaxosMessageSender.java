@@ -72,7 +72,7 @@ public class HalfCircleInstancePaxosMessageSender extends AbstractInstancePaxosM
 		stringBuffer.append("]");
 		linkInfo = stringBuffer.toString();
 		//debug output
-		if (context.getConfiguration().isDebugLog()) {
+		if (logger.isDebugEnabled()) {
 			logger.debug(linkInfo);
 		}
 

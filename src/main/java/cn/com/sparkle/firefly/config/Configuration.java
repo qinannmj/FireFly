@@ -43,7 +43,6 @@ public class Configuration {
 	private int transportSingleTcpMaxWaitingMemSize;
 	private String netLayer;
 	private int diskMemLost;
-	private boolean debugLog;
 	private int catchUpDelay;
 	private boolean electSelfMaster;
 	private int voteValueSplitSize;
@@ -211,15 +210,7 @@ public class Configuration {
 			}
 
 		}
-		if (confProp.getProperty("debug-log") == null) {
-			throw new ConfigurationError("debug-log not be set, please check your configuration!");
-		} else {
-			String temp = confProp.getProperty("debug-log");
-			if (!temp.trim().equals("true") && !temp.trim().equals("false")) {
-				throw new ConfigurationError("debug-log must be true or false, please check your configuration!");
-			}
-			this.debugLog = Boolean.parseBoolean(temp);
-		}
+		
 		if (confProp.getProperty("elect-self-master") == null) {
 			throw new ConfigurationError("elect-self-master not be set, please check your configuration!");
 		} else {
@@ -397,7 +388,6 @@ public class Configuration {
 		logger.info("system configuration");
 		logger.info("catch-up-delay:" + this.catchUpDelay);
 		logger.info("service-port:" + this.clientPort);
-		logger.info("debug-log:" + this.debugLog);
 		logger.info("disk-mem-lost:" + this.diskMemLost);
 		logger.info("configuration-file-path:" + this.filePath);
 		logger.info("net-layer:" + this.netLayer);
@@ -442,7 +432,7 @@ public class Configuration {
 	}
 
 	public synchronized void addSenator(String address, long version) throws ConfigurationException {
-		if (isDebugLog()) {
+		if (logger.isDebugEnabled()) {
 			logger.debug(String.format("add %s ,version:%s targetVersion: %s", address, this.configNodeSet.getVersion(), version));
 		}
 		if (version <= this.configNodeSet.getVersion()) {
@@ -466,7 +456,7 @@ public class Configuration {
 	}
 
 	public synchronized void removeSenator(String address, long version) throws ConfigurationException {
-		if (isDebugLog()) {
+		if (logger.isDebugEnabled()) {
 			logger.debug(String.format("remove %s ,version:%s targetVersion: %s", address, this.configNodeSet.getVersion(), version));
 		}
 		if (version <= this.configNodeSet.getVersion()) {
@@ -654,10 +644,6 @@ public class Configuration {
 
 	public String getFilePath() {
 		return filePath;
-	}
-
-	public boolean isDebugLog() {
-		return debugLog;
 	}
 
 	public int getNetChecksumType() {

@@ -26,15 +26,14 @@ import cn.com.sparkle.firefly.net.netlayer.PaxosSession;
  */
 public class AdminLookupHandler extends HandlerInterface {
 	private final static Logger logger = Logger.getLogger(AdminLookupHandler.class);
-	
+
 	private Context context;
 	private HashMap<String, AdminProcessor> processorMap = new HashMap<String, AdminProcessor>();
 
-	public AdminLookupHandler(Context context,List<AdminProcessor> processors) {
+	public AdminLookupHandler(Context context, List<AdminProcessor> processors) {
 		this.context = context;
-		
-		
-		ReElectionProcessor electionProcessor= new ReElectionProcessor(context);
+
+		ReElectionProcessor electionProcessor = new ReElectionProcessor(context);
 		ClusterStateProcessor clusterStateProcessor = new ClusterStateProcessor(context);
 		StateProcessor stateProcessor = new StateProcessor(context);
 		ChangeRoomProcessor changeRoomProcessor = new ChangeRoomProcessor(context);
@@ -43,11 +42,11 @@ public class AdminLookupHandler extends HandlerInterface {
 		processors.add(clusterStateProcessor);
 		processors.add(stateProcessor);
 		processors.add(changeRoomProcessor);
-		
+
 		//load into command map
-		for(AdminProcessor processor : processors){
-			for(String name : processor.getName()){
-				if(processorMap.put(name, processor) != null){
+		for (AdminProcessor processor : processors) {
+			for (String name : processor.getName()) {
+				if (processorMap.put(name, processor) != null) {
 					throw new RuntimeException(String.format("repeat name of adminprocessor,name:%s", name));
 				}
 			}
@@ -66,10 +65,10 @@ public class AdminLookupHandler extends HandlerInterface {
 	public void onReceiveLookUp(final PaxosSession session, final AddRequest request) {
 		byte[] b = request.getValue();
 		String[] r = (new String(b)).split(" ");
-		if (r.length  <2 || context.getConfiguration().getSelfAddress().equals(r[1]) ) {
+		if (r.length < 2 || context.getConfiguration().getSelfAddress().equals(r[1])) {
 			//process by self
 			AdminProcessor p = processorMap.get(r[0]);
-			if(context.getConfiguration().isDebugLog()){
+			if (logger.isDebugEnabled()) {
 				logger.info("command: " + new String(b));
 			}
 			if (p != null) {
@@ -84,14 +83,14 @@ public class AdminLookupHandler extends HandlerInterface {
 			if (node != null) {
 				//route successfully
 				try {
-					node.sendAddRequest(CommandType.ADMIN_READ,-1, b, new AddRequestCallBack(null, null, null) {
+					node.sendAddRequest(CommandType.ADMIN_READ, -1, b, new AddRequestCallBack(null, null, null) {
 						@Override
 						public void fail() {
 							AdminLookupHandler.this.sendResponseCommandResponse(session, request, "no route to target!".getBytes());
 						}
 
 						@Override
-						public void call(byte[] response,long instanceId, boolean isLast) {
+						public void call(byte[] response, long instanceId, boolean isLast) {
 							AdminLookupHandler.this.sendResponseCommandResponse(session, request, response);
 						}
 					});
@@ -105,7 +104,7 @@ public class AdminLookupHandler extends HandlerInterface {
 	}
 
 	@Override
-	public byte[] onLoged(byte[] bytes,int offset ,int length) {
+	public byte[] onLoged(byte[] bytes, int offset, int length) {
 		//the method will be not invoked!
 		throw new RuntimeException("unsupported method!");
 	}

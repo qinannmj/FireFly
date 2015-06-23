@@ -22,7 +22,7 @@ public class ElectionPaxosInstance extends PaxosInstance {
 	private ElectionId id;
 
 	public ElectionPaxosInstance(Map<String, NetNode> voteNode, int quorum, ElectionId id, Context context, String address) {
-		super(new ElectionPaxosMessageSender(context, voteNode, quorum), 0, address, context.getConfiguration().isDebugLog());
+		super(new ElectionPaxosMessageSender(context, voteNode, quorum), 0, address);
 		this.cState = context.getcState();
 		this.id = new ElectionId(id.getAddress(), id.getIncreaseId(), id.getVersion()); //avoid the propertis of id are changed
 	}
@@ -39,7 +39,7 @@ public class ElectionPaxosInstance extends PaxosInstance {
 
 	@Override
 	public void instanceFail(long refuseId, Value value) {
-		if (debugLog) {
+		if (logger.isDebugEnabled()) {
 			logger.debug("election refuseId " + refuseId);
 		}
 		if (refuseId >= cState.getSelfState().getElectionVoteIdBySelf().getIncreaseId()) {

@@ -14,19 +14,16 @@ import cn.com.sparkle.raptor.core.util.TimeUtil;
 
 public class FlushThreadGroup {
 	private final static Logger logger = Logger.getLogger(FlushThreadGroup.class);
-	
-	private boolean debug;
-	
+
 	private FinishRealEventThread finishRealEventThread;
 
 	private final WriteQueue<BufferedFileOut, BufferPackage, MyNode> waitQueue = new WriteQueue<BufferedFileOut, BufferPackage, MyNode>();
 
 	private ArrayBlockingQueue<MyNode> idleBufferPool = new ArrayBlockingQueue<MyNode>(1000);
-	
+
 	private LinkedBlockingQueue<BufferedFileOut> allOpenedOut = new LinkedBlockingQueue<BufferedFileOut>();
-	
-	public FlushThreadGroup(int buffSize, int idleBufferPoolSize, String groupName,final boolean debug) {
-		this.debug = debug;
+
+	public FlushThreadGroup(int buffSize, int idleBufferPoolSize, String groupName) {
 		for (int i = 0; i < idleBufferPoolSize; ++i) {
 			idleBufferPool.add(new MyNode(null, new WriteBufferPackage(buffSize)));
 		}
@@ -43,23 +40,25 @@ public class FlushThreadGroup {
 					MyNode n;
 					try {
 						n = waitQueue.take(2000);
-						if(n != null){
+						if (n != null) {
 							long ct = TimeUtil.currentTimeMillis();
 							BufferPackage bp = n.getElement();
 							BufferedFileOut out = n.getTag();
 							long pos = n.getTag().getRaf().getFilePointer();
-							if(bp.getBuffer() == null){
+							if (bp.getBuffer() == null) {
 								//skip
 								RandomAccessFile raf = n.getTag().getRaf();
 								raf.seek(raf.getFilePointer() + bp.size());
-								if(debug){
-									logger.debug(String.format("skip to disk cost:%s size:%s pos:%s from:%s bufferinstance:%s",TimeUtil.currentTimeMillis() - ct,bp.size(),pos,n.getTag().getRaf().getFD().toString(),bp));
+								if (logger.isDebugEnabled()) {
+									logger.debug(String.format("skip to disk cost:%s size:%s pos:%s from:%s bufferinstance:%s", TimeUtil.currentTimeMillis()
+											- ct, bp.size(), pos, n.getTag().getRaf().getFD().toString(), bp));
 								}
-							}else{
+							} else {
 								//write
 								n.getTag().getRaf().write(bp.getBuffer(), 0, bp.size());
-								if(debug){
-									logger.debug(String.format("flush to disk cost:%s size:%s pos:%s from:%s bufferinstance:%s",TimeUtil.currentTimeMillis() - ct,bp.size(),pos,n.getTag().getRaf().getFD().toString(),bp));
+								if (logger.isDebugEnabled()) {
+									logger.debug(String.format("flush to disk cost:%s size:%s pos:%s from:%s bufferinstance:%s", TimeUtil.currentTimeMillis()
+											- ct, bp.size(), pos, n.getTag().getRaf().getFD().toString(), bp));
 								}
 								List<Callable<Object>> calllist = bp.getCallableList();
 								bp.clear();
@@ -67,14 +66,14 @@ public class FlushThreadGroup {
 								finishRealEventThread.addFinishEvent(calllist);
 							}
 							out.finish();
-						}else{
+						} else {
 							//flush bufferout
 							Iterator<BufferedFileOut> iter = allOpenedOut.iterator();
-							while(iter.hasNext()){
+							while (iter.hasNext()) {
 								BufferedFileOut out = iter.next();
-								if(!out.isClose()){
+								if (!out.isClose()) {
 									out.flush();
-								}else{
+								} else {
 									iter.remove();
 								}
 							}
@@ -94,23 +93,18 @@ public class FlushThreadGroup {
 		t.setName("Paxos-File-Flush-Thread");
 		t.start();
 	}
-	public void open(BufferedFileOut out){
+
+	public void open(BufferedFileOut out) {
 		allOpenedOut.add(out);
 	}
+
 	public WriteQueue<BufferedFileOut, BufferPackage, MyNode> getWaitQueue() {
 		return waitQueue;
 	}
-	
 
 	public ArrayBlockingQueue<MyNode> getIdleBufferPool() {
 		return idleBufferPool;
 	}
-
-
-	public boolean isDebug() {
-		return debug;
-	}
-
 
 	public static class MyNode extends WriteQueue.Node<BufferedFileOut, BufferPackage> {
 		public MyNode(BufferedFileOut tag, BufferPackage element) {

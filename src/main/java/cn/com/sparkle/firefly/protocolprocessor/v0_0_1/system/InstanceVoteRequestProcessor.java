@@ -34,12 +34,12 @@ public class InstanceVoteRequestProcessor extends AbstractProtocolV0_0_1Processo
 	public void receive(final MessagePackage messagePackage, final PaxosSession session) throws InterruptedException {
 		if (messagePackage.hasInstanceVoteRequest()) {
 			InstanceVoteRequest request = messagePackage.getInstanceVoteRequest();
-			if (conf.isDebugLog()) {
+			if (logger.isDebugEnabled()) {
 				logger.debug("vote instanceId:" + request.getInstanceId());
 			}
 			ChainVoteCallBackV0_0_1 chainCallback = new ChainVoteCallBackV0_0_1(request.getInstanceId(), request.getChainCount() == 0 ? 1 : 2,
-					messagePackage.getId(), session, this, conf.isDebugLog());
-			
+					messagePackage.getId(), session, this);
+
 			SystemNetNode node = null;
 			long sendMessageId = -1;
 			if (request.getChainCount() != 0) {
@@ -55,26 +55,28 @@ public class InstanceVoteRequestProcessor extends AbstractProtocolV0_0_1Processo
 					sendMessageId = node.sendInstanceVoteRequest(request.getInstanceId(), id, request.getValuetype(), request.getValueLength(), chain);
 				}
 			}
-			ValueTransportConfig vtc = new ValueTransportConfig(request, node,sendMessageId , chainCallback);
+			ValueTransportConfig vtc = new ValueTransportConfig(request, node, sendMessageId, chainCallback);
 			ValueTransportPipeState valueState = session.get(PaxosSessionKeys.VOTE_VAlUE_TRANSPORT_PIPE_STATE);
-			if(valueState == null){
+			if (valueState == null) {
 				valueState = new ValueTransportPipeState();
 				session.put(PaxosSessionKeys.VOTE_VAlUE_TRANSPORT_PIPE_STATE, valueState);
 			}
 			valueState.register(messagePackage.getId(), ValueType.getValueType(request.getValuetype()), request.getValueLength(), vtc);
-			if(context.getConfiguration().isDebugLog()){
-				logger.debug(String.format("start vote value transport pipe: valueLength:%s messageId:%s tomessageId:%s", request.getValueLength(),messagePackage.getId(),vtc.getMessageId()));
+			if (logger.isDebugEnabled()) {
+				logger.debug(String.format("start vote value transport pipe: valueLength:%s messageId:%s tomessageId:%s", request.getValueLength(),
+						messagePackage.getId(), vtc.getMessageId()));
 			}
 		} else {
 			super.fireOnReceive(messagePackage, session);
 		}
 	}
-	public final static class ValueTransportConfig{
+
+	public final static class ValueTransportConfig {
 		private InstanceVoteRequest request;
 		private SystemNetNode node;
 		private long messageId;
 		private ChainVoteCallBackV0_0_1 callback;
-		
+
 		public ValueTransportConfig(InstanceVoteRequest request, SystemNetNode node, long messageId, ChainVoteCallBackV0_0_1 callback) {
 			super();
 			this.request = request;
@@ -82,19 +84,23 @@ public class InstanceVoteRequestProcessor extends AbstractProtocolV0_0_1Processo
 			this.messageId = messageId;
 			this.callback = callback;
 		}
+
 		public ChainVoteCallBackV0_0_1 getCallback() {
 			return callback;
 		}
+
 		public InstanceVoteRequest getRequest() {
 			return request;
 		}
+
 		public SystemNetNode getNode() {
 			return node;
 		}
+
 		public long getMessageId() {
 			return messageId;
 		}
-		
+
 	}
 
 }

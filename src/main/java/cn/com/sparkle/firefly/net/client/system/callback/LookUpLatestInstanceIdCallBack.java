@@ -8,8 +8,8 @@ public abstract class LookUpLatestInstanceIdCallBack extends QuorumCallBack<Obje
 
 	private ReentrantLock lock = new ReentrantLock();
 
-	public LookUpLatestInstanceIdCallBack(int quorum, int needResponseCount, boolean debugLog) {
-		super(quorum, needResponseCount, debugLog);
+	public LookUpLatestInstanceIdCallBack(int quorum, int needResponseCount) {
+		super(quorum, needResponseCount);
 	}
 
 	public void callback(long instanceId) {

@@ -25,11 +25,10 @@ import cn.com.sparkle.firefly.protocolprocessor.ProtocolManager;
 
 public class CommandAsyncProcessor implements Runnable {
 	private final static Logger logger = Logger.getLogger(CommandAsyncProcessor.class);
-	
+
 	private static NetClient nioSocketClient;
 	private static UserClientHandler handler;
 	private static ReConnectDeamon reConnectThread = new ReConnectDeamon();
-	
 
 	private final int runningMemMaxSize;
 	private String[] senator = {};
@@ -44,7 +43,6 @@ public class CommandAsyncProcessor implements Runnable {
 
 	private EntryNode root = new EntryNode();
 	private AtomicInteger runningSize = new AtomicInteger(0);
-	
 
 	private int masterDistance;
 
@@ -57,7 +55,6 @@ public class CommandAsyncProcessor implements Runnable {
 	private MasterHeartBeatDeamon heartBeatDeamon;
 
 	private volatile boolean isWakeup = false;
-	private boolean debugLog;
 
 	public static class EntryNode {
 		private Command c;
@@ -85,7 +82,7 @@ public class CommandAsyncProcessor implements Runnable {
 	private ConnectEvent connectEvent = new ConnectEvent() {
 		@Override
 		public void disconnect(String address, NetNode node) {
-			
+
 			wakeup();//may be first node is disconnected
 		}
 
@@ -101,20 +98,19 @@ public class CommandAsyncProcessor implements Runnable {
 		t.start();
 	}
 
-	public static void init(String confPath, String netLayerType, int preferChecksumType, int heartBeatInterval, ProtocolManager protocolManager,
-			boolean debugLog) throws Throwable {
-		
-		nioSocketClient = NetFactory.makeClient(netLayerType,debugLog);
-		handler = new UserClientHandler(nioSocketClient, preferChecksumType, heartBeatInterval, protocolManager, reConnectThread, debugLog);
-		nioSocketClient.init(confPath, heartBeatInterval, handler,"userclient");
+	public static void init(String confPath, String netLayerType, int preferChecksumType, int heartBeatInterval, ProtocolManager protocolManager)
+			throws Throwable {
+
+		nioSocketClient = NetFactory.makeClient(netLayerType);
+		handler = new UserClientHandler(nioSocketClient, preferChecksumType, heartBeatInterval, protocolManager, reConnectThread);
+		nioSocketClient.init(confPath, heartBeatInterval, handler, "userclient");
 		reConnectThread.startThread();
 
 	}
 
-	public CommandAsyncProcessor(String[] senator, int masterDistance,int waitingMemMaxSize,int runningMemMaxSize, MasterHeartBeatDeamon heartBeatDeamon,
-			boolean debugLog) throws Throwable {
+	public CommandAsyncProcessor(String[] senator, int masterDistance, int waitingMemMaxSize, int runningMemMaxSize, MasterHeartBeatDeamon heartBeatDeamon)
+			throws Throwable {
 		this.newSenator = senator;
-		this.debugLog = debugLog;
 		this.masterDistance = masterDistance;
 		this.heartBeatDeamon = heartBeatDeamon;
 		this.runningMemMaxSize = runningMemMaxSize;
@@ -127,7 +123,7 @@ public class CommandAsyncProcessor implements Runnable {
 			nodeChangeLock.lock();
 			newSenator = senator;
 			StringBuffer sb = new StringBuffer();
-			for(String s : senator){
+			for (String s : senator) {
 				sb.append(" ").append(s);
 			}
 			wakeup();
@@ -205,7 +201,7 @@ public class CommandAsyncProcessor implements Runnable {
 					reConnect();
 					if (curConnectConfig != null) {
 						// redo
-						if(debugLog){
+						if (logger.isDebugEnabled()) {
 							logger.debug("reSend requset");
 						}
 						EntryNode next = root;
@@ -224,7 +220,7 @@ public class CommandAsyncProcessor implements Runnable {
 				if (curConnectConfig != null) {
 					Command c = commandQueue.peek();
 					while (c != null) {
-						if(runningSize.get() + c.cost() > runningMemMaxSize ){
+						if (runningSize.get() + c.cost() > runningMemMaxSize) {
 							break;
 						}
 						EntryNode e = new EntryNode();
@@ -237,7 +233,7 @@ public class CommandAsyncProcessor implements Runnable {
 							root.next = e;
 							e.prev = root;
 						}
-						
+
 						runningSize.addAndGet(e.c.cost());
 						try {
 							sendRequestToNode(curConnectConfig, e);
@@ -331,8 +327,8 @@ public class CommandAsyncProcessor implements Runnable {
 	public EntryNode getRoot() {
 		return root;
 	}
-	
-	public void finish(Command c){
+
+	public void finish(Command c) {
 		runningSize.addAndGet(-c.cost());
 	}
 }

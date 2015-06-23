@@ -277,7 +277,7 @@ public class RecordFileOperatorV2 implements RecordFileOperator {
 					try {
 						DataChunk chunk = new DataChunk(factory, allocator.getIdle(dir.getAbsolutePath() + "/" + instanceId), context);
 						chunk.setInited(true);
-						if (context.getConfiguration().isDebugLog()) {
+						if (logger.isDebugEnabled()) {
 							logger.debug(String.format("allocate a file %s", chunk.getFile().getAbsoluteFile()));
 						}
 						fileIndexer.add(chunk);
@@ -351,7 +351,7 @@ public class RecordFileOperatorV2 implements RecordFileOperator {
 						DataChunk chunk = new DataChunk(factory, allocator.getIdle(dir.getAbsolutePath() + "/"
 								+ (dataChunk != null ? Math.max(dataChunk.getMaxVoteInstanceId(), dataChunk.getSuccessfullInstanceId()) + 1 : 0)), context);
 						chunk.setInited(true);
-						if (context.getConfiguration().isDebugLog()) {
+						if (logger.isDebugEnabled()) {
 							logger.debug(String.format("allocate a file %s", chunk.getFile().getAbsoluteFile()));
 						}
 						fileIndexer.add(chunk);

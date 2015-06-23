@@ -79,7 +79,7 @@ public class ClusterState implements ConfigureEventListener, HeartBeatEventListe
 			electionIdLock.lock();
 
 			if (lastElectionId.compareTo(this.lastElectionId) != 0) {
-				if (conf.isDebugLog()) {
+				if (logger.isDebugEnabled()) {
 					logger.debug("master change:" + lastElectionId.getIncreaseId() + "  " + lastElectionId.getAddress());
 				}
 				if (this.lastElectionId.getAddress().equals(conf.getSelfAddress())) {
@@ -109,7 +109,7 @@ public class ClusterState implements ConfigureEventListener, HeartBeatEventListe
 			electionIdLock.lock();
 			if (lastElectionId.getAddress().equals(conf.getSelfAddress())) {
 				lastElectionId = new ElectionId("", -1, lastElectionId.getVersion());
-				if (conf.isDebugLog()) {
+				if (logger.isDebugEnabled()) {
 					logger.debug("master change:" + lastElectionId.getIncreaseId() + "  " + lastElectionId.getAddress());
 				}
 				setMasterDistance(Constants.MAX_MASTER_DISTANCE);
@@ -123,7 +123,7 @@ public class ClusterState implements ConfigureEventListener, HeartBeatEventListe
 	private void setMasterDistance(int distance) {
 		try {
 			nodeLock.lock();
-			if(conf.isDebugLog()){
+			if(logger.isDebugEnabled()){
 				logger.debug(String.format("set master distance to %s",distance));
 			}
 			this.masterDistance = distance;
@@ -164,7 +164,7 @@ public class ClusterState implements ConfigureEventListener, HeartBeatEventListe
 			if (masterDistance != 0) {
 				setMasterDistance(Constants.MAX_MASTER_DISTANCE);
 			}
-			if (conf.isDebugLog()) {
+			if (logger.isDebugEnabled()) {
 				logger.debug("lost a node " + address);
 			}
 		} finally {
@@ -190,7 +190,7 @@ public class ClusterState implements ConfigureEventListener, HeartBeatEventListe
 
 				senators = new NodesCollection(senators.getNodeMembers(), senators.getValidActiveNodes(), newAllActiveNodes, senators.getNodeStates());
 			}
-			if (ClusterState.this.conf.isDebugLog()) {
+			if (ClusterState.this.logger.isDebugEnabled()) {
 				logger.debug("add a node " + nNode.getAddress());
 			}
 		} finally {

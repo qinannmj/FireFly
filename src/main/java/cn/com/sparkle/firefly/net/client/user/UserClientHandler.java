@@ -20,16 +20,13 @@ public class UserClientHandler implements NetHandler {
 
 	private NetClient client;
 	private ReConnectDeamon reConnectThread;
-	private boolean debugLog;
 
 	private ProtocolProcessorChain processor;
 	private UserClientNegotiationProcessor negotiationProcessor;
 
-	public UserClientHandler(NetClient client, int preferChecksumType, int heartBeatInterval, ProtocolManager protocolManager, ReConnectDeamon reConnectThread,
-			boolean debugLog) {
+	public UserClientHandler(NetClient client, int preferChecksumType, int heartBeatInterval, ProtocolManager protocolManager, ReConnectDeamon reConnectThread) {
 		this.client = client;
 		this.reConnectThread = reConnectThread;
-		this.debugLog = debugLog;
 
 		negotiationProcessor = new UserClientNegotiationProcessor(preferChecksumType, heartBeatInterval, protocolManager);
 		processor = new DefaultProtocolProcessorChain();
@@ -42,11 +39,11 @@ public class UserClientHandler implements NetHandler {
 
 		ConnectConfig connectConfig = (ConnectConfig) session.get(PaxosSessionKeys.USER_CLIENT_CONNECT_CONFIG);
 		UserNetNode node = (UserNetNode) session.get(PaxosSessionKeys.NET_NODE_KEY);
-		if(node != null){
+		if (node != null) {
 			node.onClose();
 			connectConfig.disconnected(node);
 		}
-		
+
 		reConnect(connectConfig);
 		processor.onDisConnect(session);
 
@@ -58,10 +55,10 @@ public class UserClientHandler implements NetHandler {
 		ConnectConfig connectConfig = (ConnectConfig) connectAttachment;
 		session.put(PaxosSessionKeys.USER_CLIENT_CONNECT_CONFIG, connectConfig);
 		session.put(PaxosSessionKeys.ADDRESS_KEY, connectConfig.getAddress()); //just for record the address of this node
-		if (debugLog) {
+		if (logger.isDebugEnabled()) {
 			logger.debug("connected " + connectConfig.getAddress());
 		}
-		negotiationProcessor.negotiation(session, "user-client",connectConfig.getAddress());
+		negotiationProcessor.negotiation(session, "user-client", connectConfig.getAddress());
 		processor.onConnect(session);
 	}
 
@@ -87,10 +84,10 @@ public class UserClientHandler implements NetHandler {
 			ConnectConfig connectConfig = (ConnectConfig) value;
 			String[] a = connectConfig.getAddress().split(":");
 			try {
-				if (debugLog) {
+				if (logger.isDebugEnabled()) {
 					log.debug("reConnect " + connectConfig.getAddress() + ",autoReConnect=" + connectConfig.isAutoReConnect());
 				}
-				if(connectConfig.isAutoReConnect()){
+				if (connectConfig.isAutoReConnect()) {
 					client.connect(a[0], Integer.parseInt(a[1]), connectConfig);
 				}
 			} catch (Throwable e) {

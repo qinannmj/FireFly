@@ -18,9 +18,8 @@ public class ChainPrepareCallBackV0_0_1 extends PaxosPrepareCallBack {
 	private PaxosSession session;
 	private long instanceId; //just for trace
 
-	public ChainPrepareCallBackV0_0_1(InstancePrepareRequestProcessor processor, long instanceId, int needResponseCount, long messageId, PaxosSession session,
-			boolean isDebug) {
-		super(needResponseCount, needResponseCount, null, isDebug);
+	public ChainPrepareCallBackV0_0_1(InstancePrepareRequestProcessor processor, long instanceId, int needResponseCount, long messageId, PaxosSession session) {
+		super(needResponseCount, needResponseCount, null);
 		this.messageId = messageId;
 		this.session = session;
 		this.instanceId = instanceId;

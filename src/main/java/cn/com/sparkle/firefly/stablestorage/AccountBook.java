@@ -60,35 +60,36 @@ public class AccountBook {
 		logger.info("last waited execute instanceId:" + lastWaitExecuteInstanceId);
 
 		fileOperator = StoreVersion.loadRecordFileOperator(dir, lastWaitExecuteInstanceId, instanceExecutor, context);
-		
+
 	}
-	
-	public void initLoad() throws ClassNotFoundException, IOException, UnsupportedChecksumAlgorithm{
+
+	public void initLoad() throws ClassNotFoundException, IOException, UnsupportedChecksumAlgorithm {
 		fileOperator.loadData();
 		if (!fileOperator.isDamaged() && !isInitAndNoDamage) {
 			isInitAndNoDamage = true;
 			AccountBookEvent.doInitedEvent(context.getEventsManager());
-			if(context.getConfiguration().isDebugLog()){
+			if (logger.isDebugEnabled()) {
 				logger.debug("init load success!");
 			}
-		}else{
-			if(context.getConfiguration().isDebugLog()){
+		} else {
+			if (logger.isDebugEnabled()) {
 				logger.debug("init load failed!");
 			}
 		}
-		
+
 	}
-	
+
 	public void finishCurInstance(final long instanceId) throws IOException, UnsupportedChecksumAlgorithm {
 		instanceIdNoRedoHint = instanceId;
 	}
 
-	public boolean writeSuccessfulRecord(final long instanceId, final SuccessfulRecord.Builder successfulRecord, LinkedList<AddRequestPackage> addRequestPackages)
-			throws IOException, UnsupportedChecksumAlgorithm {
-		return writeSuccessfulRecord(instanceId, successfulRecord, addRequestPackages,null);
+	public boolean writeSuccessfulRecord(final long instanceId, final SuccessfulRecord.Builder successfulRecord,
+			LinkedList<AddRequestPackage> addRequestPackages) throws IOException, UnsupportedChecksumAlgorithm {
+		return writeSuccessfulRecord(instanceId, successfulRecord, addRequestPackages, null);
 	}
-	
-	public boolean  writeSuccessfulRecord(final long instanceId, final SuccessfulRecord.Builder successfulRecord, LinkedList<AddRequestPackage> addRequestPackages,Callable<Object> realEvent) throws IOException, UnsupportedChecksumAlgorithm{
+
+	public boolean writeSuccessfulRecord(final long instanceId, final SuccessfulRecord.Builder successfulRecord,
+			LinkedList<AddRequestPackage> addRequestPackages, Callable<Object> realEvent) throws IOException, UnsupportedChecksumAlgorithm {
 		boolean res = fileOperator.writeSuccessfulRecord(instanceId, successfulRecord, addRequestPackages, realEvent);
 		if (!fileOperator.isDamaged() && !isInitAndNoDamage) {
 			synchronized (this) {
@@ -100,6 +101,7 @@ public class AccountBook {
 		}
 		return res;
 	}
+
 	public long getInstanceIdNoRedoHint() {
 		return instanceIdNoRedoHint;
 	}

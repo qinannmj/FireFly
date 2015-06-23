@@ -13,7 +13,7 @@ public class PaxosVoteCallBack extends QuorumCallBack<Value> implements VoteCall
 	private ReentrantLock lock = new ReentrantLock();
 
 	public PaxosVoteCallBack(int quorum, int needResponseCount, PaxosInstance paxosInstance) {
-		super(quorum, needResponseCount, paxosInstance.debugLog);
+		super(quorum, needResponseCount);
 		this.paxosInstance = paxosInstance;
 	}
 

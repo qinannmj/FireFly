@@ -46,7 +46,7 @@ public class TestClient {
 		}
 		
 		final PaxosClient client = new PaxosClient(address, "target/classes/service_out_net.prop", type,
-				ChecksumUtil.NO_CHECKSUM, 2000, 1, 1000,10 * 1024 * 1024,true);
+				ChecksumUtil.NO_CHECKSUM, 2000, 1, 1000,10 * 1024 * 1024);
 		
 		
 

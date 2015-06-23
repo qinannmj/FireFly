@@ -89,7 +89,7 @@ public class DataChunk {
 	@SuppressWarnings("rawtypes")
 	public ReadResult initRead(long startInstanceId, ReadRecordCallback<Builder<? extends Builder>> readCallback) throws IOException,
 			UnsupportedChecksumAlgorithm {
-		if (context.getConfiguration().isDebugLog()) {
+		if (logger.isDebugEnabled()) {
 			logger.debug(String.format("initRead from:%s file:%s", startInstanceId, file.getAbsoluteFile()));
 		}
 		ReadResult r = readRecord(startInstanceId, Long.MAX_VALUE, readCallback);
@@ -143,7 +143,7 @@ public class DataChunk {
 		} else {
 			throw new RuntimeException(String.format("excepted successful instanceId %s , give instanceId %s", successfullInstanceId + 1, instanceId));
 		}
-		if (context.getConfiguration().isDebugLog()) {
+		if (logger.isDebugEnabled()) {
 			logger.debug("instanceId:" + instanceId + " isPlace " + (successRecord.getV().getType() == ValueType.PLACE.getValue()) + " successfullInstanceId "
 					+ successfullInstanceId);
 		}

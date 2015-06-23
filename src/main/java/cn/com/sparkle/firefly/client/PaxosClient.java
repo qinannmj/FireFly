@@ -21,7 +21,6 @@ public class PaxosClient {
 	private AtomicInteger flag = new AtomicInteger(0);
 	private AtomicLong responseInstanceId = new AtomicLong(-1);
 	@SuppressWarnings("unused")
-	private boolean debugLog;
 
 	/**
 	 * @param senator
@@ -40,45 +39,33 @@ public class PaxosClient {
 	public PaxosClient(String[] senator, String netLayerConfPath, String netLayerType, int preferChecksumType, int heartBeatInterval, int tcpConnectNum,
 			int masterDistance, int singleTcpWaitingMaxMem) throws Throwable {
 		this(senator, netLayerConfPath, netLayerType, preferChecksumType, heartBeatInterval, tcpConnectNum, masterDistance, ProtocolManager
-				.createClientProtocolManager(), singleTcpWaitingMaxMem, false);
+				.createClientProtocolManager(), singleTcpWaitingMaxMem);
 	}
+
+	public PaxosClient(String[] senator, String netLayerConfPath, String netLayerType, int preferChecksumType, int heartBeatInterval, int tcpConnectNum,
+			int masterDistance) throws Throwable {
+		this(senator, netLayerConfPath, netLayerType, preferChecksumType, heartBeatInterval, tcpConnectNum, masterDistance, ProtocolManager
+				.createClientProtocolManager());
+	}
+
 
 	public PaxosClient(String[] senator, String netLayerConfPath, String netLayerType, int preferChecksumType, int heartBeatInterval, int tcpConnectNum,
 			int masterDistance, ProtocolManager protocolManager) throws Throwable {
-		this(senator, netLayerConfPath, netLayerType, preferChecksumType, heartBeatInterval, tcpConnectNum, masterDistance, protocolManager, false);
+		this(senator, netLayerConfPath, netLayerType, preferChecksumType, heartBeatInterval, tcpConnectNum, masterDistance, protocolManager, 524288);
 	}
 
 	public PaxosClient(String[] senator, String netLayerConfPath, String netLayerType, int preferChecksumType, int heartBeatInterval, int tcpConnectNum,
-			int masterDistance, boolean debugLog) throws Throwable {
-		this(senator, netLayerConfPath, netLayerType, preferChecksumType, heartBeatInterval, tcpConnectNum, masterDistance, ProtocolManager
-				.createClientProtocolManager(), debugLog);
-	}
-
-	public PaxosClient(String[] senator, String netLayerConfPath, String netLayerType, int preferChecksumType, int heartBeatInterval, int tcpConnectNum,
-			int masterDistance, int singleTcpWaitingMaxMem, boolean debugLog) throws Throwable {
-		this(senator, netLayerConfPath, netLayerType, preferChecksumType, heartBeatInterval, tcpConnectNum, masterDistance, ProtocolManager
-				.createClientProtocolManager(), singleTcpWaitingMaxMem, debugLog);
-	}
-
-	public PaxosClient(String[] senator, String netLayerConfPath, String netLayerType, int preferChecksumType, int heartBeatInterval, int tcpConnectNum,
-			int masterDistance, ProtocolManager protocolManager, boolean debugLog) throws Throwable {
-		this(senator, netLayerConfPath, netLayerType, preferChecksumType, heartBeatInterval, tcpConnectNum, masterDistance, protocolManager, 524288, debugLog);
-	}
-
-	public PaxosClient(String[] senator, String netLayerConfPath, String netLayerType, int preferChecksumType, int heartBeatInterval, int tcpConnectNum,
-			int masterDistance, ProtocolManager protocolManager, int singleTcpWaitingMaxMem, boolean debugLog) throws Throwable {
+			int masterDistance, ProtocolManager protocolManager, int singleTcpWaitingMaxMem) throws Throwable {
 		masterDistance = Math.min(Constants.MAX_MASTER_DISTANCE, masterDistance);
-		this.debugLog = debugLog;
 		if (tcpConnectNum < 1) {
 			tcpConnectNum = 1;
 		}
-		CommandAsyncProcessor.init(netLayerConfPath, netLayerType, preferChecksumType, heartBeatInterval, protocolManager, debugLog);
+		CommandAsyncProcessor.init(netLayerConfPath, netLayerType, preferChecksumType, heartBeatInterval, protocolManager);
 		processor = new CommandAsyncProcessor[tcpConnectNum];
-		MasterHeartBeatDeamon heartBeatDeamon = new MasterHeartBeatDeamon(debugLog);
+		MasterHeartBeatDeamon heartBeatDeamon = new MasterHeartBeatDeamon();
 		heartBeatDeamon.setName("heartBeatDeamon");
 		for (int i = 0; i < tcpConnectNum; ++i) {
-			processor[i] = new CommandAsyncProcessor(senator, masterDistance, singleTcpWaitingMaxMem / 3, singleTcpWaitingMaxMem * 2 / 3, heartBeatDeamon,
-					debugLog);
+			processor[i] = new CommandAsyncProcessor(senator, masterDistance, singleTcpWaitingMaxMem / 3, singleTcpWaitingMaxMem * 2 / 3, heartBeatDeamon);
 			processor[i].runDeamon();
 		}
 

@@ -119,12 +119,12 @@ public class AddRequestDealer implements InstanceExecuteEventListener, InstanceP
 		Map<String, NetNode> initedActiveNodes = senators.getValidActiveNodes();
 
 		LookUpLatestInstanceIdCallBack callback = new LookUpLatestInstanceIdCallBack(QuorumCalcUtil.calcQuorumNum(senators.getNodeMembers().size(),
-				conf.getDiskMemLost()), initedActiveNodes.size(), conf.isDebugLog()) {
+				conf.getDiskMemLost()), initedActiveNodes.size()) {
 			@Override
 			public void finish(long instanceId) {
 				try {
 					lock.lock();
-					if (conf.isDebugLog()) {
+					if (logger.isDebugEnabled()) {
 						logger.debug("LookUpLatestInstanceIdCallBack result:" + instanceId);
 					}
 					if (isMaster) {
@@ -146,7 +146,7 @@ public class AddRequestDealer implements InstanceExecuteEventListener, InstanceP
 							// num is more than the count needed,when the server
 							// get the position of master.
 							int newNullCommandCount = (int) (instanceId - selfIncreaseInstanceId);
-							if (conf.isDebugLog()) {
+							if (logger.isDebugEnabled()) {
 								logger.debug("insert " + newNullCommandCount + " null command,current count is " + nullCommandCount);
 							}
 							for (int i = 0; i < newNullCommandCount - nullCommandCount; i++) {
@@ -224,7 +224,7 @@ public class AddRequestDealer implements InstanceExecuteEventListener, InstanceP
 				LinkedList<AddRequestPackage> list = new LinkedList<AddRequestPackage>();
 				// merge message from all client
 				do {
-					
+
 					AddRequestPackage arp = requestQueue.removeFirst();
 					String error = arp.testAdminToPaxosAble(); //test admin command if can execute
 					if (error == null) {
@@ -243,7 +243,7 @@ public class AddRequestDealer implements InstanceExecuteEventListener, InstanceP
 							curByteCount += arp.getValueByteSize();
 						}
 						list.add(arp);
-						if (conf.isDebugLog()) {
+						if (logger.isDebugEnabled()) {
 							logger.debug("requestQueue.size()" + requestQueue.size() + " list.size:" + list.size() + " curTcpPackageByteSize"
 									+ curTcpPackageByteSize);
 						}
@@ -374,7 +374,7 @@ public class AddRequestDealer implements InstanceExecuteEventListener, InstanceP
 						DealState ds = session.get(DEAL_STATE_KEY);
 						ds.isDealing = false;
 					}
-					if (conf.isDebugLog()) {
+					if (logger.isDebugEnabled()) {
 						logger.debug("this instanceId has succeeded! instanceId : " + instance.getInstanceId() + " nullCommandNum:" + nullCommandCount);
 					}
 				}
@@ -384,7 +384,7 @@ public class AddRequestDealer implements InstanceExecuteEventListener, InstanceP
 				// Constants.PAXOS_FAIL_FILE_DAMAGED indicates some file is damaged ,
 				// and the master can't study from others,and not enough
 				// node can provide this instance has succeeded
-				if (conf.isDebugLog()) {
+				if (logger.isDebugEnabled()) {
 					logger.debug("instance fail ,refuse id:" + refuseId);
 				}
 				boolean withPrepare = TimeUtil.currentTimeMillis() < withoutPreparePhaseTime;
@@ -431,7 +431,7 @@ public class AddRequestDealer implements InstanceExecuteEventListener, InstanceP
 	@Override
 	public void instanceSuccess(InstancePaxosInstance instance, Value value) {
 		try {
-			if (conf.isDebugLog()) {
+			if (logger.isDebugEnabled()) {
 				logger.debug("instance " + instance.getInstanceId() + " succeed!");
 			}
 			lock.lock();
@@ -442,11 +442,11 @@ public class AddRequestDealer implements InstanceExecuteEventListener, InstanceP
 
 				if (instance.getWantAssginValue() != value) {
 					context.getcState().getSelfState().addRecoverRecordFromMasterLossCount();
-					if (context.getConfiguration().isDebugLog()) {
+					if (logger.isDebugEnabled()) {
 						logger.debug("recover one command from master loss!");
 					}
 				} else {
-					if (context.getConfiguration().isDebugLog()) {
+					if (logger.isDebugEnabled()) {
 						logger.debug("null command successed");
 					}
 				}
@@ -477,13 +477,13 @@ public class AddRequestDealer implements InstanceExecuteEventListener, InstanceP
 							logger.error("AddRequestPackage:" + arp);
 							logger.error("session:" + arp.getSession());
 							logger.error("arp.valuesize:" + arp.getValueByteSize());
-							for(AddRequest addRequset : arp.getValueList()){
+							for (AddRequest addRequset : arp.getValueList()) {
 								logger.error("value:" + addRequset.getValue());
 							}
 						}
 					}
 					long realStartTime = Math.max(lastSuccessTime, instance.getStartTime());
-					if (conf.isDebugLog()) {
+					if (logger.isDebugEnabled()) {
 						logger.debug(String.format("instance success, cost %s", TimeUtil.currentTimeMillis() - realStartTime));
 					}
 					lastSuccessTime = TimeUtil.currentTimeMillis();
@@ -507,7 +507,7 @@ public class AddRequestDealer implements InstanceExecuteEventListener, InstanceP
 			lock.lock();
 			isMaster = true;
 			withoutPreparePhaseTime = TimeUtil.currentTimeMillis() + 5 * Constants.MAX_HEART_BEAT_INTERVAL;
-			if (context.getConfiguration().isDebugLog()) {
+			if (logger.isDebugEnabled()) {
 				logger.debug("withoutPreparePhaseTime: " + withoutPreparePhaseTime + " curtime: " + TimeUtil.currentTimeMillis());
 			}
 			reStartDeal();
@@ -530,7 +530,7 @@ public class AddRequestDealer implements InstanceExecuteEventListener, InstanceP
 				}
 			}
 			requestQueue.clear();
-			if (context.getConfiguration().isDebugLog()) {
+			if (logger.isDebugEnabled()) {
 				logger.debug("lost position!");
 			}
 		} finally {
@@ -555,6 +555,7 @@ public class AddRequestDealer implements InstanceExecuteEventListener, InstanceP
 	public PaxosMessageSender getSender() {
 		return builder.buildSender(context, conf.getPaxosSender());
 	}
+
 	public static void main(String[] args) {
 		AddRequest nullRequest = new AddRequest(-1, CommandType.ADMIN_WRITE, NULL_BYTES, -1);
 		AddRequestPackage nullRequestPackage = new AddRequestPackage(nullRequest, null, null);

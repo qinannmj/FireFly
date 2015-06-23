@@ -28,7 +28,7 @@ public class CatchUpCallBack {
 	}
 
 	public void fail() {
-		if(conf.isDebugLog()){
+		if (logger.isDebugEnabled()) {
 			logger.debug("study failed!");
 		}
 		future.set(false);
@@ -46,7 +46,7 @@ public class CatchUpCallBack {
 	}
 
 	public void finish() {
-		if (conf.isDebugLog()) {
+		if (logger.isDebugEnabled()) {
 			logger.debug("study " + studyNum + " successful records");
 		}
 		future.set(true);

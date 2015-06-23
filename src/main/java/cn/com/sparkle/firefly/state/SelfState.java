@@ -31,8 +31,6 @@ public class SelfState implements ConfigureEventListener{
 	private Context context;
 
 
-	private boolean isDebug;
-	
 	public SelfState(EventsManager eventManager,String selfAddress){
 		eventManager.registerListener(this);
 		this.selfAddress = selfAddress;
@@ -46,7 +44,6 @@ public class SelfState implements ConfigureEventListener{
 		electionVoteIdBySelf = new ElectionId("", 0, context.getConfiguration().getConfigNodeSet().getVersion());
 		electionPrepareId = new ElectionId("", -1, context.getConfiguration().getConfigNodeSet().getVersion());
 		electionLastVoteId = context.getAccountBook().getKnowedMaxInstanceId();
-		isDebug = context.getConfiguration().isDebugLog();
 		isSenator = context.getConfiguration().getConfigNodeSet().getSenatorsMap().containsKey(context.getConfiguration().getSelfAddress());
 	}
 	
@@ -63,7 +60,7 @@ public class SelfState implements ConfigureEventListener{
 			electionLastVoteId = context.getAccountBook().getKnowedMaxInstanceId() > electionLastVoteId ? context.getAccountBook().getKnowedMaxInstanceId()
 					: electionLastVoteId;
 
-			if (isDebug) {
+			if (logger.isDebugEnabled()) {
 				String sample = compareResult == 1 ? ">" : (compareResult == 0 ? "=" : "<");
 				logger.debug(String.format("%s%s%s%s%s peerLastVoteId:%s selfLastVoteId:%s peerConfVersion:%s selfConfVersion:%s", id.getIncreaseId(),
 						id.getAddress(), sample, electionPrepareId.getIncreaseId(), electionPrepareId.getAddress()
@@ -90,7 +87,7 @@ public class SelfState implements ConfigureEventListener{
 
 	public void addPaxosPipelineProcessCount() {
 		++paxosPipelineProcessCount;
-		if (isDebug) {
+		if (logger.isDebugEnabled()) {
 			if ((paxosPipelineProcessCount) % 1000 == 0) {
 				logger.debug("add count " + paxosPipelineProcessCount);
 			}

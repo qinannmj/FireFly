@@ -30,7 +30,7 @@ public class ConfigClient {
 	private ConcurrentHashMap<String, LocalValue> localCache = new ConcurrentHashMap<String, LocalValue>();
 
 	public ConfigClient(String[] server, String path) throws Throwable {
-		paxosClient = new PaxosClient(server, path, "raptor", ChecksumUtil.PURE_JAVA_CRC32, 2000, 3, 2, false);
+		paxosClient = new PaxosClient(server, path, "raptor", ChecksumUtil.PURE_JAVA_CRC32, 2000, 3, 2);
 		operator = paxosClient.getOperator();
 	}
 

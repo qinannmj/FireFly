@@ -43,29 +43,30 @@ public class ClusterStateProcessor extends AbstractAdminProcessor {
 		PaxosMessageSender sender = context.getAddRequestDealer().getSender();
 		pw.println(String.format("sender-info=%s", sender == null ? "" : sender.linkInfo()));
 		long remainTime = (context.getAddRequestDealer().getWithoutPreparePhaseTime() - TimeUtil.currentTimeMillis()) / 1000;
-		if (context.getConfiguration().isDebugLog()) {
+		if (logger.isDebugEnabled()) {
 			logger.debug("withoutPreparePhaseTime: " + context.getAddRequestDealer().getWithoutPreparePhaseTime() + "  remainTime: " + remainTime);
 		}
 		pw.println(String.format("prepare-optimized-status=%s", remainTime <= 0 ? "optimized" : " remained " + remainTime + "s"));
 		pw.println();
 		pw.println("senators status:");
-		pw.println(String.format(SENATOR_FORMAT, "id","room", "isMasterConnected", "lastHeartTime", "maxLogId", "master-distance", "isUpToDate"));
+		pw.println(String.format(SENATOR_FORMAT, "id", "room", "isMasterConnected", "lastHeartTime", "maxLogId", "master-distance", "isUpToDate"));
 		NodesCollection collections = context.getcState().getSenators();
 		for (NodeState ns : collections.getNodeStates().values()) {
-			String masterDistance = ns.getMasterDistance() + ((ns.getMasterDistance() == 0 && ns.isConnected()) ? "(master)" : (ns.isArbitrator()?"(arbitrator)":""));
+			String masterDistance = ns.getMasterDistance()
+					+ ((ns.getMasterDistance() == 0 && ns.isConnected()) ? "(master)" : (ns.isArbitrator() ? "(arbitrator)" : ""));
 			String room = ns.getRoom();
-			pw.println(String.format(SENATOR_FORMAT, ns.getAddress(),room, ns.isConnected(), sdf.format(new Date(ns.getLastBeatHeatTime())),
+			pw.println(String.format(SENATOR_FORMAT, ns.getAddress(), room, ns.isConnected(), sdf.format(new Date(ns.getLastBeatHeatTime())),
 					ns.getLastCanExecuteInstanceId(), masterDistance, ns.isUpToDate()));
 		}
-		
+
 		pw.println();
 		pw.println("followers status:");
 		pw.println(String.format(FOLLOWER_FORMAT, "id", "room", "isMasterConnected", "lastHeartTime", "maxLogId", "master-distance", "isUpToDate"));
 		for (NodeState ns : context.getcState().getFollowers()) {
 			String masterDistance = ns.getMasterDistance() + ((ns.getMasterDistance() == 0 && ns.isConnected()) ? "(master)" : "");
-			if(ns.getLastBeatHeatTime() + Constants.MAX_HEART_BEAT_INTERVAL * 2 > TimeUtil.currentTimeMillis()){
+			if (ns.getLastBeatHeatTime() + Constants.MAX_HEART_BEAT_INTERVAL * 2 > TimeUtil.currentTimeMillis()) {
 				String room = ns.getRoom();
-				pw.println(String.format(FOLLOWER_FORMAT, ns.getAddress(),room, ns.isConnected(), sdf.format(new Date(ns.getLastBeatHeatTime())),
+				pw.println(String.format(FOLLOWER_FORMAT, ns.getAddress(), room, ns.isConnected(), sdf.format(new Date(ns.getLastBeatHeatTime())),
 						ns.getLastCanExecuteInstanceId(), masterDistance, ns.isUpToDate()));
 			}
 		}
@@ -79,7 +80,7 @@ public class ClusterStateProcessor extends AbstractAdminProcessor {
 
 	@Override
 	public String[] getName() {
-		return new String[]{Commands.CLSTUER_STATE,Commands.CLSTUER_STATE1};
+		return new String[] { Commands.CLSTUER_STATE, Commands.CLSTUER_STATE1 };
 	}
 
 }

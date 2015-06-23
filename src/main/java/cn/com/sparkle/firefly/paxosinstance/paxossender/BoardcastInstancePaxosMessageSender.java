@@ -84,7 +84,7 @@ public class BoardcastInstancePaxosMessageSender extends AbstractInstancePaxosMe
 		}
 		stringBuffer.append("]");
 		linkInfo = stringBuffer.toString();
-		if (conf.isDebugLog()) {
+		if (logger.isDebugEnabled()) {
 			logger.debug(linkInfo);
 		}
 	}

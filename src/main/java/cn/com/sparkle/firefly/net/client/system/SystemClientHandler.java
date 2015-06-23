@@ -69,7 +69,7 @@ public class SystemClientHandler implements NetHandler {
 		session.put(PaxosSessionKeys.ADDRESS_KEY, node.getAddress()); //just for record the address of this node
 		if (node.isValid()) {
 			processor.onConnect(session);
-			negotiationProcessor.negotiation(session, conf.getSelfAddress(),node.getAddress());
+			negotiationProcessor.negotiation(session, conf.getSelfAddress(), node.getAddress());
 		} else {
 			session.closeSession();
 		}
@@ -94,7 +94,7 @@ public class SystemClientHandler implements NetHandler {
 		public void reConnect(Object value) {
 			ConfigNode node = (ConfigNode) value;
 			try {
-				if (conf.isDebugLog()) {
+				if (logger.isDebugEnabled()) {
 					log.debug("reConnect " + node.getAddress() + " " + node.isValid());
 				}
 				if (node.isValid()) {

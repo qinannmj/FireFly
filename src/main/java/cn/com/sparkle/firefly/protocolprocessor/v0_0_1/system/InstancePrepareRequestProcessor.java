@@ -39,28 +39,28 @@ public class InstancePrepareRequestProcessor extends AbstractProtocolV0_0_1Proce
 		if (messagePackage.hasInstancePrepareRequest()) {
 
 			InstancePrepareRequest request = messagePackage.getInstancePrepareRequest();
-			if (context.getConfiguration().isDebugLog()) {
+			if (logger.isDebugEnabled()) {
 				logger.debug("prepare instanceId:" + request.getInstanceId());
 			}
 			//check master address
 			if (!request.getId().getAddress().equals(context.getcState().getLastElectionId().getAddress())) {
-				ChainPrepareCallBackV0_0_1 chainPrepareCallBack = new ChainPrepareCallBackV0_0_1(this, request.getInstanceId(), 1,
-						messagePackage.getId(), session, context.getConfiguration().isDebugLog());
+				ChainPrepareCallBackV0_0_1 chainPrepareCallBack = new ChainPrepareCallBackV0_0_1(this, request.getInstanceId(), 1, messagePackage.getId(),
+						session);
 				//response time out to requester
 				chainPrepareCallBack.callBad(Constants.PAXOS_FAIL_TIME_OUT, null);
 			} else {
 				int needResponseCount = request.getChainCount() == 0 ? 1 : 2;
 				ChainPrepareCallBackV0_0_1 chainPrepareCallBack = new ChainPrepareCallBackV0_0_1(this, request.getInstanceId(), needResponseCount,
-						messagePackage.getId(), session, context.getConfiguration().isDebugLog());
-				doPrepare(request,chainPrepareCallBack);
+						messagePackage.getId(), session);
+				doPrepare(request, chainPrepareCallBack);
 			}
 		} else {
 			super.fireOnReceive(messagePackage, session);
 		}
 	}
-	private void doPrepare(InstancePrepareRequest request,final ChainPrepareCallBackV0_0_1 chainPrepareCallBack){
+
+	private void doPrepare(InstancePrepareRequest request, final ChainPrepareCallBackV0_0_1 chainPrepareCallBack) {
 		try {
-			
 
 			final long ct = TimeUtil.currentTimeMillis();
 			long result = context.getAccountBook().writePrepareRecord(request.getInstanceId(), request.getId(), new PrepareRecordRealWriteEvent() {
@@ -69,7 +69,7 @@ public class InstancePrepareRequestProcessor extends AbstractProtocolV0_0_1Proce
 					Id id = record.hasHighestVotedNum() ? record.getHighestVotedNum() : record.getHighestJoinNum();
 					Value value = record.hasHighestValue() ? record.getHighestValue() : null;
 					chainPrepareCallBack.callGood(id, value);
-					if (context.getConfiguration().isDebugLog()) {
+					if (logger.isDebugEnabled()) {
 						logger.debug("instanceId: " + instanceId + " prepare succeeded write file cost:" + (TimeUtil.currentTimeMillis() - ct)
 								+ " value isNull:" + (value == null));
 					}
@@ -79,7 +79,7 @@ public class InstancePrepareRequestProcessor extends AbstractProtocolV0_0_1Proce
 				public void instanceSucceeded(long instanceId, SuccessfulRecord record) {
 					//indicate the instance has succeed,and has not put to execute queue
 					chainPrepareCallBack.callBad(Constants.PAXOS_FAIL_INSTANCE_SUCCEEDED, ValueTranslator.toValue(record.getV()));
-					if (context.getConfiguration().isDebugLog()) {
+					if (logger.isDebugEnabled()) {
 						logger.debug("prepare instanceId:" + instanceId + " refused.the instance has succeeded.");
 					}
 				}
@@ -90,7 +90,7 @@ public class InstancePrepareRequestProcessor extends AbstractProtocolV0_0_1Proce
 					//in this condition , this node can response timeout to master launched this instance vote,
 					//The the master will study this instance through the process of catch up.
 					chainPrepareCallBack.callBad(Constants.PAXOS_FAIL_INSTANCE_SUCCEEDED, null);
-					if (context.getConfiguration().isDebugLog()) {
+					if (logger.isDebugEnabled()) {
 						logger.debug("prepare instanceId:" + instanceId + " refused.the instance has succeeded.");
 					}
 				}
@@ -98,9 +98,9 @@ public class InstancePrepareRequestProcessor extends AbstractProtocolV0_0_1Proce
 
 			if (result != Constants.FILE_WRITE_SUCCESS) {// failed
 				chainPrepareCallBack.callBad(result, null);
-				if (context.getConfiguration().isDebugLog()) {
-					logger.debug("prepare refused: instanceId " + request.getInstanceId() + "  conflict with highestJoinNum:" + result
-							+ " exceptedJoinNum:" + request.getId().getIncreaseId() + ":" + request.getId().getAddress());
+				if (logger.isDebugEnabled()) {
+					logger.debug("prepare refused: instanceId " + request.getInstanceId() + "  conflict with highestJoinNum:" + result + " exceptedJoinNum:"
+							+ request.getId().getIncreaseId() + ":" + request.getId().getAddress());
 				}
 			}
 

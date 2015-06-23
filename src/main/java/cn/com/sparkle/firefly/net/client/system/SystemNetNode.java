@@ -36,12 +36,13 @@ public class SystemNetNode extends NetNode {
 	private final long INSERT_SUCCESSFUL_MESSAGE_BYTE_SIZE;
 
 	private int userPort;
-	
+
 	private boolean isArbitrator;
 
 	private Configuration conf;
 
-	public SystemNetNode(Configuration conf, PaxosSession session, String address, int userPort, Protocol protocol, String appVersion, int heartBeatnterval ,boolean isArbitrator) {
+	public SystemNetNode(Configuration conf, PaxosSession session, String address, int userPort, Protocol protocol, String appVersion, int heartBeatnterval,
+			boolean isArbitrator) {
 		super(session, address, protocol, appVersion, heartBeatnterval);
 		this.syncSuccessfulMessageStrategy = SyncStrategyFactory.build(conf);
 		INSERT_SUCCESSFUL_MESSAGE_BYTE_SIZE = conf.getSessionSuccessSyncMaxMem() / 4;
@@ -141,19 +142,19 @@ public class SystemNetNode extends NetNode {
 
 	private ReentrantLock successLock = new ReentrantLock();
 	private long successfulMessageMayBeHeldUp = 0;
-	private final static Logger logger = Logger.getLogger(SystemNetNode.class); 
+	private final static Logger logger = Logger.getLogger(SystemNetNode.class);
 
 	public void sendInstanceSuccessMessage(long instanceId, Id id, Value value, List<String> notifyList, List<SuccessTransportConfig> notifyChain)
 			throws InterruptedException {
-		if(conf.isDebugLog()){
+		if (logger.isDebugEnabled()) {
 			logger.debug("isArbitrator " + isArbitrator + "  value" + (value != null) + " id " + id);
 		}
-		if(isArbitrator && value != null){
+		if (isArbitrator && value != null) {
 			/*if value is null indicates the node is quorum.And if the node is arbitrator , 
-			must be transport to the arbitrator to help node clear the mem of vote record.*/ 
+			must be transport to the arbitrator to help node clear the mem of vote record.*/
 			return;
 		}
-		
+
 		long packageId = -1;
 		try {
 			successLock.lock();
@@ -200,10 +201,10 @@ public class SystemNetNode extends NetNode {
 		}
 	}
 
-	public void sendCatchUpRequest(long instanceId, int size,boolean isArbitrator, CatchUpCallBack callback) {
+	public void sendCatchUpRequest(long instanceId, int size, boolean isArbitrator, CatchUpCallBack callback) {
 		CallBack<? extends Object> _callBack = new CatchUpCallBackV0_0_1(callback);
 		long packageId = generatePackageId();
-		byte[] request = getProtocol().createCatchUpRequest(packageId, instanceId, size,isArbitrator);
+		byte[] request = getProtocol().createCatchUpRequest(packageId, instanceId, size, isArbitrator);
 		try {
 			write(request, packageId, _callBack);
 		} catch (NetCloseException e) {

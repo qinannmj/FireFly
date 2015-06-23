@@ -70,7 +70,7 @@ public class AdminCmd {
 		String contextPath = AdminCmd.class.getResource("/").getPath();
 		PropertyConfigurator.configure(contextPath + "cmdlog4j.properties");
 		final PaxosClient client = new PaxosClient(args, contextPath+ "conf10000/service_out_net.prop", "netty", ChecksumUtil.PURE_JAVA_CRC32, 2000, 1,
-				999999, false);
+				999999);
 		PaxosOperater operater = client.getOperator();
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 		while (true) {

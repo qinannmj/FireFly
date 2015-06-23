@@ -2,8 +2,11 @@ package cn.com.sparkle.raptor.core.buff;
 
 import java.nio.ByteBuffer;
 
+import org.apache.log4j.Logger;
+
 public class IoBufferArray {
 	private IoBuffer[] ioBuffArray;
+	private final static Logger logger = Logger.getLogger(IoBufferArray.class);
 
 	public IoBufferArray(IoBuffer[] ioBuffArray) {
 		this.ioBuffArray = ioBuffArray;
@@ -20,7 +23,9 @@ public class IoBufferArray {
 			try {
 				byteBuffer.put(src, offset, canWriteLength);
 			} catch (java.lang.RuntimeException e) {
-				System.out.println(src.length + "  " + offset + "   " + canWriteLength + "   " + byteBuffer.remaining());
+				if(logger.isDebugEnabled()){
+					logger.debug(src.length + "  " + offset + "   " + canWriteLength + "   " + byteBuffer.remaining());
+				}
 				throw e;
 			}
 			length -= canWriteLength;

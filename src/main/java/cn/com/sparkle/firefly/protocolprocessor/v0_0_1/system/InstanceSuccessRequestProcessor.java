@@ -45,8 +45,9 @@ public class InstanceSuccessRequestProcessor extends AbstractProtocolV0_0_1Proce
 	public void receive(MessagePackage messagePackage, PaxosSession session) throws InterruptedException {
 		if (messagePackage.hasInstanceSuccessMessage()) {
 			InstanceSuccessMessage message = messagePackage.getInstanceSuccessMessage();
-			if(this.conf.isDebugLog()){
-				logger.debug("instanceid " +  message.getId() + " " + message.getHighestVoteNum() + " value " + message.hasValue() + " isArbitratorV " + (message.hasValue() ? message.getValue().getType() == ValueType.PLACE.getValue() : false) );
+			if (logger.isDebugEnabled()) {
+				logger.debug("instanceid " + message.getId() + " " + message.getHighestVoteNum() + " value " + message.hasValue() + " isArbitratorV "
+						+ (message.hasValue() ? message.getValue().getType() == ValueType.PLACE.getValue() : false));
 			}
 			try {
 
@@ -72,12 +73,12 @@ public class InstanceSuccessRequestProcessor extends AbstractProtocolV0_0_1Proce
 						InstanceSuccessTransport transport = notifyChainList.remove(0);
 						if (transport.getIsTransValue()) {
 							trySendSuccess(transport.getAddress(), message.getId(), id, v, transport.getNotifyAddressList(), notifyChainList);
-							if (conf.isDebugLog()) {
+							if (logger.isDebugEnabled()) {
 								logger.debug("transport with value to " + transport.getAddress());
 							}
 						} else {
 							trySendSuccess(transport.getAddress(), message.getId(), id, null, transport.getNotifyAddressList(), notifyChainList);
-							if (conf.isDebugLog()) {
+							if (logger.isDebugEnabled()) {
 								logger.debug("transport without value to " + transport.getAddress());
 							}
 						}
@@ -86,7 +87,7 @@ public class InstanceSuccessRequestProcessor extends AbstractProtocolV0_0_1Proce
 						//this node need to notify nodes not in quorum
 						for (String address : notifyList) {
 							trySendSuccess(address, message.getId(), id, v, null, null);
-							if (conf.isDebugLog()) {
+							if (logger.isDebugEnabled()) {
 								logger.debug("notify with value to " + address);
 							}
 						}
@@ -99,7 +100,7 @@ public class InstanceSuccessRequestProcessor extends AbstractProtocolV0_0_1Proce
 					super.sendResponse(session, MessagePackage.newBuilder().setId(messagePackage.getId()).setIsLast(true).build().toByteArray());
 				}
 
-				if (conf.isDebugLog()) {
+				if (logger.isDebugEnabled()) {
 					logger.debug("instanceId:" + message.getId() + " succeeded");
 				}
 			} catch (IOException e) {

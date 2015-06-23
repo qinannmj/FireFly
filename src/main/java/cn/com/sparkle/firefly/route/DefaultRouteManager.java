@@ -79,7 +79,7 @@ public class DefaultRouteManager implements RouteManage, MasterDistanceChangeLis
 		}
 		upLevelAddress = upAddress;
 		upLevelNetNode = upNode;
-		if(conf.isDebugLog()){
+		if(logger.isDebugEnabled()){
 			logger.debug("uplevel node :" + upLevelAddress);
 		}
 		return upLevelAddress;

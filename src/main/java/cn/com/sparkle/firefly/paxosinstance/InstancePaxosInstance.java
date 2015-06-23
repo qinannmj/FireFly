@@ -31,7 +31,7 @@ public class InstancePaxosInstance extends PaxosInstance {
 	private Context context;
 
 	public InstancePaxosInstance(PaxosMessageSender sender, long instanceId, Id id, LinkedList<AddRequestPackage> addRequestPackages, Context context) {
-		super(sender, instanceId, id.getAddress(), context.getConfiguration().isDebugLog());
+		super(sender, instanceId, id.getAddress());
 		this.context = context;
 		this.id = id;
 		this.addRequestPackages = addRequestPackages;
@@ -63,7 +63,7 @@ public class InstancePaxosInstance extends PaxosInstance {
 
 	@Override
 	public void voteSuccess(Value value) {
-		if (debugLog) {
+		if (logger.isDebugEnabled()) {
 			logger.debug("instanceId:" + instanceId + " isWantedValue:" + (value == wantedValue));
 		}
 		InstancePaxosEvent.doSuccessEvent(context.getEventsManager(), this, value);

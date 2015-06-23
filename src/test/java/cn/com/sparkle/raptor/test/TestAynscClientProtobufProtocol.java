@@ -44,7 +44,7 @@ public class TestAynscClientProtobufProtocol {
 //		protocol.registerMessage(1, PersonMessage.Person.getDefaultInstance());
 		
 		TestAynscClientProtobufProtocolHandler ih = new TestAynscClientProtobufProtocolHandler();
-		IoHandler handler = new MultiThreadHandler( 20, 300, 60, TimeUnit.SECONDS,new CodecHandler(16 *1024, 4 * 1024, protocol, ih)  );
+		IoHandler handler = new MultiThreadHandler( 20, 300, 60, TimeUnit.SECONDS,new CodecHandler(1024, 64 * 1024, protocol, ih)  );
 		for(int i = 0 ; i < 1 ; i++){
 //		while(true){
 			WaitFinishConnect wfc = new WaitFinishConnect();
@@ -117,7 +117,7 @@ class TestAynscClientProtobufProtocolHandler implements IoHandler{
 						Person.Builder builder = Person.newBuilder().setId(++i).setName(soure);
 //						AddressBook.Builder ab = AddressBook.newBuilder().addPerson(builder);
 						CountDownLatch c = send(builder.build(),session);
-//						c.await();
+						c.await();
 //						break;
 					} catch (Exception e) {
 						e.printStackTrace();

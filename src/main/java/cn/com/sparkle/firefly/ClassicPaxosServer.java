@@ -76,13 +76,13 @@ public class ClassicPaxosServer implements AccountBookEventListener, ConfigureEv
 		
 		
 
-		client = NetFactory.makeClient(configuration.getNetLayer(), configuration.isDebugLog());
+		client = NetFactory.makeClient(configuration.getNetLayer());
 
 		ClusterState clusterState = new ClusterState(eManager, configuration);
 		this.context = new Context(configuration, clusterState, eManager);
 		handler = new SystemServerHandler(getEventsManager(), configuration);
 		//init server
-		NetServer server = NetFactory.makeServer(configuration.getNetLayer(), configuration.isDebugLog());
+		NetServer server = NetFactory.makeServer(configuration.getNetLayer());
 		server.init(configuration.getFilePath() + "/system_in_net.prop", configuration.getHeartBeatInterval(), handler,configuration.getIp(), configuration.getPort(), "systemserver");
 		//initiate instance executor
 		InstanceExecutor ie = new InstanceExecutor(context, userHandlerInterface, lastExceptInstanceId == null ? -1 : lastExceptInstanceId);
@@ -171,7 +171,7 @@ public class ClassicPaxosServer implements AccountBookEventListener, ConfigureEv
 		EventsManager eventsManager = context.getEventsManager();
 		Configuration conf = context.getConfiguration();
 		UserServerHandler handler = new UserServerHandler(eventsManager, conf, userHandlerInterface, context.getProtocolManager());
-		NetServer server = NetFactory.makeServer(conf.getNetLayer(), conf.isDebugLog());
+		NetServer server = NetFactory.makeServer(conf.getNetLayer());
 		server.init(conf.getFilePath() + "/service_in_net.prop", conf.getHeartBeatInterval(), handler,conf.getIp(), conf.getClientPort(), "userserver");
 
 		server.listen();

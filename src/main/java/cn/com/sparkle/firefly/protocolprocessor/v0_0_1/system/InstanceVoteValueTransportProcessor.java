@@ -51,7 +51,7 @@ public class InstanceVoteValueTransportProcessor extends AbstractProtocolV0_0_1P
 
 			instanceState.getV().fill(partValue);
 
-			if (context.getConfiguration().isDebugLog()) {
+			if (logger.isDebugEnabled()) {
 				logger.debug(String.format("value transport pipe recv : %s / %s messageId:%s", instanceState.getV().length(), instanceState.getDataLength(),messagePackage.getId()));
 			}
 			
@@ -90,7 +90,7 @@ public class InstanceVoteValueTransportProcessor extends AbstractProtocolV0_0_1P
 			@Override
 			public void successWrite(long instanceId, InstanceVoteRecord record) {
 				chainCallback.call(Constants.VOTE_OK, null);
-				if (conf.isDebugLog()) {
+				if (logger.isDebugEnabled()) {
 					logger.debug("isntanceId:" + instanceId + "vote succeed write file cost:" + (TimeUtil.currentTimeMillis() - ct));
 				}
 			}
@@ -98,7 +98,7 @@ public class InstanceVoteValueTransportProcessor extends AbstractProtocolV0_0_1P
 			@Override
 			public void instanceSucceeded(long instanceId, SuccessfulRecord record) {
 				chainCallback.call(Constants.PAXOS_FAIL_INSTANCE_SUCCEEDED, ValueTranslator.toValue(record.getV()));
-				if (conf.isDebugLog()) {
+				if (logger.isDebugEnabled()) {
 					logger.debug("isntanceId:" + instanceId + "vote fail, the instance has succeeded!");
 				}
 			}
@@ -106,7 +106,7 @@ public class InstanceVoteValueTransportProcessor extends AbstractProtocolV0_0_1P
 			@Override
 			public void instanceExecuted(long instanceId) {
 				chainCallback.call(Constants.PAXOS_FAIL_INSTANCE_SUCCEEDED, null);
-				if (conf.isDebugLog()) {
+				if (logger.isDebugEnabled()) {
 					logger.debug("isntanceId:" + instanceId + "vote fail, the instance has succeeded!");
 				}
 			}
@@ -117,11 +117,11 @@ public class InstanceVoteValueTransportProcessor extends AbstractProtocolV0_0_1P
 					.writeVotedRecord(request.getInstanceId(), request.getVoteId(), ValueTranslator.toStoreModelValue(value).build(), realWriteEvent);
 			if (result != Constants.FILE_WRITE_SUCCESS) {
 				chainCallback.call(result, null);
-				if (conf.isDebugLog()) {
+				if (logger.isDebugEnabled()) {
 					logger.debug("isntanceId:" + request.getInstanceId() + " vote refused");
 				}
 			} else {
-				if (conf.isDebugLog()) {
+				if (logger.isDebugEnabled()) {
 					logger.debug("vote wait real write event");
 				}
 			}

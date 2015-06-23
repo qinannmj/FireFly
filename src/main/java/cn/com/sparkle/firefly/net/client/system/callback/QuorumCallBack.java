@@ -15,12 +15,10 @@ public abstract class QuorumCallBack<T> {
 	private long error = Constants.PAXOS_FAIL_TIME_OUT;
 	private T errorCause;
 
-	private boolean isDebug;
 
-	public QuorumCallBack(int quorum, int needResponseCount, boolean isDebug) {
+	public QuorumCallBack(int quorum, int needResponseCount) {
 		this.needResponseCount = needResponseCount;
 		this.quorum = quorum;
-		this.isDebug = isDebug;
 	}
 
 	protected void netBad() {
@@ -46,7 +44,7 @@ public abstract class QuorumCallBack<T> {
 	}
 
 	private void checkCount() {
-		if (isDebug) {
+		if (logger.isDebugEnabled()) {
 			logger.debug(toString() + "goodNum:" + goodNum + " badNum:" + badNum + " netBadNum:" + netBadNum + " needResponseCount:" + needResponseCount);
 		}
 		if (goodNum == quorum) {

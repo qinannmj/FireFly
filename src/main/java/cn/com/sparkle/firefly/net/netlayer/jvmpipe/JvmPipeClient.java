@@ -15,14 +15,9 @@ public class JvmPipeClient implements NetClient {
 	private final static AtomicLong atomicLong = new AtomicLong(0);
 	private NetClient netClient;
 	
-	private boolean isDebug;
-	
-	
-	
 
-	public JvmPipeClient(NetClient netClient,boolean isDebug) {
+	public JvmPipeClient(NetClient netClient) {
 		this.netClient = netClient;
-		this.isDebug = isDebug;
 	}
 
 	@Override
@@ -39,7 +34,7 @@ public class JvmPipeClient implements NetClient {
 			serverSession.setPeer(clientSession);
 			netClient.getHandler().onConnect(clientSession, connectAttachment);
 			serverHandler.onConnect(serverSession, null);
-			if(isDebug){
+			if(logger.isDebugEnabled()){
 				logger.debug("build a injvm pipe,id:" + flag);
 			}
 			return future;

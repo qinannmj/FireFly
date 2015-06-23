@@ -33,14 +33,14 @@ public class SpeedControlModel implements InstancePaxosEventListener, InstanceEx
 	@Override
 	public void instanceSuccess(InstancePaxosInstance instance, Value value) {
 		int valueSize = value.length();
-		if (conf.isDebugLog()) {
+		if (logger.isDebugEnabled()) {
 			logger.debug(String.format("valuesize:%s instanceStartTime:%s lastSuccessTime:%s",valueSize,instance.getStartTime(),lastSuccessTime) );
 		}
 		long curRealStartTime = Math.max(instance.getStartTime(), lastSuccessTime);
 		if (TimeUtil.currentTimeMillis() - curRealStartTime < conf.getResponseDelay()) {
 			int promoteSize = valueSize * 2;
 
-			if (conf.isDebugLog()) {
+			if (logger.isDebugEnabled()) {
 				logger.debug("up promoteSize :" + promoteSize + " curTcpPackageSize:" + curTcpPackageSize);
 			}
 			if (promoteSize > curTcpPackageSize) {
@@ -48,7 +48,7 @@ public class SpeedControlModel implements InstancePaxosEventListener, InstanceEx
 			}
 		} else {
 			int promoteSize = (int) Math.floor(valueSize * 0.75);
-			if (conf.isDebugLog()) {
+			if (logger.isDebugEnabled()) {
 				logger.debug("down promoteSize :" + promoteSize + " curTcpPackageSize:" + curTcpPackageSize);
 			}
 			if (promoteSize < curTcpPackageSize) {
@@ -65,7 +65,7 @@ public class SpeedControlModel implements InstancePaxosEventListener, InstanceEx
 	@Override
 	public void maxPackageSizeChange(int curMaxPackageSize) {
 		curTcpPackageSize = curMaxPackageSize;
-		if (conf.isDebugLog()) {
+		if (logger.isDebugEnabled()) {
 			logger.debug("maxPackageSizeChange cur value=" + curMaxPackageSize);
 		}
 

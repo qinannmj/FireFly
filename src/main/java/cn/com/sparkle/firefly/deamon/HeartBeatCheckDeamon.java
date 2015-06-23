@@ -64,7 +64,7 @@ public class HeartBeatCheckDeamon extends Thread implements NodeStateChangeEvent
 							nodeState.setUpToDate(isUptoDate);
 							nodeState.setConnectedValidNode(list);
 							node.sendActiveHeartBeat(nodeState,distance);
-							if (context.getConfiguration().isDebugLog()) {
+							if (logger.isDebugEnabled()) {
 								logger.debug("send active heartbeat to master by pass!");
 							}
 						}
@@ -91,7 +91,7 @@ public class HeartBeatCheckDeamon extends Thread implements NodeStateChangeEvent
 	@Override
 	public void openConnect(NetNode nNode) {
 		PriorNode priorNode = new PriorNode(nNode.getHeartBeatInterval(), (SystemNetNode) nNode);
-		if (context.getConfiguration().isDebugLog()) {
+		if (logger.isDebugEnabled()) {
 			logger.debug("add node to check heart beat queue, interval " + nNode.getHeartBeatInterval());
 		}
 		queue.add(priorNode);

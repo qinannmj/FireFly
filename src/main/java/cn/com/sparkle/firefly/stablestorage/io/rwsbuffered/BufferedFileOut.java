@@ -167,7 +167,7 @@ public class BufferedFileOut implements RecordFileOut, PriorChangeable {
 			if (old == 0) {
 				finishCondition.signal();
 			}
-			if (flushThreadGroup.isDebug()) {
+			if (logger.isDebugEnabled()) {
 				logger.debug(String.format("finish a node flush, waiting size %s instance %s", waitedWriteBuffSize.get(), this));
 			}
 		} finally {
@@ -199,7 +199,7 @@ public class BufferedFileOut implements RecordFileOut, PriorChangeable {
 				raf.setLength(fileLength);
 				raf.getChannel().force(true);
 				raf.close();
-				if (flushThreadGroup.isDebug()) {
+				if (logger.isDebugEnabled()) {
 					logger.debug(String.format("close file[filename:%s lenght:%s wait %s] instance %s", filename, fileLength, waitedWriteBuffSize.get(), this));
 				}
 				return;
@@ -219,7 +219,7 @@ public class BufferedFileOut implements RecordFileOut, PriorChangeable {
 				raf.setLength(fileLength);
 				raf.getChannel().force(true);
 				raf.close();
-				if (flushThreadGroup.isDebug()) {
+				if (logger.isDebugEnabled()) {
 					logger.debug(String.format("close file[filename:%s lenght:%s wait1 %s] instance %s", filename, fileLength, waitedWriteBuffSize.get(), this));
 				}
 			} finally {

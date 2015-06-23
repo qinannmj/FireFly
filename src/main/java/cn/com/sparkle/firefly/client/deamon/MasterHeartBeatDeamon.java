@@ -16,18 +16,12 @@ import cn.com.sparkle.raptor.core.util.TimeUtil;
 
 public class MasterHeartBeatDeamon extends Thread {
 	private final static Logger logger = Logger.getLogger(MasterHeartBeatDeamon.class);
-	@SuppressWarnings("unused")
-	private boolean debugLog;
 
 	private PriorityBlockingQueue<PriorNode> queue = new PriorityBlockingQueue<PriorNode>(100);
 
 	private HashMap<CommandAsyncProcessor, PriorNode> priorNodeMap = new HashMap<CommandAsyncProcessor, PriorNode>(256);
 
 	private ReentrantLock lock = new ReentrantLock();
-
-	public MasterHeartBeatDeamon(boolean debugLog) {
-		this.debugLog = debugLog;
-	}
 
 	public void run() {
 
@@ -36,7 +30,7 @@ public class MasterHeartBeatDeamon extends Thread {
 
 				PriorNode priorNode = queue.poll();
 				if (!priorNode.invalided) {
-					Command c = new Command(CommandType.ADMIN_WRITE,-1, null, new BeatHeartCallback(priorNode, queue));
+					Command c = new Command(CommandType.ADMIN_WRITE, -1, null, new BeatHeartCallback(priorNode, queue));
 					try {
 						priorNode.processor.addCommand(c, 1, TimeUnit.MICROSECONDS);
 					} catch (InterruptedException e) {
@@ -78,7 +72,7 @@ public class MasterHeartBeatDeamon extends Thread {
 		}
 
 		@Override
-		public void response(byte[] result,long instanceId) {
+		public void response(byte[] result, long instanceId) {
 			NetNode n = priorNode.processor.getNode();
 			int interval = n == null ? 10 : n.getHeartBeatInterval();
 			priorNode.nextExecTime = sendTime + interval;

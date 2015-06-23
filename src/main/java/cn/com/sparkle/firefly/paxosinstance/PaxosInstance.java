@@ -19,13 +19,11 @@ public abstract class PaxosInstance {
 
 	private Value lastValue;
 	private SystemFuture<Boolean> future;
-	public boolean debugLog;
 	private volatile PaxosMessageSender sender;
 
-	public PaxosInstance(PaxosMessageSender sender, long instanceId, String selfAddress, boolean debugLog) {
+	public PaxosInstance(PaxosMessageSender sender, long instanceId, String selfAddress) {
 		super();
 		this.instanceId = instanceId;
-		this.debugLog = debugLog;
 		this.sender = sender;
 	}
 
@@ -51,7 +49,7 @@ public abstract class PaxosInstance {
 	}
 
 	public final void prepareSuccess(Value returnLastValue) {
-		if (debugLog) {
+		if (logger.isDebugEnabled()) {
 			logger.debug("prepareSuccessEvent returnValue isNull:" + (returnLastValue == null));
 		}
 		lastValue = returnLastValue != null ? returnLastValue : getWantAssginValue();
@@ -63,7 +61,7 @@ public abstract class PaxosInstance {
 	}
 
 	public final void voteSuccess() {
-		if (debugLog) {
+		if (logger.isDebugEnabled()) {
 			logger.debug("voteSuccess instanceId:" + instanceId);
 		}
 		voteSuccess(lastValue);

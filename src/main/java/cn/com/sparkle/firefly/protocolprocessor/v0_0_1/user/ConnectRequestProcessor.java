@@ -94,7 +94,7 @@ public class ConnectRequestProcessor extends AbstractProtocolV0_0_1Processor imp
 			rwlock.writeLock().unlock();
 		}
 		for (Entry<Integer, ConcurrentHashMap<PaxosSession, PaxosSession>> e : wantConnectMasterSessionMap.entrySet()) {
-			if (conf.isDebugLog()) {
+			if (logger.isDebugEnabled()) {
 				logger.debug("this server's master distance change to " + distance);
 			}
 			if (e.getKey() > masterDistance) {

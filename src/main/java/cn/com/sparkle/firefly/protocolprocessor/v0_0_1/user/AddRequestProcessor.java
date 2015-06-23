@@ -151,7 +151,7 @@ public class AddRequestProcessor extends AbstractProtocolV0_0_1Processor impleme
 			String[] senator = null;
 			if (node != null) {
 				masterAddress = node.getAddress().split(":")[0] + ":" + node.getUserPort();
-				if (conf.isDebugLog()) {
+				if (logger.isDebugEnabled()) {
 					logger.debug("transport to " + masterAddress);
 				}
 				senator = new String[]{masterAddress};
@@ -166,12 +166,12 @@ public class AddRequestProcessor extends AbstractProtocolV0_0_1Processor impleme
 				try {
 					client = new PaxosClient(senator, conf.getFilePath() + "/service_out_net.prop", conf.getNetLayer(),
 							conf.getNetChecksumType(), conf.getHeartBeatInterval(), conf.getTransportTcpNum(), Constants.MAX_MASTER_DISTANCE,
-							protocolManager, conf.getTransportSingleTcpMaxWaitingMemSize(), conf.isDebugLog());
+							protocolManager, conf.getTransportSingleTcpMaxWaitingMemSize());
 				} catch (Throwable e) {
 					logger.error("fatal error", e);
 				}
 			} else {
-				if (conf.isDebugLog()) {
+				if (logger.isDebugEnabled()) {
 					logger.debug("change address");
 				}
 				try {
