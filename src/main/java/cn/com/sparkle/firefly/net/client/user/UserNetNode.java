@@ -17,7 +17,7 @@ public class UserNetNode extends NetNode {
 
 	public void sendConnectRequest(int masterDistance, ConnectRequestCallBack callback) {
 		long packageId = this.generatePackageId();
-		byte[] request = getProtocol().createConnectRequsetRequest(packageId, masterDistance);
+		byte[][] request = getProtocol().createConnectRequsetRequest(packageId, masterDistance);
 		CallBack<? extends Object> _callback = getProtocol().createConnectRequestCallBack(callback);
 		try {
 			write(request, packageId, _callback);
@@ -27,14 +27,14 @@ public class UserNetNode extends NetNode {
 
 	public void sendAddRequest(CommandType commandType,long instanceId, byte[] value, AddRequestCallBack callback) throws NetCloseException {
 		long packageId = this.generatePackageId();
-		byte[] request = getProtocol().createAddRequest(packageId, commandType, value,instanceId);
+		byte[][] request = getProtocol().createAddRequest(packageId, commandType, value,instanceId);
 		CallBack<? extends Object> _callback = getProtocol().createAddRequestCallBack(callback);
 		this.write(request, packageId, _callback);
 	}
 
 	public void sendHeartBeat(AddRequestCallBack callback) throws NetCloseException {
 		long packageId = this.generatePackageId();
-		byte[] request = getProtocol().createHeartBeatRequest(packageId);
+		byte[][] request = getProtocol().createHeartBeatRequest(packageId);
 		CallBack<? extends Object> _callback = getProtocol().createAddRequestCallBack(callback);
 		this.write(request, packageId, _callback);
 	}

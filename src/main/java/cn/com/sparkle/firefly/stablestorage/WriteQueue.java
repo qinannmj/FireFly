@@ -110,9 +110,7 @@ public class WriteQueue<Tag, Element, MyNode extends WriteQueue.Node<Tag, Elemen
 				}else if (highPrior.next == highPrior && lowPriorIdle != 0) {
 					sleepTime = TimeUtil.currentTimeMillis() - sleepTime;
 					int time =(int)( sleepTime);
-					lowPriorIdle = time > lowPriorIdle ? 0 : lowPriorIdle - 1;
-//					--lowPriorIdle;
-//					logger.info(String.format("lowPriorIdle:%s ", lowPriorIdle));
+					lowPriorIdle = time > lowPriorIdle ? 0 : lowPriorIdle - time;
 				}
 			}
 			MyNode n;
@@ -123,35 +121,19 @@ public class WriteQueue<Tag, Element, MyNode extends WriteQueue.Node<Tag, Elemen
 				if(highPrior.next != highPrior){
 					lowPriorIdle = LOW_IDLE;
 				}
-//				logger.info(String.format("write low,high exist %s highsize %s", highPrior.next != highPrior,highWrite));
 			}else{
 				n = (MyNode) highPrior.next;
 				highPrior.next = n.next;
 				n.next.prev = highPrior;
 				if(lowPriorIdle != 0){
-					--lowPriorIdle;
-//					logger.info(String.format("lowPriorIdle:%s ,write high", lowPriorIdle));
+					sleepTime = TimeUtil.currentTimeMillis() - sleepTime;
+					int time =(int)( sleepTime);
+					lowPriorIdle = time > lowPriorIdle ? 0 : lowPriorIdle - time;
 				}else{
 					lowPriorIdle = LOW_IDLE;
 				}
 				++highWrite;
 			}
-//			
-//			if (highPrior.next != highPrior && ()) {
-//				n = (MyNode) highPrior.next;
-//				highPrior.next = n.next;
-//				n.next.prev = highPrior;
-//				if(lowPriorIdle == 1){
-//					lowPriorIdle = LOW_IDLE;
-//				}else{
-//					--lowPriorIdle;
-//				}
-//			} else {
-//				n = (MyNode) lowPrior.next;
-//				lowPrior.next = n.next;
-//				n.next.prev = lowPrior;
-//				
-//			}
 			lastNodeOfTag.remove(n.tag);
 			--size;
 			return n;

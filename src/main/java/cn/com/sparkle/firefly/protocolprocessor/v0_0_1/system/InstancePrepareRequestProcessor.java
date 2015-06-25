@@ -30,11 +30,6 @@ public class InstancePrepareRequestProcessor extends AbstractProtocolV0_0_1Proce
 	}
 
 	@Override
-	public void sendResponse(PaxosSession session, byte[] response) { // expose this method to chainPrepareCallback
-		super.sendResponse(session, response);
-	}
-
-	@Override
 	public void receive(final MessagePackage messagePackage, final PaxosSession session) throws InterruptedException {
 		if (messagePackage.hasInstancePrepareRequest()) {
 

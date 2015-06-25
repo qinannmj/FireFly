@@ -44,7 +44,7 @@ public class ElectionPrepareRequestProcessor extends AbstractProtocolV0_0_1Proce
 			//send response
 			responseBuilder.setId(messagePackage.getId());
 			responseBuilder.setIsLast(true);
-			sendResponse(session, responseBuilder.build().toByteArray());
+			sendResponse(session, responseBuilder.build());
 		} else {
 			super.fireOnReceive(messagePackage, session);
 		}

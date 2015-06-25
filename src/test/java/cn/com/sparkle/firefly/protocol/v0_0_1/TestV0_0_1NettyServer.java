@@ -35,7 +35,7 @@ public class TestV0_0_1NettyServer {
 
 		});
 		NettyServer server = new NettyServer();
-		server.init("target/classes/service_out_net.prop", 20000, new NetHandler() {
+		server.init("target/test-classes/service_out_net.prop", 20000, new NetHandler() {
 
 			@Override
 			public void onRefuse(Object connectAttachment) {

@@ -58,7 +58,7 @@ public class SenatorHeartBeatProcessor extends AbstractProtocolV0_0_1Processor i
 			response.setSenatorHeartBeatResponse(builder);
 			response.setId(messagePackage.getId());
 			response.setIsLast(true);
-			sendResponse(session, response.build().toByteArray());
+			sendResponse(session, response.build());
 		} else {
 			super.fireOnReceive(messagePackage, session);
 		}

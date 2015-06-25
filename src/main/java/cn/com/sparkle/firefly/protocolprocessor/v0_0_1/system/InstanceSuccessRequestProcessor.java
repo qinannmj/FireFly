@@ -97,7 +97,7 @@ public class InstanceSuccessRequestProcessor extends AbstractProtocolV0_0_1Proce
 
 				if (messagePackage.getId() != -1) {
 					//this is a request needed to response
-					super.sendResponse(session, MessagePackage.newBuilder().setId(messagePackage.getId()).setIsLast(true).build().toByteArray());
+					super.sendResponse(session, MessagePackage.newBuilder().setId(messagePackage.getId()).setIsLast(true).build());
 				}
 
 				if (logger.isDebugEnabled()) {

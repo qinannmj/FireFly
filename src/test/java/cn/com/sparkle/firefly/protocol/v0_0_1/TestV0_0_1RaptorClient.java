@@ -2,6 +2,7 @@ package cn.com.sparkle.firefly.protocol.v0_0_1;
 
 import java.util.LinkedList;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.log4j.Logger;
@@ -23,7 +24,7 @@ public class TestV0_0_1RaptorClient implements NetHandler {
 	private ReentrantLock lock = new ReentrantLock();
 	private long start = System.currentTimeMillis();
 	private long tc = 0;
-	private LinkedList<CountDownLatch> l = new LinkedList<CountDownLatch>();
+	private LinkedBlockingQueue<CountDownLatch> l = new LinkedBlockingQueue<CountDownLatch>();
 	private ReentrantLock llock = new ReentrantLock();
 	final FrameUnpackFilter frameUnpackFilter = new FrameUnpackFilter();
 
@@ -32,12 +33,7 @@ public class TestV0_0_1RaptorClient implements NetHandler {
 			@Override
 			public void receive(FrameBody t, PaxosSession session) throws InterruptedException {
 				t.isValid();
-				try{
-					llock.lock();
-					l.removeFirst().countDown();
-				}finally{
-					llock.unlock();
-				}
+				l.poll().countDown();
 				try{
 					lock.lock();
 					++cc;
@@ -59,7 +55,7 @@ public class TestV0_0_1RaptorClient implements NetHandler {
 	public static void main(String[] args) throws Exception {
 		logger.debug("start");
 		RaptorClient client = new RaptorClient();
-		client.init("target/classes/service_in_net.prop", 20000, new TestV0_0_1RaptorClient(),"client");
+		client.init("target/classes/service_in_net1.prop", 20000, new TestV0_0_1RaptorClient(),"client");
 		client.connect("127.0.0.1", 1234, null);
 
 	}
@@ -74,7 +70,7 @@ public class TestV0_0_1RaptorClient implements NetHandler {
 		System.out.println("connect");
 		for (int i = 0; i < 1; i++) {
 			Thread t = new Thread() {
-				private byte[] buff = new byte[1024];
+				private byte[][] buff = new byte[][]{new byte[512],new byte[512]};
 
 				public void run() {
 					int i = 0;
@@ -84,9 +80,9 @@ public class TestV0_0_1RaptorClient implements NetHandler {
 //					}
 					while (true) {
 						try {
-							FrameBody body = new FrameBody(buff, ChecksumUtil.INBUILD_CRC32);
+							FrameBody body = new FrameBody(buff, ChecksumUtil.NO_CHECKSUM);
 							CountDownLatch c = send(body, session);
-//							c.await();
+							c.await();
 						} catch (Exception e) {
 							e.printStackTrace();
 							break;
@@ -113,14 +109,8 @@ public class TestV0_0_1RaptorClient implements NetHandler {
 	}
 
 	public CountDownLatch send(FrameBody o, PaxosSession session) throws NetCloseException {
-		CountDownLatch c;
-		try {
-			llock.lock();
-			c = new CountDownLatch(1);
-			l.addLast(c);
-		} finally {
-			llock.unlock();
-		}
+		CountDownLatch c = new CountDownLatch(1);
+		l.add(c);
 		session.write(o);
 		return c;
 	}

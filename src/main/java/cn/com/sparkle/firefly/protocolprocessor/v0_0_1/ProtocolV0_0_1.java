@@ -1,5 +1,6 @@
 package cn.com.sparkle.firefly.protocolprocessor.v0_0_1;
 
+import java.io.IOException;
 import java.util.List;
 
 import cn.com.sparkle.firefly.Context;
@@ -64,6 +65,9 @@ import cn.com.sparkle.firefly.stablestorage.model.StoreModel;
 import cn.com.sparkle.firefly.stablestorage.util.IdTranslator;
 import cn.com.sparkle.firefly.stablestorage.util.ValueTranslator;
 import cn.com.sparkle.firefly.state.NodeState;
+import cn.com.sparkle.firefly.util.BytesArrayMaker;
+import cn.com.sparkle.firefly.util.ProtobufUtil;
+import cn.com.sparkle.raptor.core.io.BytesArraysOutputStream;
 
 import com.google.protobuf.ByteString;
 
@@ -130,9 +134,18 @@ public class ProtocolV0_0_1 extends AbstraceProtocol {
 		return MessagePackage.newBuilder().setId(packageId).setIsLast(isLast);
 	}
 
+	private byte[][] transformToByte(MessagePackage messagePackage) {
+		try {
+			return ProtobufUtil.transformTo(messagePackage);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
 	@Override
-	public byte[] createHeartBeatRequest(long packageId) {
-		return makeMessagePackage(packageId).setHeartBeatRequest(HeartBeatRequest.getDefaultInstance()).build().toByteArray();
+	public byte[][] createHeartBeatRequest(long packageId) {
+		MessagePackage mp = makeMessagePackage(packageId).setHeartBeatRequest(HeartBeatRequest.getDefaultInstance()).build();
+		return transformToByte(mp);
 	}
 
 	@Override
@@ -141,7 +154,7 @@ public class ProtocolV0_0_1 extends AbstraceProtocol {
 	}
 
 	@Override
-	public byte[] createElectionPrepareRequest(long packageId, long lastVoteId, cn.com.sparkle.firefly.model.ElectionId id) {
+	public byte[][] createElectionPrepareRequest(long packageId, long lastVoteId, cn.com.sparkle.firefly.model.ElectionId id) {
 		ElectionPrepareRequest.Builder builder = ElectionPrepareRequest.newBuilder();
 		StoreModel.Id.Builder idBuilder = IdTranslator.toStoreModelId(id);
 		ElectionId.Builder eid = ElectionId.newBuilder();
@@ -149,7 +162,8 @@ public class ProtocolV0_0_1 extends AbstraceProtocol {
 		eid.setVersion(id.getVersion());
 		builder.setId(eid);
 		builder.setLastVoteId(lastVoteId);
-		return makeMessagePackage(packageId).setElectionPrepareRequest(builder).build().toByteArray();
+		MessagePackage mp = makeMessagePackage(packageId).setElectionPrepareRequest(builder).build();
+		return transformToByte(mp);
 	}
 
 	@Override
@@ -158,14 +172,15 @@ public class ProtocolV0_0_1 extends AbstraceProtocol {
 	}
 
 	@Override
-	public byte[] createInstancePrepareRequest(long packageId, long instanceId, Id id, List<String> chain) {
+	public byte[][] createInstancePrepareRequest(long packageId, long instanceId, Id id, List<String> chain) {
 		InstancePrepareRequest.Builder builder = InstancePrepareRequest.newBuilder();
 		StoreModel.Id.Builder idBuilder = IdTranslator.toStoreModelId(id);
 		if (chain != null && chain.size() != 0) {
 			builder.addAllChain(chain);
 		}
 		builder.setId(idBuilder).setInstanceId(instanceId);
-		return makeMessagePackage(packageId).setInstancePrepareRequest(builder).build().toByteArray();
+		MessagePackage mp = makeMessagePackage(packageId).setInstancePrepareRequest(builder).build();
+		return transformToByte(mp);
 	}
 
 	@Override
@@ -174,7 +189,7 @@ public class ProtocolV0_0_1 extends AbstraceProtocol {
 	}
 
 	@Override
-	public byte[] createInstanceVoteRequest(long packageId, long instanceId, Id id, int valueType, int valueLength, List<String> chain) {
+	public byte[][] createInstanceVoteRequest(long packageId, long instanceId, Id id, int valueType, int valueLength, List<String> chain) {
 
 		StoreModel.Id.Builder idBuilder = IdTranslator.toStoreModelId(id);
 
@@ -186,13 +201,15 @@ public class ProtocolV0_0_1 extends AbstraceProtocol {
 		if (chain != null && chain.size() != 0) {
 			builder.addAllChain(chain);
 		}
-		return makeMessagePackage(packageId).setInstanceVoteRequest(builder).build().toByteArray();
+		MessagePackage mp = makeMessagePackage(packageId).setInstanceVoteRequest(builder).build();
+		return transformToByte(mp);
 	}
 
 	@Override
-	public byte[] createLookUpLatestInstanceIdRequest(long packageId) {
+	public byte[][] createLookUpLatestInstanceIdRequest(long packageId) {
 		LookUpLatestInstanceIdRequest.Builder builder = LookUpLatestInstanceIdRequest.newBuilder();
-		return makeMessagePackage(packageId).setLookUpLatestInstanceIdRequest(builder).build().toByteArray();
+		MessagePackage mp = makeMessagePackage(packageId).setLookUpLatestInstanceIdRequest(builder).build();
+		return transformToByte(mp);
 	}
 
 	@Override
@@ -202,7 +219,7 @@ public class ProtocolV0_0_1 extends AbstraceProtocol {
 	}
 
 	@Override
-	public byte[] createInstanceSuccessRequest(long packageId, long instanceId, Id id, Value value, List<String> notifyList,
+	public byte[][] createInstanceSuccessRequest(long packageId, long instanceId, Id id, Value value, List<String> notifyList,
 			List<SuccessTransportConfig> notifyChain) {
 		InstanceSuccessMessage.Builder builder = InstanceSuccessMessage.newBuilder();
 		builder.setId(instanceId);
@@ -226,8 +243,8 @@ public class ProtocolV0_0_1 extends AbstraceProtocol {
 				builder.addNotifyChain(transport);
 			}
 		}
-
-		return makeMessagePackage(packageId).setInstanceSuccessMessage(builder).build().toByteArray();
+		MessagePackage mp = makeMessagePackage(packageId).setInstanceSuccessMessage(builder).build();
+		return transformToByte(mp);
 	}
 
 	@Override
@@ -236,33 +253,36 @@ public class ProtocolV0_0_1 extends AbstraceProtocol {
 	}
 
 	@Override
-	public byte[] createElectionSuccessRequest(long packageId, cn.com.sparkle.firefly.model.ElectionId electionId) {
+	public byte[][] createElectionSuccessRequest(long packageId, cn.com.sparkle.firefly.model.ElectionId electionId) {
 		ElectionSuccessMessage.Builder builder = ElectionSuccessMessage.newBuilder();
 		ElectionId.Builder eid = ElectionId.newBuilder();
 		StoreModel.Id.Builder _id = IdTranslator.toStoreModelId(electionId);
 		eid.setId(_id).setVersion(electionId.getVersion());
 		builder.setId(eid);
-		return makeMessagePackage(packageId).setElectionSuccessMessage(builder).build().toByteArray();
+		MessagePackage mp = makeMessagePackage(packageId).setElectionSuccessMessage(builder).build();
+		return transformToByte(mp);
 	}
 
 	@Override
-	public byte[] createElectionVoteRequest(long packageId, long lastVoteId, cn.com.sparkle.firefly.model.ElectionId electionId) {
+	public byte[][] createElectionVoteRequest(long packageId, long lastVoteId, cn.com.sparkle.firefly.model.ElectionId electionId) {
 		ElectionVoteRequest.Builder builder = ElectionVoteRequest.newBuilder();
 		ElectionId.Builder eid = ElectionId.newBuilder();
 		StoreModel.Id.Builder _id = IdTranslator.toStoreModelId(electionId);
 		eid.setId(_id).setVersion(electionId.getVersion());
 		builder.setId(eid);
 		builder.setLastVoteId(lastVoteId);
-		return makeMessagePackage(packageId).setElectionVoteRequest(builder).build().toByteArray();
+		MessagePackage mp = makeMessagePackage(packageId).setElectionVoteRequest(builder).build();
+		return transformToByte(mp);
 	}
 
 	@Override
-	public byte[] createCatchUpRequest(long packageId, long instanceId, int size,boolean isArbitratory) {
+	public byte[][] createCatchUpRequest(long packageId, long instanceId, int size, boolean isArbitratory) {
 		CatchUpRequest.Builder builder = CatchUpRequest.newBuilder();
 		builder.setStartInstanceId(instanceId);
 		builder.setSize(size);
 		builder.setIsArbitrator(isArbitratory);
-		return makeMessagePackage(packageId).setCatchUpRequest(builder).build().toByteArray();
+		MessagePackage mp = makeMessagePackage(packageId).setCatchUpRequest(builder).build();
+		return transformToByte(mp);
 	}
 
 	@Override
@@ -271,38 +291,42 @@ public class ProtocolV0_0_1 extends AbstraceProtocol {
 	}
 
 	@Override
-	public byte[] createAddResponse(long packageId, long instanceId, byte[] bytes, boolean isLast) {
+	public byte[][] createAddResponse(long packageId, long instanceId, byte[] bytes, boolean isLast) {
 		AddResponse.Builder builder = AddResponse.newBuilder();
 		builder.setResult(ByteString.copyFrom(bytes));
 		if (instanceId != -1) {
 			builder.setInstanceId(instanceId);
 		}
-		return makeMessagePackage(packageId, isLast).setAddResponse(builder).build().toByteArray();
+		MessagePackage mp = makeMessagePackage(packageId, isLast).setAddResponse(builder).build();
+		return transformToByte(mp);
 	}
 
 	@Override
-	public byte[] createAdminResponse(long packageId, boolean isSuccess, String error) {
+	public byte[][] createAdminResponse(long packageId, boolean isSuccess, String error) {
 		CommandResponse.Builder builder = CommandResponse.newBuilder();
 		builder.setIsSuccessful(isSuccess);
 		if (error != null) {
 			builder.setError(error);
 		}
-		return makeMessagePackage(packageId).setCommandResponse(builder).build().toByteArray();
+		MessagePackage mp = makeMessagePackage(packageId).setCommandResponse(builder).build();
+		return transformToByte(mp);
 	}
 
 	@Override
-	public byte[] createConnectRequsetRequest(long packageId, int masterDistance) {
+	public byte[][] createConnectRequsetRequest(long packageId, int masterDistance) {
 		ConnectRequest.Builder builder = ConnectRequest.newBuilder().setMasterDistance(masterDistance);
-		return makeMessagePackage(packageId).setConnectRequest(builder).build().toByteArray();
+		MessagePackage mp = makeMessagePackage(packageId).setConnectRequest(builder).build();
+		return transformToByte(mp);
 	}
 
 	@Override
-	public byte[] createAddRequest(long packageId, CommandType commandType, byte[] value, long instaceId) {
+	public byte[][] createAddRequest(long packageId, CommandType commandType, byte[] value, long instaceId) {
 		AddRequest.Builder builder = AddRequest.newBuilder();
 		builder.setValue(ByteString.copyFrom(value));
 		builder.setCommandType(commandType.getValue());
 		builder.setInstanceId(instaceId);
-		return makeMessagePackage(packageId).setAddRequest(builder).build().toByteArray();
+		MessagePackage mp = makeMessagePackage(packageId).setAddRequest(builder).build();
+		return transformToByte(mp);
 	}
 
 	@Override
@@ -311,7 +335,7 @@ public class ProtocolV0_0_1 extends AbstraceProtocol {
 	}
 
 	@Override
-	public byte[] createActiveHeartMessage(NodeState nodeState, int lifecycle) {
+	public byte[][] createActiveHeartMessage(NodeState nodeState, int lifecycle) {
 		SenatorHeartBeatResponse.Builder heart = SenatorHeartBeatResponse.newBuilder();
 		heart.addAllConnectedValidNodes(nodeState.getConnectedValidNode());
 		heart.setElectionAddress(nodeState.getLastElectionId().getAddress());
@@ -327,7 +351,8 @@ public class ProtocolV0_0_1 extends AbstraceProtocol {
 		ActiveHeartBeatRequest.Builder request = ActiveHeartBeatRequest.newBuilder().setAddress(nodeState.getAddress())
 				.setIsArbitrator(nodeState.isArbitrator()).setHeartBeatResponse(heart).setLifecycle(lifecycle);
 
-		return makeMessagePackage(-1).setActiveHeartBeatRequest(request).build().toByteArray();
+		MessagePackage mp = makeMessagePackage(-1).setActiveHeartBeatRequest(request).build();
+		return transformToByte(mp);
 	}
 
 	@Override
@@ -336,10 +361,11 @@ public class ProtocolV0_0_1 extends AbstraceProtocol {
 	}
 
 	@Override
-	public byte[] createValueTrunk(long packageId, byte[] value, int valueOffset, int size) {
+	public byte[][] createValueTrunk(long packageId, byte[] value, int valueOffset, int size) {
 		ValueTrunk.Builder vt = ValueTrunk.newBuilder();
 		vt.setPart(ByteString.copyFrom(value, valueOffset, size));
-		return makeMessagePackage(packageId, size == 0).setValueTrunk(vt).build().toByteArray();
+		MessagePackage mp = makeMessagePackage(packageId, size == 0).setValueTrunk(vt).build();
+		return transformToByte(mp);
 	}
 
 }

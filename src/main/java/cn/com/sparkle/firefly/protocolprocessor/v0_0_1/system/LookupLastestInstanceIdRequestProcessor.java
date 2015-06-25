@@ -25,7 +25,7 @@ public class LookupLastestInstanceIdRequestProcessor extends AbstractProtocolV0_
 			responseBuilder.setLookUpLatestInstanceIdResponse(response);
 			responseBuilder.setId(messagePackage.getId());
 			responseBuilder.setIsLast(true);
-			sendResponse(session, responseBuilder.build().toByteArray());
+			sendResponse(session, responseBuilder.build());
 		} else {
 			super.fireOnReceive(messagePackage, session);
 		}

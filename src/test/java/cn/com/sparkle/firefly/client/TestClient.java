@@ -35,7 +35,7 @@ public class TestClient {
 
 		String type = args.length > 0 ?args[0] : "raptor";
 		int cycle = args.length > 1 ? Integer.parseInt(args[1]):8*512;
-		int threadSize = args.length > 2 ? Integer.parseInt(args[2]):10;
+		int threadSize = args.length > 2 ? Integer.parseInt(args[2]):1;
 		String[] address = {"127.0.0.1:10004", "127.0.0.1:11001","127.0.0.1:9001",  "127.0.0.1:12001","127.0.0.1:10001" };
 		
 		if(args.length > 3){

@@ -37,7 +37,7 @@ public abstract class NetNode implements Comparable<NetNode> {
 		this.heartBeatInterval = heartBeatInterval;
 	}
 
-	protected void write(byte[] message, long packageId, CallBack<? extends Object> callBack) throws NetCloseException {
+	protected void write(byte[][] message, long packageId, CallBack<? extends Object> callBack) throws NetCloseException {
 		FrameBody body;
 		try {
 			body = new FrameBody(message, session.getChecksumType());

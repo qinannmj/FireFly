@@ -42,7 +42,9 @@ import cn.com.sparkle.firefly.stablestorage.model.StoreModel.SuccessfulRecord;
 import cn.com.sparkle.firefly.stablestorage.model.SuccessfulRecordWrap;
 import cn.com.sparkle.firefly.stablestorage.util.FileUtil;
 import cn.com.sparkle.firefly.util.IdComparator;
+import cn.com.sparkle.firefly.util.ProtobufUtil;
 
+import com.google.protobuf.ByteString;
 import com.google.protobuf.GeneratedMessage.Builder;
 
 public class RecordFileOperatorDefault implements RecordFileOperator {
@@ -156,7 +158,7 @@ public class RecordFileOperatorDefault implements RecordFileOperator {
 										if (body.isValid()) {
 											if (head.getType() == RecordType.SUCCESS) {
 												InstanceVoteRecord voteRecord = votedInstanceRecordMap.remove(head.getInstanceId());
-												SuccessfulRecord.Builder record = SuccessfulRecord.newBuilder().mergeFrom(body.getBody());
+												SuccessfulRecord.Builder record = SuccessfulRecord.newBuilder().mergeFrom(ByteString.copyFrom(ProtobufUtil.transformTo(body.getBody())));
 												if (!record.hasV()) {
 													if (IdComparator.getInstance().compare(record.getHighestVoteNum(), voteRecord.getHighestVotedNum()) == 0) {
 														record.setV(voteRecord.getHighestValue());
@@ -190,7 +192,7 @@ public class RecordFileOperatorDefault implements RecordFileOperator {
 												}
 
 											} else {
-												InstanceVoteRecord instance = InstanceVoteRecord.newBuilder().mergeFrom(body.getBody()).build();
+												InstanceVoteRecord instance = InstanceVoteRecord.newBuilder().mergeFrom(ByteString.copyFrom(ProtobufUtil.transformTo(body.getBody()))).build();
 												votedInstanceRecordMap.put(head.getInstanceId(), instance);
 												if (head.getInstanceId() > maxVoteInstanceId) {
 													maxVoteInstanceId = head.getInstanceId();
@@ -275,8 +277,8 @@ public class RecordFileOperatorDefault implements RecordFileOperator {
 			boolean isVotedBySelf = voteRecord != null
 					&& IdComparator.getInstance().compare(successfulRecord.getHighestVoteNum(), voteRecord.getHighestVotedNum()) == 0;
 			//build a object to save
-			RecordBody body = new RecordBody(successfulRecord.build().toByteArray(), preferChecksum);
-			RecordHead head = new RecordHead(body.getBody().length, instanceId, RecordType.SUCCESS, preferChecksum);
+			RecordBody body = new RecordBody(ProtobufUtil.transformTo(successfulRecord.build()), preferChecksum);
+			RecordHead head = new RecordHead(body.getBodyLen(), instanceId, RecordType.SUCCESS, preferChecksum);
 			Record record = new Record(head, body);
 
 			//build a execute record
@@ -356,8 +358,8 @@ public class RecordFileOperatorDefault implements RecordFileOperator {
 				maxKnowedInstanceId = instanceId;
 			}
 
-			RecordBody body = new RecordBody(record.toByteArray(), preferChecksum);
-			RecordHead head = new RecordHead(body.getBody().length, instanceId, RecordType.VOTE, preferChecksum);
+			RecordBody body = new RecordBody(ProtobufUtil.transformTo(record), preferChecksum);
+			RecordHead head = new RecordHead(body.getBodyLen(), instanceId, RecordType.VOTE, preferChecksum);
 			Record r = new Record(head, body);
 			boolean result = writeRecordLog(r, new Callable<Object>() {
 				@Override
@@ -501,7 +503,7 @@ public class RecordFileOperatorDefault implements RecordFileOperator {
 									RecordBody body = RecordBody.readFromStream(in, head);
 									if (body.isValid()) {
 										if (head.getType() == RecordType.SUCCESS) {
-											SuccessfulRecord.Builder record = SuccessfulRecord.newBuilder().mergeFrom(body.getBody());
+											SuccessfulRecord.Builder record = SuccessfulRecord.newBuilder().mergeFrom(ByteString.copyFrom(ProtobufUtil.transformTo(body.getBody())));
 											InstanceVoteRecord voteRecord = voteRecordMap.remove(head.getInstanceId());
 											if (!record.hasV()) {
 												if (IdComparator.getInstance().compare(record.getHighestVoteNum(), voteRecord.getHighestVotedNum()) == 0) {
@@ -514,7 +516,7 @@ public class RecordFileOperatorDefault implements RecordFileOperator {
 
 											readCallback.read(head.getInstanceId(), record);
 										} else {
-											InstanceVoteRecord.Builder voteRecord = InstanceVoteRecord.newBuilder().mergeFrom(body.getBody());
+											InstanceVoteRecord.Builder voteRecord = InstanceVoteRecord.newBuilder().mergeFrom(ByteString.copyFrom(ProtobufUtil.transformTo(body.getBody())));
 											voteRecordMap.put(head.getInstanceId(), voteRecord.build());
 											readCallback.read(head.getInstanceId(), voteRecord);
 										}

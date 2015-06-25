@@ -59,7 +59,7 @@ public class TestV0_0_1NettyClient implements NetHandler {
 	public static void main(String[] args) throws Throwable {
 		logger.debug("start");
 		NettyClient client = new NettyClient();
-		client.init("target/classes/service_in_net.prop", 20000, new TestV0_0_1NettyClient(),"client");
+		client.init("target/test-classes/service_in_net1.prop", 20000, new TestV0_0_1NettyClient(),"client");
 		client.connect("127.0.0.1", 1234, null);
 
 	}
@@ -74,7 +74,7 @@ public class TestV0_0_1NettyClient implements NetHandler {
 		System.out.println("connect");
 		for (int i = 0; i < 1; i++) {
 			Thread t = new Thread() {
-				private byte[] buff = new byte[1024];
+				private byte[][] buff = new byte[][]{new byte[512],new byte[512]};
 
 				public void run() {
 					int i = 0;
@@ -83,7 +83,7 @@ public class TestV0_0_1NettyClient implements NetHandler {
 						try {
 							FrameBody body = new FrameBody(buff, ChecksumUtil.INBUILD_CRC32);
 							CountDownLatch c = send(body, session);
-//							c.await();
+							c.await();
 						} catch (Exception e) {
 							e.printStackTrace();
 							break;

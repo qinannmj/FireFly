@@ -9,6 +9,7 @@ import org.apache.log4j.Logger;
 import cn.com.sparkle.firefly.checksum.ChecksumUtil;
 import cn.com.sparkle.firefly.checksum.ChecksumUtil.UnsupportedChecksumAlgorithm;
 import cn.com.sparkle.firefly.stablestorage.io.RecordFileOut;
+import cn.com.sparkle.firefly.util.BytesArrayMaker;
 
 /**
  * 
@@ -21,32 +22,39 @@ import cn.com.sparkle.firefly.stablestorage.io.RecordFileOut;
  */
 public final class RecordBody {
 	private final static Logger logger = Logger.getLogger(RecordBody.class);
-	private byte[] body;
+	private byte[][] body;
 	private byte[] checksum;
 	private int checksumType;
+	private int bodyLen = 0;
 
-	public RecordBody(byte[] body, int checksumType) throws UnsupportedChecksumAlgorithm {
+	public RecordBody(byte[][] body, int checksumType) throws UnsupportedChecksumAlgorithm {
 		this.checksumType = checksumType;
 		this.body = body;
-		checksum = ChecksumUtil.checksum(checksumType, body, 0, body.length);
+		for(byte[] b : body){
+			this.bodyLen += b.length;
+		}
+		checksum = ChecksumUtil.checksum(checksumType, body, bodyLen);
 	}
 
-	public RecordBody(byte[] body, byte[] checksum, int checksumType) {
+	public RecordBody(byte[][] body, byte[] checksum, int checksumType) {
 		this.body = body;
 		this.checksum = checksum;
 		this.checksumType = checksumType;
+		for(byte[] b : body){
+			this.bodyLen += b.length;
+		}
 	}
 
 	public boolean isValid() {
 		try {
-			return ChecksumUtil.validate(checksumType, body, checksum, 0, body.length);
+			return ChecksumUtil.validate(checksumType, body, checksum, bodyLen);
 		} catch (UnsupportedChecksumAlgorithm e) {
 			logger.warn("May be error program logic error or data be damaged!", e);
 			return false;
 		}
 	}
 
-	public byte[] getBody() {
+	public byte[][] getBody() {
 		return body;
 	}
 
@@ -55,16 +63,32 @@ public final class RecordBody {
 	}
 
 	public void writeToStream(RecordFileOut out, Callable<Object> callable,boolean isSync) throws IOException {
-		out.write(this.body, 0, this.body.length, null,false);
+		for(byte[] b : body){
+			out.write(b, 0, b.length, null,false);
+		}
 		out.write(this.checksum, 0, this.checksum.length, callable,isSync);
 	}
 	
 	public int getSerializeSize(){
-		return body.length + this.checksum.length;
+		return bodyLen + this.checksum.length;
 	}
+	
+	
+	public int getBodyLen() {
+		return bodyLen;
+	}
+
 	public static RecordBody readFromStream(InputStream in, RecordHead head) throws IOException {
-		byte[] body = new byte[head.getBodySize()];
-		int size = in.read(body);
+		byte[][] body = BytesArrayMaker.makeBytesArray(head.getBodySize());
+		int size = 0;
+		for(byte[] bytes : body){
+			int readSize = in.read(bytes);
+			if(readSize >=0){
+				size += readSize;
+			}else{
+				break;
+			}
+		}
 		if (size != head.getBodySize()) {
 			return null;
 		}
@@ -75,4 +99,5 @@ public final class RecordBody {
 		}
 		return new RecordBody(body, checksum, head.getChecksumType());
 	}
+	
 }

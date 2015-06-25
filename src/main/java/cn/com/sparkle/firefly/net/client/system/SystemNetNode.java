@@ -58,7 +58,7 @@ public class SystemNetNode extends NetNode {
 	void sendFirstHeartBeat(EventsManager eventsManager) {
 		CallBack<? extends Object> callback = getProtocol().createHeartBeatCallBack(new FirstHeartBeatCallBack(eventsManager));
 		long packageId = generatePackageId();
-		byte[] request = getProtocol().createHeartBeatRequest(packageId);
+		byte[][] request = getProtocol().createHeartBeatRequest(packageId);
 		try {
 			write(request, packageId, callback);
 		} catch (NetCloseException e) {
@@ -68,14 +68,14 @@ public class SystemNetNode extends NetNode {
 	public void sendHeartBeat(EventsManager eventsManager) throws NetCloseException {
 		CallBack<? extends Object> callback = getProtocol().createHeartBeatCallBack(new HeartBeatCallBack(eventsManager));
 		long packageId = generatePackageId();
-		byte[] request = getProtocol().createHeartBeatRequest(packageId);
+		byte[][] request = getProtocol().createHeartBeatRequest(packageId);
 		write(request, packageId, callback);
 	}
 
 	public void sendElectionPrepareRequest(ElectionId id, long lastVoteId, PrepareCallBack callback) {
 		CallBack<? extends Object> _callback = getProtocol().createPaxosPrepareCallBack(callback);
 		long packageId = generatePackageId();
-		byte[] request = getProtocol().createElectionPrepareRequest(packageId, lastVoteId, id);
+		byte[][] request = getProtocol().createElectionPrepareRequest(packageId, lastVoteId, id);
 		try {
 			write(request, packageId, _callback);
 		} catch (NetCloseException e) {
@@ -85,7 +85,7 @@ public class SystemNetNode extends NetNode {
 	public void sendInstancePrepareRequest(Id id, long instanceId, List<String> chain, PrepareCallBack callback) {
 		CallBack<? extends Object> _callback = getProtocol().createPaxosPrepareCallBack(callback);
 		long packageId = generatePackageId();
-		byte[] request = getProtocol().createInstancePrepareRequest(packageId, instanceId, id, chain);
+		byte[][] request = getProtocol().createInstancePrepareRequest(packageId, instanceId, id, chain);
 		try {
 			write(request, packageId, _callback);
 		} catch (NetCloseException e) {
@@ -110,7 +110,7 @@ public class SystemNetNode extends NetNode {
 
 	public long sendInstanceVoteRequest(long instanceId, Id id, int valueType, int valueLength, List<String> chain) {
 		long packageId = generatePackageId();
-		byte[] request = getProtocol().createInstanceVoteRequest(packageId, instanceId, id, valueType, valueLength, chain);
+		byte[][] request = getProtocol().createInstanceVoteRequest(packageId, instanceId, id, valueType, valueLength, chain);
 		try {
 			write(request, packageId, null);
 		} catch (NetCloseException e) {
@@ -119,7 +119,7 @@ public class SystemNetNode extends NetNode {
 	}
 
 	public void sendVoteValueTrunk(long packageId, VoteCallBack callback, byte[] bytes, int offset, int size) {
-		byte[] request = getProtocol().createValueTrunk(packageId, bytes, offset, size);
+		byte[][] request = getProtocol().createValueTrunk(packageId, bytes, offset, size);
 		CallBack<? extends Object> _callback = null;
 		if (callback != null) {
 			_callback = getProtocol().createPaxosVoteCallBack(callback);
@@ -133,7 +133,7 @@ public class SystemNetNode extends NetNode {
 	public void sendLookUpLatestInstanceIdRequest(LookUpLatestInstanceIdCallBack callback) {
 		CallBack<? extends Object> _callback = getProtocol().createLookUpLatestInstanceIdCallBack(callback);
 		long packageId = generatePackageId();
-		byte[] request = getProtocol().createLookUpLatestInstanceIdRequest(packageId);
+		byte[][] request = getProtocol().createLookUpLatestInstanceIdRequest(packageId);
 		try {
 			write(request, packageId, _callback);
 		} catch (NetCloseException e) {
@@ -173,7 +173,7 @@ public class SystemNetNode extends NetNode {
 				syncSuccessfulMessageStrategy.fireStrategy(this.getSession());
 				packageId = generatePackageId();
 			}
-			byte[] request = getProtocol().createInstanceSuccessRequest(packageId, instanceId, id, value, notifyList, notifyChain);
+			byte[][] request = getProtocol().createInstanceSuccessRequest(packageId, instanceId, id, value, notifyList, notifyChain);
 			try {
 				write(request, packageId, _callBack);
 			} catch (NetCloseException e) {
@@ -184,7 +184,7 @@ public class SystemNetNode extends NetNode {
 	}
 
 	public void sendElectionSuccessMessage(ElectionId id) {
-		byte[] request = getProtocol().createElectionSuccessRequest(-1, id);
+		byte[][] request = getProtocol().createElectionSuccessRequest(-1, id);
 		try {
 			write(request, -1, null);
 		} catch (NetCloseException e) {
@@ -194,7 +194,7 @@ public class SystemNetNode extends NetNode {
 	public void sendElectionVoteRequest(ElectionId id, long lastVoteId, VoteCallBack callback) {
 		CallBack<? extends Object> _callback = getProtocol().createPaxosVoteCallBack(callback);
 		long packageId = generatePackageId();
-		byte[] request = getProtocol().createElectionVoteRequest(packageId, lastVoteId, id);
+		byte[][] request = getProtocol().createElectionVoteRequest(packageId, lastVoteId, id);
 		try {
 			write(request, packageId, _callback);
 		} catch (NetCloseException e) {
@@ -204,7 +204,7 @@ public class SystemNetNode extends NetNode {
 	public void sendCatchUpRequest(long instanceId, int size, boolean isArbitrator, CatchUpCallBack callback) {
 		CallBack<? extends Object> _callBack = new CatchUpCallBackV0_0_1(callback);
 		long packageId = generatePackageId();
-		byte[] request = getProtocol().createCatchUpRequest(packageId, instanceId, size, isArbitrator);
+		byte[][] request = getProtocol().createCatchUpRequest(packageId, instanceId, size, isArbitrator);
 		try {
 			write(request, packageId, _callBack);
 		} catch (NetCloseException e) {
@@ -212,14 +212,14 @@ public class SystemNetNode extends NetNode {
 	}
 
 	public void sendActiveHeartBeat(NodeState nodeState, int curDistance) throws NetCloseException {
-		byte[] request = getProtocol().createActiveHeartMessage(nodeState,
+		byte[][] request = getProtocol().createActiveHeartMessage(nodeState,
 				Constants.MAX_ACTIVE_HEART_BEAT_LIFE_CYCLE > curDistance ? curDistance : Constants.MAX_ACTIVE_HEART_BEAT_LIFE_CYCLE);
 		write(request, -1, null);
 	}
 
 	public void sendAddRequest(CommandType commandType, long instanceId, byte[] value, AddRequestCallBack callback) throws NetCloseException {
 		long packageId = this.generatePackageId();
-		byte[] request = getProtocol().createAddRequest(packageId, commandType, value, instanceId);
+		byte[][] request = getProtocol().createAddRequest(packageId, commandType, value, instanceId);
 		CallBack<? extends Object> _callback = getProtocol().createAddRequestCallBack(callback);
 		this.write(request, packageId, _callback);
 	}

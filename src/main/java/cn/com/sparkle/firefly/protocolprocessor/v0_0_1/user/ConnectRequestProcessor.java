@@ -64,7 +64,7 @@ public class ConnectRequestProcessor extends AbstractProtocolV0_0_1Processor imp
 					session.put(distanceKey, request.getMasterDistance());
 					ConnectResponse.Builder b = ConnectResponse.newBuilder().setIsSuccessful(true);
 					MessagePackage.Builder response = MessagePackage.newBuilder().setId(t.getId()).setIsLast(true).setConnectResponse(b);
-					sendResponse(session, response.build().toByteArray());
+					sendResponse(session, response.build());
 				}
 			} else {
 				logger.info("this server is not master,close connnection!");

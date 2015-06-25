@@ -113,7 +113,7 @@ public class CatchupRequestProcessor extends AbstractProtocolV0_0_1Processor imp
 								MessagePackage.Builder response = MessagePackage.newBuilder().setCatchUpResponse(b.build());
 								response.setId(msgId);
 								response.setIsLast(false);
-								sendResponse(session, response.build().toByteArray());
+								sendResponse(session, response.build());
 								b.clear();
 								packageSize = 0;
 							}
@@ -146,7 +146,7 @@ public class CatchupRequestProcessor extends AbstractProtocolV0_0_1Processor imp
 		MessagePackage.Builder responseBuilder = MessagePackage.newBuilder().setCatchUpResponse(response);
 		responseBuilder.setId(msgId);
 		responseBuilder.setIsLast(true);
-		sendResponse(session, responseBuilder.build().toByteArray());
+		sendResponse(session, responseBuilder.build());
 		if(logger.isDebugEnabled()){
 			logger.debug("proceeded a catch request");
 		}

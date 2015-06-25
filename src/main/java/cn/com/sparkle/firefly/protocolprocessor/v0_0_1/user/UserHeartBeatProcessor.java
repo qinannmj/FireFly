@@ -10,7 +10,7 @@ public class UserHeartBeatProcessor extends AbstractProtocolV0_0_1Processor {
 	@Override
 	public void receive(MessagePackage t, PaxosSession session) throws InterruptedException {
 		if (t.hasHeartBeatRequest()) {
-			sendResponse(session, t.toByteArray());
+			sendResponse(session, t);
 		} else {
 			super.fireOnReceive(t, session);
 		}

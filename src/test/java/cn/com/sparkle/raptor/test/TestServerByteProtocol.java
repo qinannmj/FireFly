@@ -25,7 +25,7 @@ public class TestServerByteProtocol {
 		// TODO Auto-generated method stub
 		NioSocketConfigure nsc = new NioSocketConfigure();
 		nsc.setProcessorNum(32);
-		nsc.setCycleRecieveBuffCellSize(1000);
+		nsc.setCycleRecieveBuffCellSize(10000);
 		nsc.setTcpNoDelay(true);
 		nsc.setRecieveBuffSize(128* 1024);
 		nsc.setSentBuffSize( 128* 1024);
@@ -33,7 +33,7 @@ public class TestServerByteProtocol {
 		//nsc.setRevieveBuffSize(1024 * 2048);
 		//nsc.setTcpNoDelay(true);
 		NioSocketServer server = new NioSocketServer(nsc);
-		server.bind(new InetSocketAddress(1234),new MultiThreadHandler(2, 300, 60, TimeUnit.SECONDS,new CodecHandler(1000, 32 * 1024, new BytesProtocol(), new TestByteProtocolHandler())));
+		server.bind(new InetSocketAddress(1234),new MultiThreadHandler(2, 300, 60, TimeUnit.SECONDS,new CodecHandler(10000, 8 * 1024, new BytesProtocol(), new TestByteProtocolHandler())));
 		
 //		server.bind(new InetSocketAddress(1234),new CodecHandler(1000, 64 * 1024, new BytesProtocol(), new TestByteProtocolHandler()));
 //		server.bind(new InetSocketAddress(12345),new FilterChain(new TestHandler()));

@@ -1,5 +1,7 @@
 package cn.com.sparkle.firefly.checksum;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.zip.Adler32;
 import java.util.zip.CRC32;
@@ -56,16 +58,29 @@ public final class ChecksumUtil {
 		}
 	}
 
-	public static byte[] checksum(int algorithmCode, byte[] bytes, int offset, int length) throws UnsupportedChecksumAlgorithm {
+	public static byte[] checksum(int algorithmCode, byte[][] bytes, int length) throws UnsupportedChecksumAlgorithm {
 		if (algorithmCode == NO_CHECKSUM) {
 			return nullChecksum;
 		}
 		int checksumLength = checksumLength(algorithmCode, length);
 		byte[] result = new byte[checksumLength];
 		Checksum checksum = getCheckSumAlgorithm(algorithmCode);
+		int idx = 0;
+		int offset = 0;
 		for (int i = 0; i < checksumLength; i += 8) {
-			int arrayLength = length < 512 ? length : 512;
-			checksum.update(bytes, offset, arrayLength);
+			int arrayLength = Math.min(length, CHECK_CHUNK_SIZE);
+			int remaind = arrayLength;
+			while(remaind != 0){
+				int calcSize = bytes[idx].length - offset;
+				calcSize = Math.min(calcSize, remaind);
+				checksum.update(bytes[idx], offset, calcSize);
+				remaind-= calcSize;
+				offset += calcSize;
+				if(offset == bytes[idx].length){
+					++idx;
+					offset = 0;
+				}
+			}
 			long chunkChecksum = checksum.getValue();
 			result[i] = (byte) (0xff & (chunkChecksum >> 56));
 			result[i + 1] = (byte) (0xff & (chunkChecksum >> 48));
@@ -75,34 +90,18 @@ public final class ChecksumUtil {
 			result[i + 5] = (byte) (0xff & (chunkChecksum >> 16));
 			result[i + 6] = (byte) (0xff & (chunkChecksum >> 8));
 			result[i + 7] = (byte) (0xff & chunkChecksum);
-			offset += arrayLength;
 			length -= arrayLength;
 			checksum.reset();
 		}
 		return result;
 	}
 
-	public static boolean validate(int algorithmCode, byte[] bytes, byte[] checksum, int offset, int length) throws UnsupportedChecksumAlgorithm {
-		if (algorithmCode == NO_CHECKSUM) {
+	public static boolean validate(int algorithmCode, byte[][] bytes, byte[] checksum, int length) throws UnsupportedChecksumAlgorithm {
+		byte[] waitCheck = checksum(algorithmCode,bytes,length);
+		if (waitCheck == nullChecksum) {
 			return true;
 		}
-		int checksumLength = checksumLength(algorithmCode, length);
-		Checksum _checksum = getCheckSumAlgorithm(algorithmCode);
-		for (int i = 0; i < checksumLength; i += 8) {
-			int arrayLength = length < 512 ? length : 512;
-			_checksum.update(bytes, offset, arrayLength);
-			long chunkChecksum = _checksum.getValue();
-
-			if (chunkChecksum != (((long) checksum[i] << 56) + ((long) (checksum[i + 1] & 255) << 48) + ((long) (checksum[i + 2] & 255) << 40)
-					+ ((long) (checksum[i + 3] & 255) << 32) + ((long) (checksum[i + 4] & 255) << 24) + ((checksum[i + 5] & 255) << 16)
-					+ ((checksum[i + 6] & 255) << 8) + ((checksum[i + 7] & 255) << 0))) {
-				return false;
-			}
-			offset += arrayLength;
-			length -= arrayLength;
-			_checksum.reset();
-		}
-		return true;
+		return Arrays.equals(waitCheck, checksum);
 	}
 
 	public final static class UnsupportedChecksumAlgorithm extends Exception {

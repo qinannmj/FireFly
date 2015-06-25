@@ -74,11 +74,13 @@ public abstract class PaxosSession {
 	public final synchronized void write(FrameBody message) throws NetCloseException {
 		try {
 			FrameHead head = new FrameHead(message.getChecksumType(), message.getBodySize());
-			Buf[] bufArray = new Buf[4];
+			Buf[] bufArray = new Buf[3 + message.getBody().length];
 			bufArray[0] = wrap(head.getHead());
 			bufArray[1] = wrap(head.getChecksum());
-			bufArray[2] = wrap(message.getBody());
-			bufArray[3] = wrap(message.getChecksum());
+			for(int i = 0 ; i < message.getBody().length ; ++i){
+				bufArray[2 + i] = wrap(message.getBody()[i]);
+			}
+			bufArray[2 + message.getBody().length] = wrap(message.getChecksum());
 			write(bufArray);
 		} catch (UnsupportedChecksumAlgorithm e) {
 			logger.error("fatal error", e);

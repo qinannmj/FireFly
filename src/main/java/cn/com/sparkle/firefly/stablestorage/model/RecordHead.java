@@ -41,16 +41,9 @@ public final class RecordHead {
 		head[1] = (byte) ((bodySize >>> 16) & 0xFF);
 		head[2] = (byte) ((bodySize >>> 8) & 0xFF);
 		head[3] = (byte) ((bodySize >>> 0) & 0xFF);
-//		head[4] = (byte) (0xff & (instanceId >> 56));
-//		head[5] = (byte) (0xff & (instanceId >> 48));
-//		head[6] = (byte) (0xff & (instanceId >> 40));
-//		head[7] = (byte) (0xff & (instanceId >> 32));
-//		head[8] = (byte) (0xff & (instanceId >> 24));
-//		head[9] = (byte) (0xff & (instanceId >> 16));
-//		head[10] = (byte) (0xff & (instanceId >> 8));
-//		head[11] = (byte) (0xff & instanceId);
+
 		LongUtil.toByte(instanceId, head, 4);
-		checksum = ChecksumUtil.checksum(checksumType, head, 0, 12);
+		checksum = ChecksumUtil.checksum(checksumType, new byte[][]{head}, 12);
 		this.bodySize = bodySize;
 		this.type = type;
 		this.instanceId = instanceId;
@@ -64,7 +57,7 @@ public final class RecordHead {
 
 	public boolean isValid() {
 		try {
-			return ChecksumUtil.validate(checksumType, head, checksum, 0, 12);
+			return ChecksumUtil.validate(checksumType, new byte[][]{head}, checksum, 12);
 		} catch (UnsupportedChecksumAlgorithm e) {
 			logger.warn("May be error program logic error or data be damaged!", e);
 			return false;
@@ -87,8 +80,6 @@ public final class RecordHead {
 
 	public long getInstanceId() {
 		if (instanceId == null) {
-//			instanceId = ((long) head[4] << 56) + ((long) (head[5] & 255) << 48) + ((long) (head[6] & 255) << 40) + ((long) (head[7] & 255) << 32)
-//					+ ((long) (head[8] & 255) << 24) + ((head[9] & 255) << 16) + ((head[10] & 255) << 8) + ((head[11] & 255) << 0);
 			instanceId = LongUtil.toLong(head, 4);
 		}
 		return instanceId;

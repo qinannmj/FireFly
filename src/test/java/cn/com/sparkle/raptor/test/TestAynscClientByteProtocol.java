@@ -31,14 +31,14 @@ public class TestAynscClientByteProtocol {
 		nsc.setProcessorNum(24);
 //		nsc.setSoLinger(5);
 		nsc.setCycleRecieveBuffCellSize(10000);
-		nsc.setCycleRecieveBuffSize(4 * 1024);
+		nsc.setCycleRecieveBuffSize(8 * 1024);
 		nsc.setRecieveBuffSize(128* 1024);
 		nsc.setSentBuffSize(128 * 1024);
 		NioSocketClient client = new NioSocketClient(nsc);
 		
 		int tcpSize = 1;
 		for(int i = 0 ; i < tcpSize; i++){
-			IoHandler handler1 = new CodecHandler(10000 / tcpSize, 64 * 1024, new BytesProtocol(), new TestAsyncByteObjetClientHandler());
+			IoHandler handler1 = new CodecHandler(30000 / tcpSize, 8 * 1024, new BytesProtocol(), new TestAsyncByteObjetClientHandler());
 			
 			IoHandler handler = new MultiThreadHandler(3, 300, 60, TimeUnit.SECONDS,handler1);
 //			
@@ -110,7 +110,7 @@ class TestAsyncByteObjetClientHandler implements IoHandler{
 						}
 						
 //						Thread.sleep(1000);
-						c.await();
+//						c.await();
 					} catch (SessionHavaClosedException e) {
 						e.printStackTrace();
 						break;

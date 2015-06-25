@@ -11,6 +11,7 @@ import cn.com.sparkle.firefly.net.netlayer.PaxosSession;
 import cn.com.sparkle.firefly.net.netlayer.PaxosSession.ObjectProtocolCacheBean;
 import cn.com.sparkle.firefly.net.netlayer.buf.Buf;
 import cn.com.sparkle.firefly.protocolprocessor.AbstractChainProtocolProcessor;
+import cn.com.sparkle.firefly.util.BytesArrayMaker;
 import cn.com.sparkle.raptor.core.buff.IoBuffer;
 import cn.com.sparkle.raptor.core.io.IoBufferArrayInputStream;
 
@@ -74,7 +75,7 @@ public class FrameUnpackFilter extends AbstractChainProtocolProcessor<Buf> {
 					if (inputStream == null) {
 						inputStream = new IoBufferArrayInputStream(bean.buff.toArray(new IoBuffer[bean.buff.size()]));
 					}
-					byte[] body = new byte[bean.head.getBodySize()];
+					byte[][] body = BytesArrayMaker.makeBytesArray(bean.head.getBodySize());
 					inputStream.read(body);
 					byte[] checksum;
 					if (bean.head.getChecksumType() == ChecksumUtil.NO_CHECKSUM) {
@@ -92,7 +93,7 @@ public class FrameUnpackFilter extends AbstractChainProtocolProcessor<Buf> {
 						bean.buff.removeFirst().close();
 					}
 
-					bean.recieveSize -= body.length + checksum.length;
+					bean.recieveSize -= bean.head.getBodySerializeSize();
 					FrameBody frameBody = new FrameBody(body, checksum, bean.head.getChecksumType());
 					frameBody.setHead(bean.head);
 					bean.head = null;//clear last time head 

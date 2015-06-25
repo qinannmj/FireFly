@@ -21,7 +21,7 @@ public class FrameHead {
 		head[1] = (byte) ((bodySize >>> 16) & 0xFF);
 		head[2] = (byte) ((bodySize >>> 8) & 0xFF);
 		head[3] = (byte) ((bodySize >>> 0) & 0xFF);
-		checksum = ChecksumUtil.checksum(checksumType, head, 0, 4);
+		checksum = ChecksumUtil.checksum(checksumType, new byte[][]{head}, 4);
 	}
 
 	public FrameHead(byte[] head, byte[] checksum) {
@@ -55,7 +55,7 @@ public class FrameHead {
 
 	public boolean isValid() {
 		try {
-			return ChecksumUtil.validate(checksumType, head, checksum, 0, 4);
+			return ChecksumUtil.validate(checksumType, new byte[][]{head}, checksum, 4);
 		} catch (UnsupportedChecksumAlgorithm e) {
 			logger.warn("May be error program logic error or data be damaged!", e);
 			return false;

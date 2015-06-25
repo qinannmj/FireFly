@@ -60,6 +60,21 @@ public class IoBufferArrayInputStream extends InputStream {
 		}
 		return len;
 	}
+	public int read(byte b[][]) throws IOException{
+		int totalReadSize = 0;
+		for(byte[] bs : b){
+			int readSize = read(bs);
+			if(readSize < 0){
+				break;
+			}else{
+				totalReadSize += readSize;
+				if(readSize < bs.length){
+					break;
+				}
+			}
+		}
+		return totalReadSize;
+	}
 
 	public synchronized int available() {
 		return capacity;

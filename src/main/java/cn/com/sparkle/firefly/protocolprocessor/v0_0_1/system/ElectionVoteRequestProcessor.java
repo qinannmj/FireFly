@@ -37,7 +37,7 @@ public class ElectionVoteRequestProcessor extends AbstractProtocolV0_0_1Processo
 			responseBuilder.setVoteResponse(response);
 			responseBuilder.setId(messagePackage.getId());
 			responseBuilder.setIsLast(true);
-			sendResponse(session, responseBuilder.build().toByteArray());
+			sendResponse(session, responseBuilder.build());
 		} else {
 			super.fireOnReceive(messagePackage, session);
 		}

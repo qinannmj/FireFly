@@ -39,7 +39,7 @@ public class ChainPrepareCallBackV0_0_1 extends PaxosPrepareCallBack {
 		builder.setPrepareResponseGood(response);
 		builder.setId(messageId);
 		builder.setIsLast(true);
-		processor.sendResponse(session, builder.build().toByteArray());
+		processor.sendResponse(session, builder.build());
 	}
 
 	@Override
@@ -52,7 +52,7 @@ public class ChainPrepareCallBackV0_0_1 extends PaxosPrepareCallBack {
 		responseBuilder.setId(messageId);
 		responseBuilder.setIsLast(true);
 		responseBuilder.setPrepareResponseBad(response);
-		processor.sendResponse(session, responseBuilder.build().toByteArray());
+		processor.sendResponse(session, responseBuilder.build());
 	}
 
 	public synchronized void callGood(StoreModel.Id sid, StoreModel.Value svalue) {

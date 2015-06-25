@@ -21,8 +21,9 @@ public class NettyPaxosSession extends PaxosSession {
 
 	@Override
 	public void write(Buf[] buf) throws NetCloseException {
-		ctx.write(buf);
-		ctx.flush();
+		ctx.channel().writeAndFlush(buf);
+		System.out.println("write");
+//		ctx.flush();
 	}
 
 	@Override

@@ -67,7 +67,7 @@ public abstract class AbstractServerProtocolNegotiationProcessor extends Abstrac
 			return;
 		}
 
-		BufferedReader br = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(body.getBody())));
+		BufferedReader br = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(body.getBody()[0])));
 
 		try {
 			String nodeAddress = br.readLine();
@@ -117,7 +117,7 @@ public abstract class AbstractServerProtocolNegotiationProcessor extends Abstrac
 			writeCustomParam(pw);
 			pw.flush();
 			try {
-				FrameBody frameBody = new FrameBody(baos.toByteArray(), ChecksumUtil.PURE_JAVA_CRC32);
+				FrameBody frameBody = new FrameBody(new byte[][]{baos.toByteArray()}, ChecksumUtil.PURE_JAVA_CRC32);
 				try {
 					session.write(frameBody);
 				} catch (NetCloseException e) {

@@ -7,27 +7,34 @@ import cn.com.sparkle.firefly.checksum.ChecksumUtil.UnsupportedChecksumAlgorithm
 
 public class FrameBody {
 	private final static Logger logger = Logger.getLogger(FrameBody.class);
-
+	
 	private int checksumType;
-	private byte[] body;
+	private byte[][] body;
 	private byte[] checksum;
+	private	int bodyLength = 0;
 	private FrameHead head;
 
-	public FrameBody(byte[] body, byte[] checksum, int checksumType) {
+	public FrameBody(byte[][] body, byte[] checksum, int checksumType) {
 		this.body = body;
 		this.checksum = checksum;
 		this.checksumType = checksumType;
+		for(byte[] b : body){
+			bodyLength += b.length;
+		}
 	}
 
-	public FrameBody(byte[] body, int checksumType) throws UnsupportedChecksumAlgorithm {
+	public FrameBody(byte[][] body, int checksumType) throws UnsupportedChecksumAlgorithm {
 		this.checksumType = checksumType;
 		this.body = body;
-		checksum = ChecksumUtil.checksum(checksumType, body, 0, body.length);
+		for(byte[] b : body){
+			bodyLength += b.length;
+		}
+		checksum = ChecksumUtil.checksum(checksumType, body, bodyLength);
 	}
 
 	public boolean isValid() {
 		try {
-			return ChecksumUtil.validate(checksumType, body, checksum, 0, body.length);
+			return ChecksumUtil.validate(checksumType, body, checksum, bodyLength);
 		} catch (UnsupportedChecksumAlgorithm e) {
 			logger.warn("May be error program logic error or data be damaged!", e);
 			return false;
@@ -43,18 +50,18 @@ public class FrameBody {
 	}
 
 	public int getBodySize() {
-		return body.length;
+		return bodyLength;
 	}
 
 	public int getSerializeSize() {
-		return body.length + checksum.length;
+		return bodyLength + checksum.length;
 	}
 
 	public int getChecksumType() {
 		return checksumType;
 	}
 
-	public byte[] getBody() {
+	public byte[][] getBody() {
 		return body;
 	}
 

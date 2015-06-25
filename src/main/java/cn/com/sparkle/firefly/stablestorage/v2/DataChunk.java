@@ -27,7 +27,9 @@ import cn.com.sparkle.firefly.stablestorage.model.StoreModel.InstanceVoteRecord;
 import cn.com.sparkle.firefly.stablestorage.model.StoreModel.SuccessfulRecord;
 import cn.com.sparkle.firefly.util.IdComparator;
 import cn.com.sparkle.firefly.util.LongUtil;
+import cn.com.sparkle.firefly.util.ProtobufUtil;
 
+import com.google.protobuf.ByteString;
 import com.google.protobuf.GeneratedMessage.Builder;
 
 /**
@@ -188,7 +190,7 @@ public class DataChunk {
 							if (body.isValid()) {
 
 								if (head.getType() == RecordType.SUCCESS) {
-									SuccessfulRecord.Builder record = SuccessfulRecord.newBuilder().mergeFrom(body.getBody());
+									SuccessfulRecord.Builder record = SuccessfulRecord.newBuilder().mergeFrom(ByteString.copyFrom(ProtobufUtil.transformTo(body.getBody())));
 									InstanceVoteRecord voteRecord = voteRecordMap.remove(head.getInstanceId());
 									if (!record.hasV()) {
 										if (IdComparator.getInstance().compare(record.getHighestVoteNum(), voteRecord.getHighestVotedNum()) == 0) {
@@ -209,7 +211,7 @@ public class DataChunk {
 										}
 									}
 								} else {
-									InstanceVoteRecord.Builder voteRecord = InstanceVoteRecord.newBuilder().mergeFrom(body.getBody());
+									InstanceVoteRecord.Builder voteRecord = InstanceVoteRecord.newBuilder().mergeFrom(ByteString.copyFrom(ProtobufUtil.transformTo(body.getBody())));
 									voteRecordMap.put(head.getInstanceId(), voteRecord.build());
 									readCallback.read(head.getInstanceId(), voteRecord);
 								}

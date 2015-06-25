@@ -62,7 +62,7 @@ public abstract class AbstractClientNegotiationProcessor extends AbstractChainPr
 		pw.flush();
 
 		try {
-			FrameBody body = new FrameBody(baos.toByteArray(), ChecksumUtil.PURE_JAVA_CRC32);
+			FrameBody body = new FrameBody(new byte[][]{baos.toByteArray()}, ChecksumUtil.PURE_JAVA_CRC32);
 			session.write(body);
 		} catch (UnsupportedChecksumAlgorithm e) {
 			logger.error("unreachable exception", e);
@@ -80,7 +80,7 @@ public abstract class AbstractClientNegotiationProcessor extends AbstractChainPr
 			return;
 		}
 
-		ByteArrayInputStream bais = new ByteArrayInputStream(body.getBody());
+		ByteArrayInputStream bais = new ByteArrayInputStream(body.getBody()[0]);
 		BufferedReader br = new BufferedReader(new InputStreamReader(bais));
 		String address = session.get(PaxosSessionKeys.ADDRESS_KEY);
 		if(address == null){

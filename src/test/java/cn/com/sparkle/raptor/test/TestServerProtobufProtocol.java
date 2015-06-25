@@ -32,8 +32,8 @@ public class TestServerProtobufProtocol {
 		nsc.setCycleRecieveBuffCellSize(1000);
 		nsc.setTcpNoDelay(true);
 		nsc.setReuseAddress(true);
-		nsc.setRecieveBuffSize(128 * 1024);
-		nsc.setSentBuffSize(128 * 1024);
+		nsc.setRecieveBuffSize(1024 * 1024);
+		nsc.setSentBuffSize(1024 * 1024);
 		//		nsc.setRecieveBuffSize(32* 1024);
 		//		nsc.setSentBuffSize( 8 * 1024);
 		//nsc.setRevieveBuffSize(1024 * 2048);
@@ -44,7 +44,7 @@ public class TestServerProtobufProtocol {
 		//		ProtoBufProtocol protocol = new ProtoBufProtocol();
 		//		protocol.registerMessage(1, PersonMessage.Person.getDefaultInstance());
 		NioSocketServer server = new NioSocketServer(nsc);
-		server.bind(new InetSocketAddress(1234), new MultiThreadHandler(20, 300, 60, TimeUnit.SECONDS, new CodecHandler(1000, 64 * 1024, protocol, new ProtobufProtocolHandler()) ));
+		server.bind(new InetSocketAddress(1234), new MultiThreadHandler(20, 300, 60, TimeUnit.SECONDS, new CodecHandler(1000, 128 * 1024, protocol, new ProtobufProtocolHandler()) ));
 		//		server.bind(new InetSocketAddress(12345),new FilterChain(new TestHandler()));
 	}
 

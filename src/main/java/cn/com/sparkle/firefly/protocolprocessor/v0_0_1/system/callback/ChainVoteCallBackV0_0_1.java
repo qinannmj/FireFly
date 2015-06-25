@@ -47,7 +47,7 @@ public class ChainVoteCallBackV0_0_1 extends QuorumCallBack<Value> implements Vo
 		builder.setId(messageId);
 		builder.setIsLast(true);
 		// send response
-		processor.sendResponse(session, builder.build().toByteArray());
+		processor.sendResponse(session, builder.build());
 	}
 
 	@Override
@@ -60,7 +60,7 @@ public class ChainVoteCallBackV0_0_1 extends QuorumCallBack<Value> implements Vo
 		responseBuilder.setVoteResponse(response);
 		responseBuilder.setId(messageId);
 		responseBuilder.setIsLast(true);
-		processor.sendResponse(session, responseBuilder.build().toByteArray());
+		processor.sendResponse(session, responseBuilder.build());
 	}
 
 	@Override

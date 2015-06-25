@@ -35,7 +35,7 @@ public class TestV0_0_1RaptorServer {
 
 		});
 		RaptorServer server = new RaptorServer();
-		server.init("target/classes/service_out_net.prop", 20000, new NetHandler() {
+		server.init("target/classes/service_in_net1.prop", 20000, new NetHandler() {
 
 			@Override
 			public void onRefuse(Object connectAttachment) {

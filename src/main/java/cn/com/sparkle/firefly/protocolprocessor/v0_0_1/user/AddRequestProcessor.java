@@ -105,7 +105,7 @@ public class AddRequestProcessor extends AbstractProtocolV0_0_1Processor impleme
 											AddResponse.Builder response = AddResponse.newBuilder().setResult(ByteString.copyFrom(bytes))
 													.setInstanceId(client.getResponseInstanceId());
 											mp.setAddResponse(response);
-											sendResponse(session, mp.build().toByteArray());
+											sendResponse(session, mp.build());
 										}
 									});
 						} catch (MasterMayBeLostException e) {
