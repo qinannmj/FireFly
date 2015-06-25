@@ -70,7 +70,7 @@ public class TestV0_0_1RaptorClient implements NetHandler {
 		System.out.println("connect");
 		for (int i = 0; i < 1; i++) {
 			Thread t = new Thread() {
-				private byte[][] buff = new byte[][]{new byte[512],new byte[512]};
+				private byte[][] buff = new byte[][]{new byte[8 * 512],new byte[512]};
 
 				public void run() {
 					int i = 0;

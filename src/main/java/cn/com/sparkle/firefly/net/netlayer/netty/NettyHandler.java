@@ -52,7 +52,6 @@ public class NettyHandler extends ChannelInboundHandlerAdapter {
 	@Override
 	public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
 		ctx.flush();
-		System.out.println("fffffffffffffffff");
 	}
 
 	@Override

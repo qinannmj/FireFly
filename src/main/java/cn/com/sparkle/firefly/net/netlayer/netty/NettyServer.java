@@ -34,9 +34,9 @@ public class NettyServer implements NetServer {
 						ch.pipeline().addLast(new IdleStateHandler((int) (2 * heartBeatInterval / 1000), 0, 0));
 
 						if (conf.getWorkthreadNum() == 0) {
-							ch.pipeline().addLast(new BufDecoder(), new BufArrayEncoder(), new NettyHandler(handler));
+							ch.pipeline().addLast(new BufDecoder(), new NettyHandler(handler));
 						} else {
-							ch.pipeline().addLast(new DefaultEventExecutorGroup(conf.getWorkthreadNum()), new BufDecoder(), new BufArrayEncoder(),
+							ch.pipeline().addLast(new DefaultEventExecutorGroup(conf.getWorkthreadNum()), new BufDecoder(),
 									new NettyHandler(handler));
 						}
 					}

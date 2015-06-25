@@ -1,5 +1,6 @@
 package cn.com.sparkle.firefly.net.netlayer.netty;
 
+import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import cn.com.sparkle.firefly.net.netlayer.NetCloseException;
 import cn.com.sparkle.firefly.net.netlayer.PaxosSession;
@@ -20,10 +21,14 @@ public class NettyPaxosSession extends PaxosSession {
 	}
 
 	@Override
-	public void write(Buf[] buf) throws NetCloseException {
-		ctx.channel().writeAndFlush(buf);
-		System.out.println("write");
-//		ctx.flush();
+	public void write(Buf[] bufs) throws NetCloseException {
+		for(int i = 0 ;i < bufs.length - 1;++i){
+			ByteBuf b = (ByteBuf) bufs[i];
+			ctx.write(b);
+		}
+		if(bufs.length > 0){
+			ctx.writeAndFlush(bufs[bufs.length - 1]);
+		}
 	}
 
 	@Override

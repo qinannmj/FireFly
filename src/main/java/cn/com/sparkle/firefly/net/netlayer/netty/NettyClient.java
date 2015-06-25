@@ -86,9 +86,9 @@ public class NettyClient implements NetClient {
 					public void initChannel(SocketChannel ch) throws Exception {
 						ch.pipeline().addLast(new IdleStateHandler((int) (2 * heartBeatInterval / 1000), 0, 0));
 						if (conf.getWorkthreadNum() == 0) {
-							ch.pipeline().addLast(new BufDecoder(), new BufArrayEncoder(), new NettyHandler(netHandler));
+							ch.pipeline().addLast(new BufDecoder(), new NettyHandler(netHandler));
 						} else {
-							ch.pipeline().addLast(new DefaultEventExecutorGroup(conf.getWorkthreadNum()), new BufDecoder(), new BufArrayEncoder(),
+							ch.pipeline().addLast(new DefaultEventExecutorGroup(conf.getWorkthreadNum()), new BufDecoder(),
 									new NettyHandler(netHandler));
 						}
 					}

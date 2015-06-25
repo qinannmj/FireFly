@@ -74,7 +74,7 @@ public class TestV0_0_1NettyClient implements NetHandler {
 		System.out.println("connect");
 		for (int i = 0; i < 1; i++) {
 			Thread t = new Thread() {
-				private byte[][] buff = new byte[][]{new byte[512],new byte[512]};
+				private byte[][] buff = new byte[][]{new byte[8 * 512],new byte[512]};
 
 				public void run() {
 					int i = 0;
@@ -83,15 +83,12 @@ public class TestV0_0_1NettyClient implements NetHandler {
 						try {
 							FrameBody body = new FrameBody(buff, ChecksumUtil.INBUILD_CRC32);
 							CountDownLatch c = send(body, session);
-							c.await();
+//							c.await();
 						} catch (Exception e) {
 							e.printStackTrace();
 							break;
 						}
-						try {
-							Thread.sleep(1);
-						} catch (InterruptedException e) {
-						}
+						
 					}
 				}
 			};
